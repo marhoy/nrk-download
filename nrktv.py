@@ -90,15 +90,27 @@ class Program:
 
 
 class Serie:
+
     def __init__(self, json):
         self.seriesId = json['seriesId']
         self.title = json['title']
         self.description = json['description']
         self.imageID = json['imageId']
+        self.seasons = {}
+
+        if 'seasonIds' not in json.keys():
+            r = session.get(NRK_TV_MOBIL_API + '/series/' + self.seriesId)
+            r.raise_for_status()
+            print(r.json())
+            json['seasonIds'] = r.json()['seasonIds']
+
+        for season in json['seasonIds']:
+            self.seasons[season['id']] = season['name']
 
     def __str__(self):
-        string = 'ID: {}\n'.format(self.seriesId)
-        string += '    Title: {}'.format(self.title)
+        string = 'SeriesID: {}\n'.format(self.seriesId)
+        string += '    Title: {}\n'.format(self.title)
+        string += '    Seasons: {}\n'.format(list(self.seasons.values()))
         return string
 
     def episodes(self):
@@ -115,7 +127,7 @@ class Serie:
 if __name__ == '__main__':
     # print('Categories:\n', get_categories())
     # print('Search:\n', search('test', api='nrk_tv_mobil'))
-    series, programs = search('snøfall')
+    series, programs = search('ikke gjør dette')
 
     for s in series:
         print(s)
