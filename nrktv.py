@@ -9,39 +9,29 @@ session = requests.Session()
 session.headers['app-version-android'] = '999'
 
 
-def get_categories(api='nrk_tv_mobil'):
-
-    if api == 'nrk_tv_mobil':
-        r = session.get(NRK_TV_MOBIL_API + '/categories')
-        r.raise_for_status()
-        return r.json()
-
-
-def search(string, api='nrk_tv_mobil'):
-
-    if api == 'nrk_tv':
-        r = session.get(NRK_TV_API + '/autocomplete?query=' + string)
-    else:
-        r = session.get(NRK_TV_MOBIL_API + '/search/' + string)
-
+def search(string):
+    r = session.get(NRK_TV_MOBIL_API + '/search/' + string)
     r.raise_for_status()
+
     series = []
     programs = []
-
     for item in r.json()['hits']:
         if item['type'] == 'serie':
-            series.append(Serie(item['hit']))
+            series.append(Series(item['hit']))
         elif item['type'] in ['program', 'episode']:
             programs.append(Program(item['hit']))
-
     return series, programs
 
 
-class Category:
-    def __init__(self, json):
-        self.categoryId = json['categoryId']
-        self.displayValue = json['displayValue']
-        self.availableFilters = json['availableFilters']
+class Season:
+    def __init__(self, json, i):
+        self.id = json['id']
+        self.name = json['name']
+        self.number = i
+
+    def __str__(self):
+        string = '{}: {} ({})'.format(self.number, self.name, self.id)
+        return string
 
 
 class Program:
@@ -89,28 +79,27 @@ class Program:
         return string
 
 
-class Serie:
-
+class Series:
     def __init__(self, json):
         self.seriesId = json['seriesId']
         self.title = json['title']
         self.description = json['description']
         self.imageID = json['imageId']
-        self.seasons = {}
+        self.seasons = []
 
-        if 'seasonIds' not in json.keys():
-            r = session.get(NRK_TV_MOBIL_API + '/series/' + self.seriesId)
-            r.raise_for_status()
-            print(r.json())
-            json['seasonIds'] = r.json()['seasonIds']
-
-        for season in json['seasonIds']:
-            self.seasons[season['id']] = season['name']
+        r = session.get(NRK_TV_MOBIL_API + '/series/' + self.seriesId)
+        r.raise_for_status()
+        self.json = r.js    on()
+        print(self.json)
+        for i, s in enumerate(reversed(self.json['seasonIds']), start=1):
+            season = Season(s, i)
+            self.seasons.append(season)
 
     def __str__(self):
         string = 'SeriesID: {}\n'.format(self.seriesId)
         string += '    Title: {}\n'.format(self.title)
-        string += '    Seasons: {}\n'.format(list(self.seasons.values()))
+        string += '    Seasons: '
+        string += '{}'.format([season.__str__() for season in self.seasons])
         return string
 
     def episodes(self):
@@ -120,30 +109,14 @@ class Serie:
         episodes = []
         for item in r.json()['programs']:
             episodes.append(Program(item))
-
         return episodes
 
 
 if __name__ == '__main__':
-    # print('Categories:\n', get_categories())
-    # print('Search:\n', search('test', api='nrk_tv_mobil'))
-    series, programs = search('ikke gjør dette')
+    series, programs = search('skam')
 
     for s in series:
         print(s)
 
-    for p in programs:
-        print(p)
-
-    # for item in s['hits']:
-    #     print(item['type'], ':')
-    #     for field in item['hit']:
-    #         print('\t', field, ':', item['hit'][field])
-    #
-    # s = episode_details('koif42002401')
-    # print(s)
-    # for item in s['hits']:
-    #     print(item['type'], ':')
-    #     for field in item['hit']:
-    #         print('\t', field, ':', item['hit'][field])
-    #
+    # for p in programs:
+    #    print(p)
