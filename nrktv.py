@@ -1,10 +1,15 @@
+#!/usr/bin/env python
+
 import requests
 import os.path
+from collections import OrderedDict
 
 NRK_TV_API = 'https://tv.nrk.no'
 NRK_TV_MOBIL_API = 'https://tvapi.nrk.no/v1'
 NRK_PS_API = 'http://v8.psapi.nrk.no'
+# image_url = 'http://m.nrk.no/m/img?kaleidoId={}&width={}'.format(json['imageId'], 640)
 
+# Initialize requests session
 session = requests.Session()
 session.headers['app-version-android'] = '999'
 
@@ -21,17 +26,6 @@ def search(string):
         elif item['type'] in ['program', 'episode']:
             programs.append(Program(item['hit']))
     return series, programs
-
-
-class Season:
-    def __init__(self, json, i):
-        self.id = json['id']
-        self.name = json['name']
-        self.number = i
-
-    def __str__(self):
-        string = '{}: {} ({})'.format(self.number, self.name, self.id)
-        return string
 
 
 class Program:
@@ -69,13 +63,23 @@ class Program:
         else:
             self.fileName = os.path.join(self.title)
 
-        image_url = 'http://m.nrk.no/m/img?kaleidoId={}&width={}'.format(json['imageId'], 640)
-
     def __str__(self):
         string = 'ID: {}\n'.format(self.programId)
         string += '    Title: {}\n'.format(self.title)
         string += '    Episode: {}\n'.format(self.episodeNumberOrDate)
         string += '    Filename: {}\n'.format(self.fileName)
+        return string
+
+
+class Season:
+    def __init__(self, idx, json):
+        self.id = json['id']
+        self.name = json['name']
+        self.number = idx
+        self.episodes = []
+
+    def __str__(self):
+        string = '{}: {} ({} ep)'.format(self.number, self.name, len(self.episodes))
         return string
 
 
@@ -85,21 +89,25 @@ class Series:
         self.title = json['title']
         self.description = json['description']
         self.imageID = json['imageId']
-        self.seasons = []
+        self.seasons = OrderedDict()
 
         r = session.get(NRK_TV_MOBIL_API + '/series/' + self.seriesId)
         r.raise_for_status()
-        self.json = r.js    on()
-        print(self.json)
-        for i, s in enumerate(reversed(self.json['seasonIds']), start=1):
-            season = Season(s, i)
-            self.seasons.append(season)
+        self.json = r.json()
+        for idx, season in enumerate(reversed(self.json['seasonIds']), start=1):
+            self.seasons[season['id']] = Season(idx, season)
+        self.get_episodes()
+
+    def get_episodes(self):
+        for item in reversed(self.json['programs']):
+            program = Program(item)
+            self.seasons[item['seasonId']].episodes.append(program)
 
     def __str__(self):
         string = 'SeriesID: {}\n'.format(self.seriesId)
         string += '    Title: {}\n'.format(self.title)
         string += '    Seasons: '
-        string += '{}'.format([season.__str__() for season in self.seasons])
+        string += '{}'.format([str(season) for season in self.seasons.values()])
         return string
 
     def episodes(self):
@@ -113,10 +121,16 @@ class Series:
 
 
 if __name__ == '__main__':
-    series, programs = search('skam')
 
-    for s in series:
-        print(s)
+    import argparse
 
-    # for p in programs:
-    #    print(p)
+    parser = argparse.ArgumentParser(description='This script can be used to search tv.nrk.no and download programs.')
+    parser.add_argument('search_string', help='The string to search for on tv.nrk.no')
+    args = parser.parse_args()
+
+    series, programs = search(args.search_string)
+    #    for p in reversed(programs):
+    #        print(p)
+    for i, s in enumerate(reversed(series)):
+        print(i, s)
+
