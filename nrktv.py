@@ -170,13 +170,9 @@ if __name__ == '__main__':
     parser.add_argument('search_string', help='The string to search for on tv.nrk.no')
     args = parser.parse_args()
 
-    l = list(range(10))
-    print(l)
-    s = get_input(len(l))
-    print(s, l[s])
-    # series, programs = search(args.search_string)
-    # for p in programs:
-    #     print(p)
-    # for i, s in enumerate(series):
-    #     print(i, s)
+    series, programs = search(args.search_string)
+    for p in programs:
+        print(p)
+    for i, s in enumerate(series):
+        print(i, s)
 
