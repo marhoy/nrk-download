@@ -2,7 +2,8 @@
 
 import requests
 import os.path
-from collections import OrderedDict
+import re
+import sys
 
 NRK_TV_API = 'https://tv.nrk.no'
 NRK_TV_MOBIL_API = 'https://tvapi.nrk.no/v1'
@@ -12,20 +13,6 @@ NRK_PS_API = 'http://v8.psapi.nrk.no'
 # Initialize requests session
 session = requests.Session()
 session.headers['app-version-android'] = '999'
-
-
-def search(string):
-    r = session.get(NRK_TV_MOBIL_API + '/search/' + string)
-    r.raise_for_status()
-
-    series = []
-    programs = []
-    for item in r.json()['hits']:
-        if item['type'] == 'serie':
-            series.append(Series(item['hit']))
-        elif item['type'] in ['program', 'episode']:
-            programs.append(Program(item['hit']))
-    return series, programs
 
 
 class Program:
@@ -75,7 +62,7 @@ class Season:
     def __init__(self, idx, json):
         self.id = json['id']
         self.name = json['name']
-        self.number = idx
+        self.number = idx + 1
         self.episodes = []
 
     def __str__(self):
@@ -89,25 +76,28 @@ class Series:
         self.title = json['title']
         self.description = json['description']
         self.imageID = json['imageId']
-        self.seasons = OrderedDict()
+        self.seasons = []
+        self.seasonId2Idx = {}
 
         r = session.get(NRK_TV_MOBIL_API + '/series/' + self.seriesId)
         r.raise_for_status()
         self.json = r.json()
-        for idx, season in enumerate(reversed(self.json['seasonIds']), start=1):
-            self.seasons[season['id']] = Season(idx, season)
+        for idx, season in enumerate(reversed(self.json['seasonIds'])):
+            self.seasons.append(Season(idx, season))
+            self.seasonId2Idx[season['id']] = idx
         self.get_episodes()
 
     def get_episodes(self):
         for item in reversed(self.json['programs']):
             program = Program(item)
-            self.seasons[item['seasonId']].episodes.append(program)
+            season_index = self.seasonId2Idx[item['seasonId']]
+            self.seasons[season_index].episodes.append(program)
 
     def __str__(self):
         string = 'SeriesID: {}\n'.format(self.seriesId)
         string += '    Title: {}\n'.format(self.title)
         string += '    Seasons: '
-        string += '{}'.format([str(season) for season in self.seasons.values()])
+        string += '{}'.format([str(season) for season in self.seasons])
         return string
 
     def episodes(self):
@@ -120,6 +110,58 @@ class Series:
         return episodes
 
 
+def search(string):
+    r = session.get(NRK_TV_MOBIL_API + '/search/' + string)
+    r.raise_for_status()
+
+    series = []
+    programs = []
+    for item in r.json()['hits']:
+        if item['type'] == 'serie':
+            series.append(Series(item['hit']))
+        elif item['type'] in ['program', 'episode']:
+            programs.append(Program(item['hit']))
+    series.reverse()
+    programs.reverse()
+    return series, programs
+
+
+def get_input(num_elements):
+    while True:
+        try:
+            string = input('Enter a number or interval (e.g. 8 or 5-10). (q to quit): ')
+            slice_match = re.match(r'^(\d*)[:-](\d*)$', string)
+            index_match = re.match(r'^(\d+)$', string)
+            quit_match = re.match(r'^q$', string.lower())
+            if slice_match:
+                slice_min = int(slice_match.group(1) or 0)
+                slice_max = int(slice_match.group(2) or num_elements - 1)
+            elif index_match:
+                slice_min = int(index_match.group(1))
+                slice_max = slice_min
+            elif quit_match:
+                print('OK, quitting program\n')
+                sys.exit(0)
+            else:
+                raise SyntaxError('Syntax not allowed')
+
+            # Check the values of the ints
+            if slice_min > slice_max:
+                raise ValueError('Max is not larger than min')
+            if slice_max >= num_elements or slice_min > num_elements - 1:
+                raise ValueError('Value is too high')
+
+        except Exception as e:
+            # An exception was generated above
+            print('Sorry, not a valid input: {}\n'.format(e))
+            continue
+        else:
+            # No exception generated above
+            break
+
+    return slice(slice_min, slice_max + 1)
+
+
 if __name__ == '__main__':
 
     import argparse
@@ -128,9 +170,13 @@ if __name__ == '__main__':
     parser.add_argument('search_string', help='The string to search for on tv.nrk.no')
     args = parser.parse_args()
 
-    series, programs = search(args.search_string)
-    #    for p in reversed(programs):
-    #        print(p)
-    for i, s in enumerate(reversed(series)):
-        print(i, s)
+    l = list(range(10))
+    print(l)
+    s = get_input(len(l))
+    print(s, l[s])
+    # series, programs = search(args.search_string)
+    # for p in programs:
+    #     print(p)
+    # for i, s in enumerate(series):
+    #     print(i, s)
 
