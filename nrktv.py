@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import requests
+import urllib.request
 import os.path
 import re
 import sys
@@ -8,53 +9,88 @@ import sys
 NRK_TV_API = 'https://tv.nrk.no'
 NRK_TV_MOBIL_API = 'https://tvapi.nrk.no/v1'
 NRK_PS_API = 'http://v8.psapi.nrk.no'
-# image_url = 'http://m.nrk.no/m/img?kaleidoId={}&width={}'.format(json['imageId'], 640)
+
+# This is where the files end up
+DOWNLOAD_DIR = os.path.expanduser('~/Downloads/nrktv')
+
+KNOWN_SERIES = {}
 
 # Initialize requests session
-session = requests.Session()
-session.headers['app-version-android'] = '999'
+SESSION = requests.Session()
+SESSION.headers['app-version-android'] = '999'
 
 
 class Program:
-    def __init__(self, json):
+    def __init__(self, json, episode_idx=0, series=None, season=None):
         self.programId = json['programId']
         self.title = json['title']
         self.description = json['description']
-        self.seriesTitle = ''
-        self.seasonNumber = ''
-        self.episodeNumberOrDate = ''
-        self.s0xe0y = ''
-        self.fileName = ''
-        # self.get_details()
+        self.imageId = json['imageId']
+        self.seriesTitle = json.get('seriesTitle', None)
+        self.episodeNumberOrDate = json.get('episodeNumberOrDate', None)
+        self.episodeTitle = json.get('episodeTitle', None)
+        self.isAvailable = None
+
+        if json.get('seriesId', None) and series is None:
+            # This is an episode, but we don't have a Series-object
+            self.series = Series(json.get('seriesId'))
+        else:
+            self.series = series
+
+        self.season = season
+        self.episode_idx = episode_idx
+        self.json = json
+        if series:
+            print('Series: {}, Season: {}'.format(series.title, season.name))
+        else:
+            print('Program:')
+        print(json, '\n\n')
+        #self.get_details()
 
     def get_details(self):
-        r = session.get(NRK_PS_API + '/mediaelement/' + self.programId)
+        r = SESSION.get(NRK_PS_API + '/mediaelement/' + self.programId)
         r.raise_for_status()
-        json = r.json()
+        self.json = r.json()
+        print(self.json, '\n\n')
+        #self.isAvailable = eval(self.json['isAvailable'])
 
-        self.seriesTitle = json['seriesTitle'] if json['seriesTitle'] != 'None' else ''
-        self.seasonNumber = json['seasonNumber'] if json['seasonNumber'] != 'None' else ''
-        self.episodeNumberOrDate = json['episodeNumberOrDate'] if json['seriesTitle'] != 'None' else ''
+        self.download_url = self.json['url']
+        # self.seriesTitle = json['seriesTitle'] if json['seriesTitle'] != 'None' else ''
+        # # self.seasonNumber = json['seasonNumber'] if json['seasonNumber'] != 'None' else ''
+        self.episodeNumberOrDate = self.json.get('episodeNumberOrDate', '')
 
-        if self.episodeNumberOrDate and self.episodeNumberOrDate.find(':') > 0:
-            self.s0xe0y = 'S' + self.seasonNumber.zfill(2) + 'E' + self.episodeNumberOrDate.split(':')[0].zfill(2)
+        # if self.episodeNumberOrDate and self.episodeNumberOrDate.find(':') > 0:
+        #     self.s0xe0y = 'S' + self.seasonNumber.zfill(2) + 'E' + self.episodeNumberOrDate.split(':')[0].zfill(2)
+        # else:
+        #     self.s0xe0y = ''
+        #
+        # if self.seriesTitle and self.s0xe0y:
+        #     self.fileName = os.path.join(self.seriesTitle, 'Season ' + self.seasonNumber.zfill(2),
+        #                                  self.seriesTitle + ' - ' + self.s0xe0y + ' - ' + self.title)
+        # elif self.seriesTitle:
+        #     self.fileName = os.path.join(self.seriesTitle, 'Season ' + self.seasonNumber.zfill(2),
+        #                                  self.seriesTitle + ' - ' + self.json['episodeTitle'])
+        # else:
+        #     self.fileName = os.path.join(self.title)
+
+    def make_filename(self):
+        filename = self.title
+        if self.series:
+            basedir = os.path.join(DOWNLOAD_DIR, self.series.dirName, self.season.dirName)
+            if re.match('^\d+:\d+$', self.episodeNumberOrDate):
+                filename += ' - S{:02}E{:02}'.format(self.season.number, self.episode_idx)
+            else:
+                filename += ' - {}'.format(self.episodeNumberOrDate)
         else:
-            self.s0xe0y = ''
+            basedir = DOWNLOAD_DIR
 
-        if self.seriesTitle and self.s0xe0y:
-            self.fileName = os.path.join(self.seriesTitle, 'Season ' + self.seasonNumber.zfill(2),
-                                         self.seriesTitle + ' - ' + self.s0xe0y + ' - ' + self.title)
-        elif self.seriesTitle:
-            self.fileName = os.path.join(self.seriesTitle, 'Season ' + self.seasonNumber.zfill(2),
-                                         self.seriesTitle + ' - ' + json['episodeTitle'])
-        else:
-            self.fileName = os.path.join(self.title)
+        return os.path.join(basedir, filename)
 
     def __str__(self):
         string = 'ID: {}\n'.format(self.programId)
         string += '    Title: {}\n'.format(self.title)
         string += '    Episode: {}\n'.format(self.episodeNumberOrDate)
-        string += '    Filename: {}\n'.format(self.fileName)
+        #string += '    Filename: {}\n'.format(self.fileName)
         return string
 
 
@@ -64,6 +100,10 @@ class Season:
         self.name = json['name']
         self.number = idx + 1
         self.episodes = []
+        if self.name.startswith('Sesong'):
+            self.dirName = 'Season {:02}'.format(self.number)
+        else:
+            self.dirName = self.name
 
     def __str__(self):
         string = '{}: {} ({} ep)'.format(self.number, self.name, len(self.episodes))
@@ -71,26 +111,33 @@ class Season:
 
 
 class Series:
-    def __init__(self, json):
-        self.seriesId = json['seriesId']
+    def __init__(self, series_id):
+
+        r = SESSION.get(NRK_TV_MOBIL_API + '/series/' + series_id)
+        r.raise_for_status()
+        json = r.json()
+
+        self.seriesId = series_id
         self.title = json['title']
         self.description = json['description']
-        self.imageID = json['imageId']
+        self.imageId = json['imageId']
+        self.dirName = self.title
         self.seasons = []
         self.seasonId2Idx = {}
+        self.json = json
 
-        r = session.get(NRK_TV_MOBIL_API + '/series/' + self.seriesId)
-        r.raise_for_status()
-        self.json = r.json()
-        for idx, season in enumerate(reversed(self.json['seasonIds'])):
+        for idx, season in enumerate(reversed(json['seasonIds'])):
             self.seasons.append(Season(idx, season))
             self.seasonId2Idx[season['id']] = idx
         self.get_episodes()
 
+        if series_id not in KNOWN_SERIES.keys():
+            KNOWN_SERIES[series_id] = self
+
     def get_episodes(self):
-        for item in reversed(self.json['programs']):
-            program = Program(item)
+        for idx, item in enumerate(reversed(self.json['programs'])):
             season_index = self.seasonId2Idx[item['seasonId']]
+            program = Program(item, idx, series=self, season=self.seasons[season_index])
             self.seasons[season_index].episodes.append(program)
 
     def __str__(self):
@@ -100,25 +147,24 @@ class Series:
         string += '{}'.format([str(season) for season in self.seasons])
         return string
 
-    def episodes(self):
-        r = session.get(NRK_TV_MOBIL_API + '/series/' + self.seriesId)
-        r.raise_for_status()
-
-        episodes = []
-        for item in r.json()['programs']:
-            episodes.append(Program(item))
-        return episodes
+    def download_metadata(self):
+        download_dir = os.path.join(DOWNLOAD_DIR, self.dirName)
+        if not os.path.exists(download_dir):
+            os.makedirs(download_dir, exist_ok=True)
+        image_url = 'http://m.nrk.no/m/img?kaleidoId={}&width={}'.format(self.imageId, 960)
+        urllib.request.urlretrieve(image_url, os.path.join(download_dir, 'show.jpg'))
 
 
 def search(string):
-    r = session.get(NRK_TV_MOBIL_API + '/search/' + string)
+    r = SESSION.get(NRK_TV_MOBIL_API + '/search/' + string)
     r.raise_for_status()
 
     series = []
     programs = []
     for item in r.json()['hits']:
+        series_id = item['hit']['seriesId']
         if item['type'] == 'serie':
-            series.append(Series(item['hit']))
+            series.append(Series(series_id))
         elif item['type'] in ['program', 'episode']:
             programs.append(Program(item['hit']))
     series.reverse()
@@ -126,7 +172,7 @@ def search(string):
     return series, programs
 
 
-def get_input(num_elements):
+def get_slice_input(num_elements):
     while True:
         try:
             string = input('Enter a number or interval (e.g. 8 or 5-10). (q to quit): ')
@@ -156,7 +202,7 @@ def get_input(num_elements):
             print('Sorry, not a valid input: {}\n'.format(e))
             continue
         else:
-            # No exception generated above
+            # No exception generated above, we're done
             break
 
     return slice(slice_min, slice_max + 1)
@@ -172,7 +218,7 @@ if __name__ == '__main__':
 
     series, programs = search(args.search_string)
     for p in programs:
+#        print(p.make_filename())
         print(p)
     for i, s in enumerate(series):
         print(i, s)
-
