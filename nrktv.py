@@ -46,10 +46,10 @@ class Program:
     def get_details(self):
         r = SESSION.get(NRK_PS_API + '/mediaelement/' + self.programId)
         r.raise_for_status()
-        self.json = r.json()
-        print(self.json, '\n\n')
-        isAvailable = eval(self.json['isAvailable'])
-        download_url = self.json['url']
+        # self.json = r.json()
+        # print(self.json, '\n\n')
+        # isAvailable = eval(self.json['isAvailable'])
+        # download_url = self.json['url']
 
     def make_filename(self):
         if self.seriesId:
