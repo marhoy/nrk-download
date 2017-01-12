@@ -146,10 +146,8 @@ class Series:
             self.programIds[item['programId']] = (season_index, episode_number)
 
     def __str__(self):
-        string = 'SeriesID: {}\n'.format(self.seriesId)
-        string += '    Title: {}\n'.format(self.title)
-        string += '    Seasons: '
-        string += '{}'.format([str(season) for season in self.seasons])
+        # string += '{}'.format([str(season) for season in self.seasons])
+        string = '{} : {} Sesong(er)'.format(self.title, len(self.seasons))
         return string
 
     def download_metadata(self):
@@ -166,20 +164,21 @@ def search(string, search_type):
     series = []
     programs = []
     for item in r.json()['hits']:
-        series_id = item['hit']['seriesId']
         if item['type'] == 'serie':
+            if search_type == 'program':
+                continue
+            series_id = item['hit']['seriesId']
             series.append(Series(series_id))
         elif item['type'] in ['program', 'episode']:
+            if search_type == 'series':
+                continue
             programs.append(Program(item['hit']))
+        else:
+            LOG.warning('Unknown item type: {}'.format(item['type']))
     series.reverse()
     programs.reverse()
 
-    if search_type == 'series':
-        return series, []
-    elif search_type == 'program':
-        return [], programs
-    else:
-        return series, programs
+    return series, programs
 
 
 def safe_filename(string):
@@ -187,10 +186,37 @@ def safe_filename(string):
     return filename
 
 
+def get_integer_input(max_allowed):
+    while True:
+        try:
+            string = input('\nEnter a number in the range 0-{}. (q to quit): '.format(max_allowed))
+            index_match = re.match(r'^(\d+)$', string)
+            quit_match = re.match(r'^q$', string.lower())
+            if index_match:
+                index = int(index_match.group(1))
+            elif quit_match:
+                print('OK, quitting program\n')
+                sys.exit(0)
+            else:
+                raise SyntaxError('Syntax not allowed')
+
+            if index > max_allowed:
+                raise ValueError('Value is too high')
+
+        except Exception as e:
+            # An exception was generated above
+            print('Sorry, not a valid input: {}\n'.format(e))
+            continue
+        else:
+            # No exception generated above, we're done
+            break
+    return index
+
+
 def get_slice_input(num_elements):
     while True:
         try:
-            string = input('Enter a number or interval (e.g. 8 or 5-10). (q to quit): ')
+            string = input('\nEnter a number or interval (e.g. 8 or 5-10). (q to quit): ')
             slice_match = re.match(r'^(\d*)[:-](\d*)$', string)
             index_match = re.match(r'^(\d+)$', string)
             quit_match = re.match(r'^q$', string.lower())
@@ -223,32 +249,51 @@ def get_slice_input(num_elements):
     return slice(slice_min, slice_max + 1)
 
 
+def series_download(series):
+    programs = []
+    for season in series.seasons:
+        for episode in season.episodes:
+            programs.append(episode)
+    ask_for_program_download(programs)
+
+
+def ask_for_program_download(programs):
+    print('\nMatching programs')
+    for i, p in enumerate(programs):
+        print('{:2}: {}'.format(i, p))
+    selection = get_slice_input(len(programs))
+    print('You selected {}'.format(selection))
+
+
 if __name__ == '__main__':
 
     import argparse
 
     parser = argparse.ArgumentParser(description='This script can be used to search tv.nrk.no and download programs.')
-    parser.add_argument('search_string',
-                        help='The string to search for on tv.nrk.no.' +
-                             ' Unless specified, searches for both series and programs')
-    group1 = parser.add_mutually_exclusive_group()
-    group1.add_argument('-s', '--series', action='store_true',
-                        help='You want to search for a series, not a program')
-    group1.add_argument('-p', '--program', action='store_true',
-                        help='You want to search for a program, not a series')
+    group1 = parser.add_mutually_exclusive_group(required=True)
+    group1.add_argument('-s', '--series', action='store_true', help='Search for series')
+    group1.add_argument('-p', '--program', action='store_true', help='Search for programs')
+    parser.add_argument('search_string')
     args = parser.parse_args()
 
     if args.series:
-        search_type = 'series'
+        series, _ = search(args.search_string, 'series')
+        if len(series) == 1:
+            print('\nOnly one matching series')
+            series_download(series[0])
+        elif len(series) > 1:
+            print('\nMatching series:')
+            for i, s in enumerate(series):
+                print('{}: {}'.format(i, s))
+            index = get_integer_input(len(series) - 1)
+            series_download(series[index])
+        else:
+            print('Sorry, no matching series')
     elif args.program:
-        search_type = 'program'
+        _, programs = search(args.search_string, 'program')
+        if programs:
+            ask_for_program_download(programs)
+        else:
+            print('Sorry, no matching series')
     else:
-        search_type = 'series_programs'
-
-    series, programs = search(args.search_string, search_type)
-    for p in programs:
-        print(p)
-    for s in series:
-        for season in s.seasons:
-            for episode in season.episodes:
-                print(episode)
+        LOG.error('Unknown state, not sure what to do')
