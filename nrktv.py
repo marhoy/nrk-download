@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 
 import requests
-import urllib.request
+import urllib
 import os.path
 import re
 import sys
 import logging
+import subprocess
 
 # Package-wide logging configuration
-logging.basicConfig(format='{levelname}: {message}', level=logging.WARNING, style='{')
+logging.basicConfig(format='{levelname}: {message}', level=logging.INFO, style='{')
 LOG = logging.getLogger()
 
 NRK_TV_API = 'https://tv.nrk.no'
@@ -24,6 +25,9 @@ KNOWN_SERIES = {}
 SESSION = requests.Session()
 SESSION.headers['app-version-android'] = '999'
 
+# To download:
+# ffmpeg -i http://nordond38b-f.akamaihd.net/i/wo/open/a0/a06bda60b46d753f7d2d7cee42cd35484e53e697/c920336f-90e3-48ef-a8eb-e5c34c3ef569_,141,316,563,1266,2250,.mp4.csmil/master.m3u8
+# -c copy -bsf:a aac_adtstoasc
 
 class Program:
     def __init__(self, json):
@@ -72,7 +76,7 @@ class Program:
             basedir = DOWNLOAD_DIR
             filename = self.title
 
-        return os.path.join(basedir, safe_filename(filename))
+        return os.path.join(basedir, valid_filename(filename))
 
     def __str__(self):
         if self.seriesId:
@@ -99,7 +103,7 @@ class Season:
         self.name = re.sub('\s+', ' ', json['name'])
         self.number = idx
         self.episodes = []
-        self.dirName = safe_filename('Season {:02} - {}'.format(self.number + 1, self.name))
+        self.dirName = valid_filename('Season {:02} - {}'.format(self.number + 1, self.name))
 
     def __str__(self):
         string = '{}: {} ({} ep)'.format(self.number, self.name, len(self.episodes))
@@ -121,7 +125,7 @@ class Series:
         self.title = re.sub('\s+', ' ', json['title'])
         self.description = json['description']
         self.imageId = json['imageId']
-        self.dirName = safe_filename(self.title)
+        self.dirName = valid_filename(self.title)
         self.seasons = []
         self.seasonId2Idx = {}
         self.programIds = {}
@@ -150,12 +154,6 @@ class Series:
         string = '{} : {} Sesong(er)'.format(self.title, len(self.seasons))
         return string
 
-    def download_metadata(self):
-        download_dir = os.path.join(DOWNLOAD_DIR, self.dirName)
-        os.makedirs(download_dir, exist_ok=True)
-        image_url = 'http://m.nrk.no/m/img?kaleidoId={}&width={}'.format(self.imageId, 960)
-        urllib.request.urlretrieve(image_url, os.path.join(download_dir, 'show.jpg'))
-
 
 def search(string, search_type):
     r = SESSION.get(NRK_TV_MOBIL_API + '/search/' + string)
@@ -181,7 +179,7 @@ def search(string, search_type):
     return series, programs
 
 
-def safe_filename(string):
+def valid_filename(string):
     filename = re.sub(r'[/\\?<>:*|!"\']', '', string)
     return filename
 
@@ -262,8 +260,63 @@ def ask_for_program_download(programs):
     for i, p in enumerate(programs):
         print('{:2}: {}'.format(i, p))
     selection = get_slice_input(len(programs))
-    print('You selected {}'.format(selection))
 
+    print('You selected {}'.format(selection))
+    for program in programs[selection]:
+
+        # Get some more details on this program
+        r = SESSION.get(NRK_PS_API + '/mediaelement/' + program.programId)
+        r.raise_for_status()
+        json = r.json()
+        if not json['isAvailable']:
+            LOG.info('Sorry, program is not available')
+        else:
+            download(KNOWN_SERIES[program.seriesId])
+            download(program, json)
+
+
+def get_image_url(image_id):
+    return 'http://m.nrk.no/m/img?kaleidoId={}&width={}'.format(image_id, 960)
+
+
+def download(obj, json=None):
+    image_url = get_image_url(obj.imageId)
+    if type(obj) == Series:
+        download_dir = os.path.join(DOWNLOAD_DIR, obj.dirName)
+        image_filename = 'show.jpg'
+    elif type(obj) == Program:
+        filename = obj.make_filename()
+        download_dir = os.path.dirname(filename)
+        image_filename = os.path.basename(filename) + '.jpg'
+    else:
+        LOG.error('Download: Unkown datatype: {}'.format(type(obj)))
+        return
+
+    # Download images
+    if not os.path.exists(os.path.join(download_dir, image_filename)):
+        LOG.info('Downloading image for {}'.format(type(obj)))
+        os.makedirs(download_dir, exist_ok=True)
+        urllib.request.urlretrieve(image_url, os.path.join(download_dir, image_filename))
+
+    # We're done with Series, the rest is regarding Programs
+    if type(obj) == Series:
+        return
+
+    # Download subtitles
+    if json['hasSubtitles'] and not os.path.exists(filename + '.no.srt'):
+        print('Downloading subtitles')
+
+        ttml_url = urllib.parse.unquote(json['mediaAssets'][0]['timedTextSubtitlesUrl'])
+        urllib.request.urlretrieve(ttml_url, filename + '.ttml')
+        cmd = ['ffmpeg', '-i', urllib.parse.unquote(json['mediaAssets'][0]['webVttSubtitlesUrl']),
+               filename + '.no.srt']
+        subprocess.run(cmd, stderr=subprocess.DEVNULL)
+
+    # Download video
+    if json['mediaUrl'] and not os.path.exists(filename + '.mp4'):
+        video_url = json['mediaUrl']
+        # re.sub()
+        # cmd =
 
 if __name__ == '__main__':
 
@@ -284,7 +337,7 @@ if __name__ == '__main__':
         elif len(series) > 1:
             print('\nMatching series:')
             for i, s in enumerate(series):
-                print('{}: {}'.format(i, s))
+                print('{:2}: {}'.format(i, s))
             index = get_integer_input(len(series) - 1)
             series_download(series[index])
         else:
