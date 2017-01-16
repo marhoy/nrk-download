@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import requests
-import urllib
+import urllib.request
+import urllib.parse
 import os.path
 import re
 import sys
@@ -25,9 +26,6 @@ KNOWN_SERIES = {}
 SESSION = requests.Session()
 SESSION.headers['app-version-android'] = '999'
 
-# To download:
-# ffmpeg -i http://nordond38b-f.akamaihd.net/i/wo/open/a0/a06bda60b46d753f7d2d7cee42cd35484e53e697/c920336f-90e3-48ef-a8eb-e5c34c3ef569_,141,316,563,1266,2250,.mp4.csmil/master.m3u8
-# -c copy -bsf:a aac_adtstoasc
 
 class Program:
     def __init__(self, json):
@@ -158,10 +156,15 @@ class Series:
 def search(string, search_type):
     r = SESSION.get(NRK_TV_MOBIL_API + '/search/' + string)
     r.raise_for_status()
+    try:
+        json = r.json()
+    except Exception as e:
+        LOG.error('Not able to parse search-results: {}'.format(e))
+        sys.exit(1)
 
     series = []
     programs = []
-    for item in r.json()['hits']:
+    for item in json['hits']:
         if item['type'] == 'serie':
             if search_type == 'program':
                 continue
@@ -285,9 +288,9 @@ def download(obj, json=None):
         download_dir = os.path.join(DOWNLOAD_DIR, obj.dirName)
         image_filename = 'show.jpg'
     elif type(obj) == Program:
-        filename = obj.make_filename()
-        download_dir = os.path.dirname(filename)
-        image_filename = os.path.basename(filename) + '.jpg'
+        program_filename = obj.make_filename()
+        download_dir = os.path.dirname(program_filename)
+        image_filename = os.path.basename(program_filename) + '.jpg'
     else:
         LOG.error('Download: Unkown datatype: {}'.format(type(obj)))
         return
@@ -303,32 +306,35 @@ def download(obj, json=None):
         return
 
     # Download subtitles
-    if json['hasSubtitles'] and not os.path.exists(filename + '.no.srt'):
+    program_filename = obj.make_filename()
+    mp4_filename = program_filename + '.mp4'
+    subtitle_file = program_filename + '.no.srt'
+    if json['hasSubtitles'] and not os.path.exists(subtitle_file):
         print('Downloading subtitles')
-
-        ttml_url = urllib.parse.unquote(json['mediaAssets'][0]['timedTextSubtitlesUrl'])
-        urllib.request.urlretrieve(ttml_url, filename + '.ttml')
         cmd = ['ffmpeg', '-i', urllib.parse.unquote(json['mediaAssets'][0]['webVttSubtitlesUrl']),
-               filename + '.no.srt']
+               subtitle_file]
         subprocess.run(cmd, stderr=subprocess.DEVNULL)
 
     # Download video
-    if json['mediaUrl'] and not os.path.exists(filename + '.mp4'):
+    if json['mediaUrl'] and not os.path.exists(mp4_filename):
         video_url = json['mediaUrl']
-        # re.sub()
-        # cmd =
+        video_url = re.sub('\.net/z/', '.net/i/', video_url)
+        video_url = re.sub('manifest\.f4m$', 'master.m3u8', video_url)
+        cmd = ['ffmpeg', '-i', video_url]
+        if os.path.exists(subtitle_file):
+            cmd += ['-i', subtitle_file, '-c:s', 'mov_text', '-metadata:s:s:0', 'language=nor']
+        cmd += ['-metadata', 'description="{}"'.format(obj.description)]
+        cmd += ['-metadata', 'track="24"']
+        cmd += ['-c:v', 'copy', '-c:a', 'copy', '-bsf:a', 'aac_adtstoasc', mp4_filename]
+        print(cmd)
+        subprocess.run(cmd)
 
-if __name__ == '__main__':
+    # Remove subtitle file after including it in the mp4 video
+    if os.path.exists(subtitle_file) and os.path.exists(mp4_filename):
+        os.remove(subtitle_file)
 
-    import argparse
 
-    parser = argparse.ArgumentParser(description='This script can be used to search tv.nrk.no and download programs.')
-    group1 = parser.add_mutually_exclusive_group(required=True)
-    group1.add_argument('-s', '--series', action='store_true', help='Search for series')
-    group1.add_argument('-p', '--program', action='store_true', help='Search for programs')
-    parser.add_argument('search_string')
-    args = parser.parse_args()
-
+def run_from_cmdline(args):
     if args.series:
         series, _ = search(args.search_string, 'series')
         if len(series) == 1:
@@ -350,3 +356,16 @@ if __name__ == '__main__':
             print('Sorry, no matching series')
     else:
         LOG.error('Unknown state, not sure what to do')
+
+
+if __name__ == '__main__':
+
+    import argparse
+    parser = argparse.ArgumentParser(description='This script can be used to search tv.nrk.no and download programs.')
+    group1 = parser.add_mutually_exclusive_group(required=True)
+    group1.add_argument('-s', '--series', action='store_true', help='Search for series')
+    group1.add_argument('-p', '--program', action='store_true', help='Search for programs')
+    parser.add_argument('search_string')
+    arguments = parser.parse_args()
+
+    run_from_cmdline(arguments)
