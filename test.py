@@ -30,7 +30,7 @@ if __name__ == '__main__':
                                           minutes=int(duration_list[1]),
                                           seconds=float(duration_list[2]))
 
-        progress_match = re.match('.+\s+time=([\d:.]+)', line)
+        progress_match = re.search('.+\s+time=([\d:.]+)', line)
         if progress_match:
             progress_list = progress_match.group(1).split(':')
             progress = datetime.timedelta(hours=int(progress_list[0]),
