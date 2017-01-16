@@ -311,7 +311,8 @@ def download(obj, json=None):
     subtitle_file = program_filename + '.no.srt'
     if json['hasSubtitles'] and not os.path.exists(subtitle_file):
         print('Downloading subtitles')
-        cmd = ['ffmpeg', '-i', urllib.parse.unquote(json['mediaAssets'][0]['webVttSubtitlesUrl']),
+        cmd = ['ffmpeg', '-loglevel', '8',
+               '-i', urllib.parse.unquote(json['mediaAssets'][0]['webVttSubtitlesUrl']),
                subtitle_file]
         subprocess.run(cmd, stderr=subprocess.DEVNULL)
 
@@ -320,13 +321,14 @@ def download(obj, json=None):
         video_url = json['mediaUrl']
         video_url = re.sub('\.net/z/', '.net/i/', video_url)
         video_url = re.sub('manifest\.f4m$', 'master.m3u8', video_url)
-        cmd = ['ffmpeg', '-i', video_url]
+        print(video_url)
+        return
+        cmd = ['ffmpeg', '-loglevel', '8', '-stats', '-i', video_url]
         if os.path.exists(subtitle_file):
             cmd += ['-i', subtitle_file, '-c:s', 'mov_text', '-metadata:s:s:0', 'language=nor']
         cmd += ['-metadata', 'description="{}"'.format(obj.description)]
         cmd += ['-metadata', 'track="24"']
         cmd += ['-c:v', 'copy', '-c:a', 'copy', '-bsf:a', 'aac_adtstoasc', mp4_filename]
-        print(cmd)
         subprocess.run(cmd)
 
     # Remove subtitle file after including it in the mp4 video
