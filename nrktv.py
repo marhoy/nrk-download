@@ -321,8 +321,6 @@ def download(obj, json=None):
         video_url = json['mediaUrl']
         video_url = re.sub('\.net/z/', '.net/i/', video_url)
         video_url = re.sub('manifest\.f4m$', 'master.m3u8', video_url)
-        print(video_url)
-        return
         cmd = ['ffmpeg', '-loglevel', '8', '-stats', '-i', video_url]
         if os.path.exists(subtitle_file):
             cmd += ['-i', subtitle_file, '-c:s', 'mov_text', '-metadata:s:s:0', 'language=nor']
