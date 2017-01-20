@@ -9,12 +9,13 @@ logging.basicConfig(format='{levelname}: {message}', level=logging.INFO, style='
 LOG = logging.getLogger()
 
 
-def worker(item):
-    LOG.debug('Starting working on item {}'.format(item.number))
+def worker(args):
+    item, shared_progress = args
+    LOG.debug('Starting work on item {}'.format(item.number))
     for i in range(item.work):
         time.sleep(1)
-        queue.put([item.number, i+1])
-    LOG.debug('Finished working on item {} after {} seconds'.format(item.number, item.work))
+        shared_progress[item.number] = i + 1
+    LOG.debug('Finished work on item {} after {} seconds'.format(item.number, item.work))
 
 
 class Item:
@@ -34,26 +35,22 @@ if __name__ == '__main__':
         total_workload += work
     LOG.debug('Total workload: {}'.format(total_workload))
 
-    progress_bar = tqdm.tqdm(total=total_workload, unit='s')
-    total_progress = 0
-    queue = multiprocessing.Queue()
-    with multiprocessing.Pool(processes=4) as pool:
-        LOG.debug('Starting workers')
-        result = pool.map_async(worker, work_items)
+    with multiprocessing.Pool(processes=3) as pool, multiprocessing.Manager() as manager:
 
-        while True:
-            try:
-                i, progress = queue.get(block=True, timeout=2)
-                work_items[i].progress = progress
-            except Exception as e:
-                LOG.debug('Queue is empty, got {}'.format(e))
-                LOG.debug('Result is ready: {}'.format(result.get()))
-                break
+        shared_progress = manager.list([0]*len(work_items))
+        progress_bar = tqdm.tqdm(total=total_workload, unit='s')
 
-            previous_progress = total_progress
-            total_progress = 0
-            for item in work_items:
-                total_progress += item.progress
-            progress_bar.update(total_progress - previous_progress)
+        LOG.debug('Starting pool of {} workers'.format(pool._processes))
+        args = [(item, shared_progress) for item in work_items]
+        result = pool.map_async(worker, args)
+
+        while not result.ready():
+            LOG.debug('Progress: {}'.format(shared_progress))
+            progress_bar.update(sum(shared_progress) - progress_bar.n)
+            time.sleep(0.1)
+
+        # Make sure the progress bar ends at 100%
+        progress_bar.update(progress_bar.total - progress_bar.n)
         progress_bar.close()
+
     print('All workers finished')
