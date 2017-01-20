@@ -44,6 +44,7 @@ if __name__ == '__main__':
         args = [(item, shared_progress) for item in work_items]
         result = pool.map_async(worker, args)
 
+
         while not result.ready():
             LOG.debug('Progress: {}'.format(shared_progress))
             progress_bar.update(sum(shared_progress) - progress_bar.n)
