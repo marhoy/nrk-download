@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+import nrkrecorder
 
 import requests
 import urllib.request
@@ -6,19 +6,11 @@ import urllib.parse
 import os.path
 import re
 import sys
-import logging
 import subprocess
-
-# Package-wide logging configuration
-logging.basicConfig(format='{levelname}: {message}', level=logging.INFO, style='{')
-LOG = logging.getLogger()
 
 NRK_TV_API = 'https://tv.nrk.no'
 NRK_TV_MOBIL_API = 'https://tvapi.nrk.no/v1'
 NRK_PS_API = 'http://v8.psapi.nrk.no'
-
-# This is where the files end up
-DOWNLOAD_DIR = os.path.expanduser('~/Downloads/nrktv')
 
 KNOWN_SERIES = {}
 
@@ -30,34 +22,44 @@ SESSION.headers['app-version-android'] = '999'
 class Program:
     def __init__(self, json):
 
-        LOG.debug('Creating new Program: {} : {}'.format(json['title'], json['programId']))
+        nrkrecorder.LOG.debug('Creating new Program: {} : {}'.format(json['title'], json['programId']))
 
         self.programId = json['programId']
         self.title = re.sub('\s+', ' ', json['title'])
         self.description = json['description']
-        self.imageId = json['imageId']
+        self.imageUrl = nrkrecorder.utils.get_image_url(json['imageId'])
         self.seriesId = json.get('seriesId', None)
         self.episodeNumberOrDate = json.get('episodeNumberOrDate', None)
         self.episodeTitle = json.get('episodeTitle', None)
+        self.isAvailable = False
+        self.hasSubtitles = False
+        self.downloadUrl = None
+        self.subtitleUrl = None
 
         if self.seriesId and self.seriesId not in KNOWN_SERIES.keys():
             # This is an episode from a series we haven't seem yet
-            LOG.debug('Program {} is from an unknown series {}'.format(self.programId, self.seriesId))
+            nrkrecorder.LOG.debug('Program {} is from an unknown series {}'.format(self.programId, self.seriesId))
             Series(self.seriesId)
 
     def get_details(self):
-        r = SESSION.get(NRK_PS_API + '/mediaelement/' + self.programId)
-        r.raise_for_status()
-        # self.json = r.json()
-        # print(self.json, '\n\n')
-        # isAvailable = eval(self.json['isAvailable'])
-        # download_url = self.json['url']
+        try:
+            r = SESSION.get(NRK_PS_API + '/mediaelement/' + self.programId)
+            r.raise_for_status()
+            json = r.json()
+        except Exception as e:
+            nrkrecorder.LOG.error('Could not get program details: {}'.format(e))
+            return
+        self.isAvailable = json['isAvailable']
+        self.hasSubtitles = json['hasSubtitles']
+        self.downloadUrl = json['mediaUrl']
+        if self.hasSubtitles:
+            self.subtitleUrl = urllib.parse.unquote(json['mediaAssets'][0]['webVttSubtitlesUrl'])
 
     def make_filename(self):
         if self.seriesId:
             series = KNOWN_SERIES[self.seriesId]
             season_number, episode_number = series.programIds[self.programId]
-            basedir = os.path.join(DOWNLOAD_DIR, series.dirName, series.seasons[season_number].dirName)
+            basedir = os.path.join(nrkrecorder.DOWNLOAD_DIR, series.dirName, series.seasons[season_number].dirName)
 
             filename = series.title
             filename += ' - S{:02}E{:02}'.format(season_number + 1, episode_number + 1)
@@ -71,10 +73,10 @@ class Program:
             else:
                 filename += ' - {}'.format(self.episodeNumberOrDate)
         else:
-            basedir = DOWNLOAD_DIR
+            basedir = nrkrecorder.DOWNLOAD_DIR
             filename = self.title
 
-        return os.path.join(basedir, valid_filename(filename))
+        return os.path.join(basedir, nrkrecorder.utils.valid_filename(filename))
 
     def __str__(self):
         if self.seriesId:
@@ -95,13 +97,13 @@ class Program:
 
 class Season:
     def __init__(self, idx, json):
-        LOG.info('Creating new season: {}: {}'.format(idx, json['name']))
+        nrkrecorder.LOG.info('Creating new season: {}: {}'.format(idx, json['name']))
 
         self.id = json['id']
         self.name = re.sub('\s+', ' ', json['name'])
         self.number = idx
         self.episodes = []
-        self.dirName = valid_filename('Season {:02} - {}'.format(self.number + 1, self.name))
+        self.dirName = nrkrecorder.utils.valid_filename('Season {:02} - {}'.format(self.number + 1, self.name))
 
     def __str__(self):
         string = '{}: {} ({} ep)'.format(self.number, self.name, len(self.episodes))
@@ -110,7 +112,7 @@ class Season:
 
 class Series:
     def __init__(self, series_id):
-        LOG.info('Creating new series: {}'.format(series_id))
+        nrkrecorder.LOG.info('Creating new series: {}'.format(series_id))
 
         # Register our seriesId. The object is updated later
         KNOWN_SERIES[series_id] = self
@@ -122,8 +124,8 @@ class Series:
         self.seriesId = series_id
         self.title = re.sub('\s+', ' ', json['title'])
         self.description = json['description']
-        self.imageId = json['imageId']
-        self.dirName = valid_filename(self.title)
+        self.imageUrl = nrkrecorder.utils.get_image_url(json['imageId'])
+        self.dirName = nrkrecorder.utils.valid_filename(self.title)
         self.seasons = []
         self.seasonId2Idx = {}
         self.programIds = {}
@@ -142,7 +144,7 @@ class Series:
             season_index = self.seasonId2Idx[item['seasonId']]
             program = Program(item)
             episode_number = len(self.seasons[season_index].episodes)
-            LOG.debug('Series {}: Adding {} to S {}, E {}'.format(
+            nrkrecorder.LOG.debug('Series {}: Adding {} to S {}, E {}'.format(
                 self.seriesId, program.title, season_index, episode_number))
             self.seasons[season_index].episodes.append(program)
             self.programIds[item['programId']] = (season_index, episode_number)
@@ -159,7 +161,7 @@ def search(string, search_type):
         r.raise_for_status()
         json = r.json()
     except Exception as e:
-        LOG.error('Not able to parse search-results: {}'.format(e))
+        nrkrecorder.LOG.error('Not able to parse search-results: {}'.format(e))
         sys.exit(1)
 
     series = []
@@ -175,79 +177,11 @@ def search(string, search_type):
                 continue
             programs.append(Program(item['hit']))
         else:
-            LOG.warning('Unknown item type: {}'.format(item['type']))
+            nrkrecorder.LOG.warning('Unknown item type: {}'.format(item['type']))
     series.reverse()
     programs.reverse()
 
     return series, programs
-
-
-def valid_filename(string):
-    filename = re.sub(r'[/\\?<>:*|!"\']', '', string)
-    return filename
-
-
-def get_integer_input(max_allowed):
-    while True:
-        try:
-            string = input('\nEnter a number in the range 0-{}. (q to quit): '.format(max_allowed))
-            index_match = re.match(r'^(\d+)$', string)
-            quit_match = re.match(r'^q$', string.lower())
-            if index_match:
-                index = int(index_match.group(1))
-            elif quit_match:
-                print('OK, quitting program\n')
-                sys.exit(0)
-            else:
-                raise SyntaxError('Syntax not allowed')
-
-            if index > max_allowed:
-                raise ValueError('Value is too high')
-
-        except Exception as e:
-            # An exception was generated above
-            print('Sorry, not a valid input: {}\n'.format(e))
-            continue
-        else:
-            # No exception generated above, we're done
-            break
-    return index
-
-
-def get_slice_input(num_elements):
-    while True:
-        try:
-            string = input('\nEnter a number or interval (e.g. 8 or 5-10). (q to quit): ')
-            slice_match = re.match(r'^(\d*)[:-](\d*)$', string)
-            index_match = re.match(r'^(\d+)$', string)
-            quit_match = re.match(r'^q$', string.lower())
-            if slice_match:
-                slice_min = int(slice_match.group(1) or 0)
-                slice_max = int(slice_match.group(2) or num_elements - 1)
-            elif index_match:
-                slice_min = int(index_match.group(1))
-                slice_max = slice_min
-            elif quit_match:
-                print('OK, quitting program\n')
-                sys.exit(0)
-            else:
-                raise SyntaxError('Syntax not allowed')
-
-            # Check the values of the ints
-            if slice_min > slice_max:
-                raise ValueError('Max is not larger than min')
-            if slice_max >= num_elements or slice_min > num_elements - 1:
-                raise ValueError('Value is too high')
-
-        except Exception as e:
-            # An exception was generated above
-            print('Sorry, not a valid input: {}\n'.format(e))
-            continue
-        else:
-            # No exception generated above, we're done
-            break
-
-    return slice(slice_min, slice_max + 1)
 
 
 def series_download(series):
@@ -262,42 +196,55 @@ def ask_for_program_download(programs):
     print('\nMatching programs')
     for i, p in enumerate(programs):
         print('{:2}: {}'.format(i, p))
-    selection = get_slice_input(len(programs))
-
+    selection = nrkrecorder.get_slice_input(len(programs))
     print('You selected {}'.format(selection))
+
+    programs_to_download = []
     for program in programs[selection]:
 
-        # Get some more details on this program
-        r = SESSION.get(NRK_PS_API + '/mediaelement/' + program.programId)
-        r.raise_for_status()
-        json = r.json()
-        if not json['isAvailable']:
-            LOG.info('Sorry, program is not available')
+        program.get_details()
+        if program.isAvailable:
+            programs_to_download.append(program)
+            download_series_metadata(KNOWN_SERIES[program.seriesId])
         else:
-            download(KNOWN_SERIES[program.seriesId])
-            download(program, json)
+            nrkrecorder.LOG.info('Sorry, program not available: {}'.format(program.title))
+
+    download_programs_in_parallel(programs_to_download)
 
 
-def get_image_url(image_id):
-    return 'http://m.nrk.no/m/img?kaleidoId={}&width={}'.format(image_id, 960)
+def download_worker(args):
+    index, program, progress_list = args
+
+
+def download_programs_in_parallel(programs):
+    pass
+
+
+def download_series_metadata(series):
+    download_dir = os.path.join(nrkrecorder.DOWNLOAD_DIR, series.dirName)
+    image_filename = 'show.jpg'
+    if not os.path.exists(os.path.join(download_dir, image_filename)):
+        nrkrecorder.LOG.info('Downloading image for series {}'.format(series.title))
+        os.makedirs(download_dir, exist_ok=True)
+        urllib.request.urlretrieve(series.imageUrl, os.path.join(download_dir, image_filename))
 
 
 def download(obj, json=None):
-    image_url = get_image_url(obj.imageId)
+    image_url = nrkrecorder.utils.get_image_url(obj.imageId)
     if type(obj) == Series:
-        download_dir = os.path.join(DOWNLOAD_DIR, obj.dirName)
+        download_dir = os.path.join(nrkrecorder.DOWNLOAD_DIR, obj.dirName)
         image_filename = 'show.jpg'
     elif type(obj) == Program:
         program_filename = obj.make_filename()
         download_dir = os.path.dirname(program_filename)
         image_filename = os.path.basename(program_filename) + '.jpg'
     else:
-        LOG.error('Download: Unkown datatype: {}'.format(type(obj)))
+        nrkrecorder.LOG.error('Download: Unkown datatype: {}'.format(type(obj)))
         return
 
     # Download images
     if not os.path.exists(os.path.join(download_dir, image_filename)):
-        LOG.info('Downloading image for {}'.format(type(obj)))
+        nrkrecorder.LOG.info('Downloading image for {}'.format(type(obj)))
         os.makedirs(download_dir, exist_ok=True)
         urllib.request.urlretrieve(image_url, os.path.join(download_dir, image_filename))
 
@@ -344,7 +291,7 @@ def search_from_cmdline(args):
             print('\nMatching series:')
             for i, s in enumerate(series):
                 print('{:2}: {}'.format(i, s))
-            index = get_integer_input(len(series) - 1)
+            index = nrkrecorder.get_integer_input(len(series) - 1)
             series_download(series[index])
         else:
             print('Sorry, no matching series')
@@ -355,17 +302,4 @@ def search_from_cmdline(args):
         else:
             print('Sorry, no matching series')
     else:
-        LOG.error('Unknown state, not sure what to do')
-
-
-if __name__ == '__main__':
-
-    import argparse
-    parser = argparse.ArgumentParser(description='This script can be used to search tv.nrk.no and download programs.')
-    group1 = parser.add_mutually_exclusive_group(required=True)
-    group1.add_argument('-s', '--series', action='store_true', help='Search for series')
-    group1.add_argument('-p', '--program', action='store_true', help='Search for programs')
-    parser.add_argument('search_string')
-    arguments = parser.parse_args()
-
-    search_from_cmdline(arguments)
+        nrkrecorder.LOG.error('Unknown state, not sure what to do')
