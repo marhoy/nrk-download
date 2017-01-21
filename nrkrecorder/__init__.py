@@ -1,5 +1,5 @@
 from .utils import get_integer_input, get_slice_input
-from .nrktv import search_from_cmdline
+from .nrktv import search, ask_for_program_download
 
 import logging
 import os

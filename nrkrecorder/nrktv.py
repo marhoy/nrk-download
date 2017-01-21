@@ -88,10 +88,8 @@ class Program:
                 self.title,
                 self.episodeNumberOrDate)
             string += ' - S{:02}E{:02}'.format(season_number + 1, episode_number + 1)
-            # string += '\n' + self.make_filename()
         else:
             string = self.title
-
         return string
 
 
@@ -117,9 +115,13 @@ class Series:
         # Register our seriesId. The object is updated later
         KNOWN_SERIES[series_id] = self
 
-        r = SESSION.get(NRK_TV_MOBIL_API + '/series/' + series_id)
-        r.raise_for_status()
-        json = r.json()
+        try:
+            r = SESSION.get(NRK_TV_MOBIL_API + '/series/' + series_id)
+            r.raise_for_status()
+            json = r.json()
+        except Exception as e:
+            nrkrecorder.LOG.error('Not able get details for {}: {}'.format(series_id, e))
+            sys.exit(1)
 
         self.seriesId = series_id
         self.title = re.sub('\s+', ' ', json['title'])
@@ -150,46 +152,34 @@ class Series:
             self.programIds[item['programId']] = (season_index, episode_number)
 
     def __str__(self):
-        # string += '{}'.format([str(season) for season in self.seasons])
         string = '{} : {} Sesong(er)'.format(self.title, len(self.seasons))
         return string
 
 
-def search(string, search_type):
+def search(search_string, search_type):
     try:
-        r = SESSION.get(NRK_TV_MOBIL_API + '/search/' + string)
+        r = SESSION.get(NRK_TV_MOBIL_API + '/search/' + search_string)
         r.raise_for_status()
         json = r.json()
     except Exception as e:
         nrkrecorder.LOG.error('Not able to parse search-results: {}'.format(e))
-        sys.exit(1)
+        return
 
-    series = []
-    programs = []
-    for item in json['hits']:
-        if item['type'] == 'serie':
-            if search_type == 'program':
-                continue
-            series_id = item['hit']['seriesId']
-            series.append(Series(series_id))
-        elif item['type'] in ['program', 'episode']:
-            if search_type == 'series':
-                continue
+    series = programs = []
+    for item in reversed(json['hits']):
+        if item['type'] == 'serie' and search_type == 'series':
+            series.append(Series(item['hit']['seriesId']))
+        elif item['type'] in ['program', 'episode'] and search_type == 'program':
             programs.append(Program(item['hit']))
-        else:
+        if item['type'] not in ['serie', 'program', 'episode']:
             nrkrecorder.LOG.warning('Unknown item type: {}'.format(item['type']))
-    series.reverse()
-    programs.reverse()
 
-    return series, programs
-
-
-def series_download(series):
-    programs = []
-    for season in series.seasons:
-        for episode in season.episodes:
-            programs.append(episode)
-    ask_for_program_download(programs)
+    if search_type == 'series':
+        return series
+    elif search_type == 'program':
+        return programs
+    else:
+        nrkrecorder.LOG.error('Unknown search type: {}'.format(search_type))
 
 
 def ask_for_program_download(programs):
@@ -197,7 +187,7 @@ def ask_for_program_download(programs):
     for i, p in enumerate(programs):
         print('{:2}: {}'.format(i, p))
     selection = nrkrecorder.get_slice_input(len(programs))
-    print('You selected {}'.format(selection))
+    nrkrecorder.LOG.debug('You selected {}'.format(selection))
 
     programs_to_download = []
     for program in programs[selection]:
@@ -209,14 +199,14 @@ def ask_for_program_download(programs):
         else:
             nrkrecorder.LOG.info('Sorry, program not available: {}'.format(program.title))
 
-    download_programs_in_parallel(programs_to_download)
+    download_programs(programs_to_download)
 
 
 def download_worker(args):
     index, program, progress_list = args
 
 
-def download_programs_in_parallel(programs):
+def download_programs(programs):
     pass
 
 
@@ -225,8 +215,12 @@ def download_series_metadata(series):
     image_filename = 'show.jpg'
     if not os.path.exists(os.path.join(download_dir, image_filename)):
         nrkrecorder.LOG.info('Downloading image for series {}'.format(series.title))
-        os.makedirs(download_dir, exist_ok=True)
-        urllib.request.urlretrieve(series.imageUrl, os.path.join(download_dir, image_filename))
+        try:
+            os.makedirs(download_dir, exist_ok=True)
+            urllib.request.urlretrieve(series.imageUrl, os.path.join(download_dir, image_filename))
+        except Exception as e:
+            nrkrecorder.LOG.error('Could not download metadata for series {}: {}'.format(series.title, e))
+            sys.exit(1)
 
 
 def download(obj, json=None):
@@ -279,27 +273,3 @@ def download(obj, json=None):
     # Remove subtitle file after including it in the mp4 video
     if os.path.exists(subtitle_file) and os.path.exists(mp4_filename):
         os.remove(subtitle_file)
-
-
-def search_from_cmdline(args):
-    if args.series:
-        series, _ = search(args.search_string, 'series')
-        if len(series) == 1:
-            print('\nOnly one matching series')
-            series_download(series[0])
-        elif len(series) > 1:
-            print('\nMatching series:')
-            for i, s in enumerate(series):
-                print('{:2}: {}'.format(i, s))
-            index = nrkrecorder.get_integer_input(len(series) - 1)
-            series_download(series[index])
-        else:
-            print('Sorry, no matching series')
-    elif args.program:
-        _, programs = search(args.search_string, 'program')
-        if programs:
-            ask_for_program_download(programs)
-        else:
-            print('Sorry, no matching series')
-    else:
-        nrkrecorder.LOG.error('Unknown state, not sure what to do')
