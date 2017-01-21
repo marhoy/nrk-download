@@ -154,9 +154,9 @@ class Series:
 
 
 def search(string, search_type):
-    r = SESSION.get(NRK_TV_MOBIL_API + '/search/' + string)
-    r.raise_for_status()
     try:
+        r = SESSION.get(NRK_TV_MOBIL_API + '/search/' + string)
+        r.raise_for_status()
         json = r.json()
     except Exception as e:
         LOG.error('Not able to parse search-results: {}'.format(e))
@@ -334,7 +334,7 @@ def download(obj, json=None):
         os.remove(subtitle_file)
 
 
-def run_from_cmdline(args):
+def search_from_cmdline(args):
     if args.series:
         series, _ = search(args.search_string, 'series')
         if len(series) == 1:
@@ -368,4 +368,4 @@ if __name__ == '__main__':
     parser.add_argument('search_string')
     arguments = parser.parse_args()
 
-    run_from_cmdline(arguments)
+    search_from_cmdline(arguments)
