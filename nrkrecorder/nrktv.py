@@ -6,6 +6,7 @@ import urllib.parse
 import os.path
 import re
 import sys
+import datetime
 import subprocess
 
 NRK_TV_API = 'https://tv.nrk.no'
@@ -35,6 +36,7 @@ class Program:
         self.hasSubtitles = False
         self.downloadUrl = None
         self.subtitleUrl = None
+        self.duration = datetime.timedelta()
 
         if self.seriesId and self.seriesId not in KNOWN_SERIES.keys():
             # This is an episode from a series we haven't seem yet
@@ -50,10 +52,11 @@ class Program:
             nrkrecorder.LOG.error('Could not get program details: {}'.format(e))
             return
         self.isAvailable = json['isAvailable']
-        self.hasSubtitles = json['hasSubtitles']
         self.downloadUrl = json['mediaUrl']
+        self.hasSubtitles = json['hasSubtitles']
         if self.hasSubtitles:
             self.subtitleUrl = urllib.parse.unquote(json['mediaAssets'][0]['webVttSubtitlesUrl'])
+        self.duration = nrkrecorder.utils.parse_duration(json['duration'])
 
     def make_filename(self):
         if self.seriesId:
@@ -207,7 +210,10 @@ def download_worker(args):
 
 
 def download_programs(programs):
-    pass
+    total_duration = datetime.timedelta()
+    for program in programs:
+        total_duration += program.duration
+    print('Programs: {}, Total duration {}'.format(len(programs), total_duration))
 
 
 def download_series_metadata(series):

@@ -1,6 +1,7 @@
 import re
 import sys
-
+import datetime
+import nrkrecorder
 
 def valid_filename(string):
     filename = re.sub(r'[/\\?<>:*|!"\']', '', string)
@@ -72,3 +73,26 @@ def get_slice_input(num_elements):
 
 def get_image_url(image_id):
     return 'http://m.nrk.no/m/img?kaleidoId={}&width={}'.format(image_id, 960)
+
+
+def parse_duration(string):
+    # PT28M39S : 28m39s
+    # PT3H12M41.6S : 3h12m41.6s
+    hours = minutes = seconds = 0
+    hours_search = re.search('(\d+)H', string)
+    minutes_search = re.search('(\d+)M', string)
+    seconds_search = re.search('([\d.]+)S', string)
+    if hours_search:
+        hours = int(hours_search.group(1))
+    if minutes_search:
+        minutes = int(minutes_search.group(1))
+    if seconds_search:
+        seconds = float(seconds_search.group(1))
+
+    try:
+        duration = datetime.timedelta(hours=hours, minutes=minutes, seconds=seconds)
+    except Exception as e:
+        nrkrecorder.LOG.warning('Unable to calculate duration: {}: {}'.format(string, e))
+        return datetime.timedelta()
+
+    return duration
