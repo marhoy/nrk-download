@@ -3,6 +3,7 @@ import sys
 import datetime
 import nrkrecorder
 
+
 def valid_filename(string):
     filename = re.sub(r'[/\\?<>:*|!"\']', '', string)
     return filename

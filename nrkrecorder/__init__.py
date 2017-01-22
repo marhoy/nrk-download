@@ -4,8 +4,9 @@ from .nrktv import search, ask_for_program_download
 import logging
 import os
 
+
 # Package-wide logging configuration
-logging.basicConfig(format='{levelname}: {message}', level=logging.INFO, style='{')
+logging.basicConfig(format='{levelname}: {message}', level=logging.WARNING, style='{')
 LOG = logging.getLogger()
 
 # This is where the files end up

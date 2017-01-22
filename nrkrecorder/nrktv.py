@@ -7,7 +7,11 @@ import os.path
 import re
 import sys
 import datetime
+import time
+import multiprocessing
 import subprocess
+import tqdm
+
 
 NRK_TV_API = 'https://tv.nrk.no'
 NRK_TV_MOBIL_API = 'https://tvapi.nrk.no/v1'
@@ -169,7 +173,10 @@ def search(search_string, search_type):
         return
 
     series = programs = []
-    for item in reversed(json['hits']):
+    hits = json.get('hits', [])
+    if hits is None:
+        hits = []
+    for item in reversed(hits):
         if item['type'] == 'serie' and search_type == 'series':
             series.append(Series(item['hit']['seriesId']))
         elif item['type'] in ['program', 'episode'] and search_type == 'program':
@@ -206,14 +213,79 @@ def ask_for_program_download(programs):
 
 
 def download_worker(args):
-    index, program, progress_list = args
+    program, program_idx, progress_list = args
+    program_filename = program.make_filename()
+    download_dir = os.path.dirname(program_filename)
+    image_filename = program_filename + '.jpg'
+    subtitle_file = program_filename + '.no.srt'
+    video_filename = program_filename + '.m4v'
+
+    # Create directory if needed
+    if not os.path.exists(download_dir):
+        try:
+            os.makedirs(download_dir, exist_ok=True)
+        except Exception as e:
+            nrkrecorder.LOG.error('Could not create directory {}: {}'.format(download_dir, e))
+            return
+
+    # Download image
+    if not os.path.exists(image_filename):
+        try:
+            nrkrecorder.LOG.info('Downloading image for {}'.format(program.title))
+            urllib.request.urlretrieve(program.imageUrl, os.path.join(download_dir, image_filename))
+        except Exception as e:
+            nrkrecorder.LOG.warning('Could not download image for program {}: {}'.format(program.title, e))
+
+    # Download subtitles
+    if program.hasSubtitles and not os.path.exists(subtitle_file):
+        nrkrecorder.LOG.info('Downloading subtitles for {}'.format(program.title))
+        cmd = ['ffmpeg', '-loglevel', '8', '-i', program.subtitleUrl, subtitle_file]
+        try:
+            subprocess.run(cmd, stdin=subprocess.DEVNULL)
+        except Exception as e:
+            nrkrecorder.LOG.warning('Could not download subtitles for program {}: {}'.format(program.title, e))
+
+    progress_list[program_idx] = 1
+    return program_idx
+
+    # # Download video
+    # if json['mediaUrl'] and not os.path.exists(mp4_filename):
+    #     video_url = json['mediaUrl']
+    #     video_url = re.sub('\.net/z/', '.net/i/', video_url)
+    #     video_url = re.sub('manifest\.f4m$', 'master.m3u8', video_url)
+    #     cmd = ['ffmpeg', '-loglevel', '8', '-stats', '-i', video_url]
+    #     if os.path.exists(subtitle_file):
+    #         cmd += ['-i', subtitle_file, '-c:s', 'mov_text', '-metadata:s:s:0', 'language=nor']
+    #     cmd += ['-metadata', 'description="{}"'.format(obj.description)]
+    #     cmd += ['-metadata', 'track="24"']
+    #     cmd += ['-c:v', 'copy', '-c:a', 'copy', '-bsf:a', 'aac_adtstoasc', mp4_filename]
+    #     subprocess.run(cmd)
 
 
 def download_programs(programs):
     total_duration = datetime.timedelta()
     for program in programs:
         total_duration += program.duration
-    print('Programs: {}, Total duration {}'.format(len(programs), total_duration))
+    total_duration = total_duration - datetime.timedelta(microseconds=total_duration.microseconds)
+    print('Ready to download {} programs, with total duration {}'.format(len(programs), total_duration))
+
+    with multiprocessing.Pool(processes=8) as pool, multiprocessing.Manager() as manager:
+
+        shared_progress = manager.list([0]*len(programs))
+        progress_bar = tqdm.tqdm(desc='Downloading', total=round(total_duration.total_seconds()), unit='s')
+
+        nrkrecorder.LOG.debug('Starting pool of {} workers'.format(pool._processes))
+        args = [(program, idx, shared_progress) for idx, program in enumerate(programs)]
+        result = pool.map_async(download_worker, args)
+
+        while not result.ready():
+            nrkrecorder.LOG.debug('Progress: {}'.format(shared_progress))
+            time.sleep(0.1)
+            progress_bar.update(sum(shared_progress) - progress_bar.n)
+        # progress_bar.update(progress_bar.total - progress_bar.n)
+        progress_bar.close()
+
+    nrkrecorder.LOG.debug('All workers finished. Result: {}'.format(result.get()))
 
 
 def download_series_metadata(series):
