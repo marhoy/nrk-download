@@ -1,5 +1,3 @@
-import nrkrecorder
-
 import requests
 import urllib.request
 import urllib.parse
@@ -12,6 +10,8 @@ import multiprocessing
 import subprocess
 import tqdm
 
+from . import utils, LOG
+import nrkrecorder
 
 NRK_TV_API = 'https://tv.nrk.no'
 NRK_TV_MOBIL_API = 'https://tvapi.nrk.no/v1'
@@ -27,12 +27,12 @@ SESSION.headers['app-version-android'] = '999'
 class Program:
     def __init__(self, json):
 
-        nrkrecorder.LOG.debug('Creating new Program: {} : {}'.format(json['title'], json['programId']))
+        LOG.debug('Creating new Program: {} : {}'.format(json['title'], json['programId']))
 
         self.programId = json['programId']
         self.title = re.sub('\s+', ' ', json['title'])
         self.description = json['description']
-        self.imageUrl = nrkrecorder.utils.get_image_url(json['imageId'])
+        self.imageUrl = utils.get_image_url(json['imageId'])
         self.seriesId = json.get('seriesId', None)
         self.episodeNumberOrDate = json.get('episodeNumberOrDate', None)
         self.episodeTitle = json.get('episodeTitle', None)
@@ -44,7 +44,7 @@ class Program:
 
         if self.seriesId and self.seriesId not in KNOWN_SERIES.keys():
             # This is an episode from a series we haven't seem yet
-            nrkrecorder.LOG.debug('Program {} is from an unknown series {}'.format(self.programId, self.seriesId))
+            LOG.debug('Program {} is from an unknown series {}'.format(self.programId, self.seriesId))
             Series(self.seriesId)
 
     def get_details(self):
@@ -53,14 +53,14 @@ class Program:
             r.raise_for_status()
             json = r.json()
         except Exception as e:
-            nrkrecorder.LOG.error('Could not get program details: {}'.format(e))
+            LOG.error('Could not get program details: {}'.format(e))
             return
         self.isAvailable = json['isAvailable']
         self.downloadUrl = json['mediaUrl']
         self.hasSubtitles = json['hasSubtitles']
         if self.hasSubtitles:
             self.subtitleUrl = urllib.parse.unquote(json['mediaAssets'][0]['webVttSubtitlesUrl'])
-        self.duration = nrkrecorder.utils.parse_duration(json['duration'])
+        self.duration = utils.parse_duration(json['duration'])
 
     def make_filename(self):
         if self.seriesId:
@@ -83,7 +83,7 @@ class Program:
             basedir = nrkrecorder.DOWNLOAD_DIR
             filename = self.title
 
-        return os.path.join(basedir, nrkrecorder.utils.valid_filename(filename))
+        return os.path.join(basedir, utils.valid_filename(filename))
 
     def __str__(self):
         if self.seriesId:
@@ -102,13 +102,13 @@ class Program:
 
 class Season:
     def __init__(self, idx, json):
-        nrkrecorder.LOG.info('Creating new season: {}: {}'.format(idx, json['name']))
+        LOG.info('Creating new season: {}: {}'.format(idx, json['name']))
 
         self.id = json['id']
         self.name = re.sub('\s+', ' ', json['name'])
         self.number = idx
         self.episodes = []
-        self.dirName = nrkrecorder.utils.valid_filename('Season {:02} - {}'.format(self.number + 1, self.name))
+        self.dirName = utils.valid_filename('Season {:02} - {}'.format(self.number + 1, self.name))
 
     def __str__(self):
         string = '{}: {} ({} ep)'.format(self.number, self.name, len(self.episodes))
@@ -117,7 +117,7 @@ class Season:
 
 class Series:
     def __init__(self, series_id):
-        nrkrecorder.LOG.info('Creating new series: {}'.format(series_id))
+        LOG.info('Creating new series: {}'.format(series_id))
 
         # Register our seriesId. The object is updated later
         KNOWN_SERIES[series_id] = self
@@ -127,14 +127,14 @@ class Series:
             r.raise_for_status()
             json = r.json()
         except Exception as e:
-            nrkrecorder.LOG.error('Not able get details for {}: {}'.format(series_id, e))
+            LOG.error('Not able get details for {}: {}'.format(series_id, e))
             sys.exit(1)
 
         self.seriesId = series_id
         self.title = re.sub('\s+', ' ', json['title'])
         self.description = json['description']
-        self.imageUrl = nrkrecorder.utils.get_image_url(json['imageId'])
-        self.dirName = nrkrecorder.utils.valid_filename(self.title)
+        self.imageUrl = utils.get_image_url(json['imageId'])
+        self.dirName = utils.valid_filename(self.title)
         self.seasons = []
         self.seasonId2Idx = {}
         self.programIds = {}
@@ -153,7 +153,7 @@ class Series:
             season_index = self.seasonId2Idx[item['seasonId']]
             program = Program(item)
             episode_number = len(self.seasons[season_index].episodes)
-            nrkrecorder.LOG.debug('Series {}: Adding {} to S {}, E {}'.format(
+            LOG.debug('Series {}: Adding {} to S {}, E {}'.format(
                 self.seriesId, program.title, season_index, episode_number))
             self.seasons[season_index].episodes.append(program)
             self.programIds[item['programId']] = (season_index, episode_number)
@@ -169,7 +169,7 @@ def search(search_string, search_type):
         r.raise_for_status()
         json = r.json()
     except Exception as e:
-        nrkrecorder.LOG.error('Not able to parse search-results: {}'.format(e))
+        LOG.error('Not able to parse search-results: {}'.format(e))
         return
 
     series = programs = []
@@ -182,22 +182,22 @@ def search(search_string, search_type):
         elif item['type'] in ['program', 'episode'] and search_type == 'program':
             programs.append(Program(item['hit']))
         if item['type'] not in ['serie', 'program', 'episode']:
-            nrkrecorder.LOG.warning('Unknown item type: {}'.format(item['type']))
+            LOG.warning('Unknown item type: {}'.format(item['type']))
 
     if search_type == 'series':
         return series
     elif search_type == 'program':
         return programs
     else:
-        nrkrecorder.LOG.error('Unknown search type: {}'.format(search_type))
+        LOG.error('Unknown search type: {}'.format(search_type))
 
 
 def ask_for_program_download(programs):
     print('\nMatching programs')
     for i, p in enumerate(programs):
         print('{:2}: {}'.format(i, p))
-    selection = nrkrecorder.get_slice_input(len(programs))
-    nrkrecorder.LOG.debug('You selected {}'.format(selection))
+    selection = utils.get_slice_input(len(programs))
+    LOG.debug('You selected {}'.format(selection))
 
     programs_to_download = []
     for program in programs[selection]:
@@ -207,7 +207,7 @@ def ask_for_program_download(programs):
             programs_to_download.append(program)
             download_series_metadata(KNOWN_SERIES[program.seriesId])
         else:
-            nrkrecorder.LOG.info('Sorry, program not available: {}'.format(program.title))
+            LOG.info('Sorry, program not available: {}'.format(program.title))
 
     download_programs(programs_to_download)
 
@@ -225,25 +225,25 @@ def download_worker(args):
         try:
             os.makedirs(download_dir, exist_ok=True)
         except Exception as e:
-            nrkrecorder.LOG.error('Could not create directory {}: {}'.format(download_dir, e))
+            LOG.error('Could not create directory {}: {}'.format(download_dir, e))
             return
 
     # Download image
     if not os.path.exists(image_filename):
         try:
-            nrkrecorder.LOG.info('Downloading image for {}'.format(program.title))
+            LOG.info('Downloading image for {}'.format(program.title))
             urllib.request.urlretrieve(program.imageUrl, os.path.join(download_dir, image_filename))
         except Exception as e:
-            nrkrecorder.LOG.warning('Could not download image for program {}: {}'.format(program.title, e))
+            LOG.warning('Could not download image for program {}: {}'.format(program.title, e))
 
     # Download subtitles
     if program.hasSubtitles and not os.path.exists(subtitle_file):
-        nrkrecorder.LOG.info('Downloading subtitles for {}'.format(program.title))
+        LOG.info('Downloading subtitles for {}'.format(program.title))
         cmd = ['ffmpeg', '-loglevel', '8', '-i', program.subtitleUrl, subtitle_file]
         try:
             subprocess.run(cmd, stdin=subprocess.DEVNULL)
         except Exception as e:
-            nrkrecorder.LOG.warning('Could not download subtitles for program {}: {}'.format(program.title, e))
+            LOG.warning('Could not download subtitles for program {}: {}'.format(program.title, e))
 
     progress_list[program_idx] = 1
     return program_idx
@@ -274,35 +274,35 @@ def download_programs(programs):
         shared_progress = manager.list([0]*len(programs))
         progress_bar = tqdm.tqdm(desc='Downloading', total=round(total_duration.total_seconds()), unit='s')
 
-        nrkrecorder.LOG.debug('Starting pool of {} workers'.format(pool._processes))
+        LOG.debug('Starting pool of {} workers'.format(pool._processes))
         args = [(program, idx, shared_progress) for idx, program in enumerate(programs)]
         result = pool.map_async(download_worker, args)
 
         while not result.ready():
-            nrkrecorder.LOG.debug('Progress: {}'.format(shared_progress))
+            LOG.debug('Progress: {}'.format(shared_progress))
             time.sleep(0.1)
             progress_bar.update(sum(shared_progress) - progress_bar.n)
         # progress_bar.update(progress_bar.total - progress_bar.n)
         progress_bar.close()
 
-    nrkrecorder.LOG.debug('All workers finished. Result: {}'.format(result.get()))
+    LOG.debug('All workers finished. Result: {}'.format(result.get()))
 
 
 def download_series_metadata(series):
     download_dir = os.path.join(nrkrecorder.DOWNLOAD_DIR, series.dirName)
     image_filename = 'show.jpg'
     if not os.path.exists(os.path.join(download_dir, image_filename)):
-        nrkrecorder.LOG.info('Downloading image for series {}'.format(series.title))
+        LOG.info('Downloading image for series {}'.format(series.title))
         try:
             os.makedirs(download_dir, exist_ok=True)
             urllib.request.urlretrieve(series.imageUrl, os.path.join(download_dir, image_filename))
         except Exception as e:
-            nrkrecorder.LOG.error('Could not download metadata for series {}: {}'.format(series.title, e))
+            LOG.error('Could not download metadata for series {}: {}'.format(series.title, e))
             sys.exit(1)
 
 
 def download(obj, json=None):
-    image_url = nrkrecorder.utils.get_image_url(obj.imageId)
+    image_url = utils.get_image_url(obj.imageId)
     if type(obj) == Series:
         download_dir = os.path.join(nrkrecorder.DOWNLOAD_DIR, obj.dirName)
         image_filename = 'show.jpg'
@@ -311,12 +311,12 @@ def download(obj, json=None):
         download_dir = os.path.dirname(program_filename)
         image_filename = os.path.basename(program_filename) + '.jpg'
     else:
-        nrkrecorder.LOG.error('Download: Unkown datatype: {}'.format(type(obj)))
+        LOG.error('Download: Unkown datatype: {}'.format(type(obj)))
         return
 
     # Download images
     if not os.path.exists(os.path.join(download_dir, image_filename)):
-        nrkrecorder.LOG.info('Downloading image for {}'.format(type(obj)))
+        LOG.info('Downloading image for {}'.format(type(obj)))
         os.makedirs(download_dir, exist_ok=True)
         urllib.request.urlretrieve(image_url, os.path.join(download_dir, image_filename))
 
