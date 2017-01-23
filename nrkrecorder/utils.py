@@ -130,3 +130,23 @@ def parse_duration(string):
         return datetime.timedelta()
 
     return duration
+
+
+def ffmpeg_seconds_downloaded(process):
+    downloaded_time = datetime.timedelta()
+
+    line = process.stderr.readline()
+    if line:
+        time_match = re.search('.+\s+time=([\d:.]+)', line)
+        if time_match:
+            downloaded_time_list = time_match.group(1).split(':')
+            downloaded_time = datetime.timedelta(hours=int(downloaded_time_list[0]),
+                                                 minutes=int(downloaded_time_list[1]),
+                                                 seconds=float(downloaded_time_list[2]))
+
+        # rate_match = re.search('\s+bitrate=([\d.]+)', line)
+        # if rate_match:
+        #    download_rate = rate_match.group(1)
+
+    return downloaded_time.total_seconds()
+

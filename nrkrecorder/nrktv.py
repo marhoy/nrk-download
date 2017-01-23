@@ -38,7 +38,7 @@ class Program:
         self.episodeTitle = json.get('episodeTitle', None)
         self.isAvailable = False
         self.hasSubtitles = False
-        self.downloadUrl = None
+        self.mediaUrl = None
         self.subtitleUrl = None
         self.duration = datetime.timedelta()
 
@@ -56,7 +56,9 @@ class Program:
             LOG.error('Could not get program details: {}'.format(e))
             return
         self.isAvailable = json['isAvailable']
-        self.downloadUrl = json['mediaUrl']
+        self.mediaUrl = json['mediaUrl']
+        self.mediaUrl = re.sub('\.net/z/', '.net/i/', self.mediaUrl)
+        self.mediaUrl = re.sub('manifest\.f4m$', 'master.m3u8', self.mediaUrl)
         self.hasSubtitles = json['hasSubtitles']
         if self.hasSubtitles:
             self.subtitleUrl = urllib.parse.unquote(json['mediaAssets'][0]['webVttSubtitlesUrl'])
@@ -245,21 +247,25 @@ def download_worker(args):
         except Exception as e:
             LOG.warning('Could not download subtitles for program {}: {}'.format(program.title, e))
 
-    progress_list[program_idx] = 1
-    return program_idx
-
     # # Download video
-    # if json['mediaUrl'] and not os.path.exists(mp4_filename):
-    #     video_url = json['mediaUrl']
-    #     video_url = re.sub('\.net/z/', '.net/i/', video_url)
-    #     video_url = re.sub('manifest\.f4m$', 'master.m3u8', video_url)
-    #     cmd = ['ffmpeg', '-loglevel', '8', '-stats', '-i', video_url]
-    #     if os.path.exists(subtitle_file):
-    #         cmd += ['-i', subtitle_file, '-c:s', 'mov_text', '-metadata:s:s:0', 'language=nor']
-    #     cmd += ['-metadata', 'description="{}"'.format(obj.description)]
-    #     cmd += ['-metadata', 'track="24"']
-    #     cmd += ['-c:v', 'copy', '-c:a', 'copy', '-bsf:a', 'aac_adtstoasc', mp4_filename]
-    #     subprocess.run(cmd)
+    if not os.path.exists(video_filename):
+        cmd = ['ffmpeg', '-loglevel', '8', '-stats', '-i', program.mediaUrl]
+        if os.path.exists(subtitle_file):
+            cmd += ['-i', subtitle_file, '-c:s', 'mov_text', '-metadata:s:s:0', 'language=nor']
+        # cmd += ['-metadata', 'description="{}"'.format(obj.description)]
+        # cmd += ['-metadata', 'track="24"']
+        cmd += ['-c:v', 'copy', '-c:a', 'copy', '-bsf:a', 'aac_adtstoasc', video_filename]
+        try:
+            process = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL,
+                                       universal_newlines=True)
+            while process.poll() is None:
+                seconds_downloaded = utils.ffmpeg_seconds_downloaded(process)
+                progress_list[program_idx] = round(seconds_downloaded)
+                time.sleep(0.5)
+            process.wait()
+        except Exception as e:
+            LOG.warning('Unable to download program {}:{}: {}'.format(
+                program.title, program.episodeTitle, e))
 
 
 def download_programs(programs):
@@ -269,10 +275,11 @@ def download_programs(programs):
     total_duration = total_duration - datetime.timedelta(microseconds=total_duration.microseconds)
     print('Ready to download {} programs, with total duration {}'.format(len(programs), total_duration))
 
-    with multiprocessing.Pool(processes=8) as pool, multiprocessing.Manager() as manager:
+    with multiprocessing.Pool(processes=os.cpu_count()) as pool, multiprocessing.Manager() as manager:
 
         shared_progress = manager.list([0]*len(programs))
-        progress_bar = tqdm.tqdm(desc='Downloading', total=round(total_duration.total_seconds()), unit='s')
+        progress_bar = tqdm.tqdm(desc='Downloading', total=round(total_duration.total_seconds()),
+                                 unit='s', unit_scale=True)
 
         LOG.debug('Starting pool of {} workers'.format(pool._processes))
         args = [(program, idx, shared_progress) for idx, program in enumerate(programs)]
@@ -282,7 +289,7 @@ def download_programs(programs):
             LOG.debug('Progress: {}'.format(shared_progress))
             time.sleep(0.1)
             progress_bar.update(sum(shared_progress) - progress_bar.n)
-        # progress_bar.update(progress_bar.total - progress_bar.n)
+        progress_bar.update(progress_bar.total - progress_bar.n)
         progress_bar.close()
 
     LOG.debug('All workers finished. Result: {}'.format(result.get()))

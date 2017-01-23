@@ -1,45 +1,7 @@
 
 import subprocess
-import re
-import datetime
-
-
-class DownloadProcess:
-    def __init__(self, command):
-        self.process = subprocess.Popen(command, stderr=subprocess.PIPE, universal_newlines=True)
-        self.duration = None
-        self.progress = None
-        self.download_rate = None
-
-    def parse_ffmpeg_output(self):
-
-        duration = downloaded_time = progress = download_rate = None
-
-        for line in iter(self.process.stderr.readline, ''):
-            duration_match = re.match('\s+Duration: ([\d:.]+)', line)
-            if duration_match:
-                duration_list = duration_match.group(1).split(':')
-                self.duration = datetime.timedelta(hours=int(duration_list[0]),
-                                                   minutes=int(duration_list[1]),
-                                                   seconds=float(duration_list[2]))
-
-
-            time_match = re.search('.+\s+time=([\d:.]+)', line)
-            if time_match:
-                downloaded_time_list = time_match.group(1).split(':')
-                downloaded_time = datetime.timedelta(hours=int(downloaded_time_list[0]),
-                                                     minutes=int(downloaded_time_list[1]),
-                                                     seconds=float(downloaded_time_list[2]))
-
-            rate_match = re.search('\s+bitrate=([\d.]+)', line)
-            if rate_match:
-                download_rate = rate_match.group(1)
-
-            if self.duration and downloaded_time:
-                progress = downloaded_time/duration
-
-        return duration, progress, download_rate
-
+import nrkrecorder
+import time
 
 if __name__ == '__main__':
 
@@ -52,17 +14,17 @@ if __name__ == '__main__':
         ]
     mp4_filenames = ['test0.mp4', 'test0.mp4']
 
-    procs = []
-    for i in range(2):
-        cmd = ['ffmpeg', '-y', '-stats', '-i', video_urls[i]]
-        cmd += ['-c:v', 'copy', '-c:a', 'copy', '-bsf:a', 'aac_adtstoasc', 'test' + str(i) + '.m4v']
+    i = 0
+    cmd = ['ffmpeg', '-loglevel', '8', '-stats', '-y', '-stats', '-i', video_urls[i]]
+    cmd += ['-c:v', 'copy', '-c:a', 'copy', '-bsf:a', 'aac_adtstoasc', 'test' + str(i) + '.m4v']
 
-        procs.append(subprocess.Popen(cmd, stderr=subprocess.PIPE, universal_newlines=True))
-        print('Started process {}'.format(i))
+    proc = subprocess.Popen(cmd, stderr=subprocess.PIPE, universal_newlines=True)
+    print('Started process')
 
-    for proc in procs:
-        while proc.poll() is None:
-        parse_ffmpeg_output(proc)
+    while proc.poll() is None:
+        seconds = nrkrecorder.utils.ffmpeg_seconds_downloaded(proc)
+        print('Downloaded {} seconds'.format(seconds))
+        time.sleep(0.5)
 
     print('Before wait')
     proc.wait()
