@@ -56,13 +56,15 @@ class Program:
             LOG.error('Could not get program details: {}'.format(e))
             return
         self.isAvailable = json['isAvailable']
-        self.mediaUrl = json['mediaUrl']
-        self.mediaUrl = re.sub('\.net/z/', '.net/i/', self.mediaUrl)
-        self.mediaUrl = re.sub('manifest\.f4m$', 'master.m3u8', self.mediaUrl)
-        self.hasSubtitles = json['hasSubtitles']
-        if self.hasSubtitles:
-            self.subtitleUrl = urllib.parse.unquote(json['mediaAssets'][0]['webVttSubtitlesUrl'])
-        self.duration = utils.parse_duration(json['duration'])
+        if self.isAvailable:
+            self.mediaUrl = json.get('mediaUrl', None)
+            if self.mediaUrl:
+                self.mediaUrl = re.sub('\.net/z/', '.net/i/', self.mediaUrl)
+                self.mediaUrl = re.sub('manifest\.f4m$', 'master.m3u8', self.mediaUrl)
+            self.hasSubtitles = json.get('hasSubtitles', False)
+            if self.hasSubtitles:
+                self.subtitleUrl = urllib.parse.unquote(json['mediaAssets'][0]['webVttSubtitlesUrl'])
+            self.duration = utils.parse_duration(json['duration'])
 
     def make_filename(self):
         if self.seriesId:
@@ -247,7 +249,7 @@ def download_worker(args):
         except Exception as e:
             LOG.warning('Could not download subtitles for program {}: {}'.format(program.title, e))
 
-    # # Download video
+    # Download video
     if not os.path.exists(video_filename):
         cmd = ['ffmpeg', '-loglevel', '8', '-stats', '-i', program.mediaUrl]
         if os.path.exists(subtitle_file):
