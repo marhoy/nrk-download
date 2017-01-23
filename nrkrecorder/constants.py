@@ -6,4 +6,4 @@ logging.basicConfig(format='{levelname}: {message}', level=logging.WARNING, styl
 LOG = logging.getLogger()
 
 # This is where the files end up
-DOWNLOAD_DIR = os.path.expanduser('~/Downloads/nrktv')
+DOWNLOAD_DIR = os.getenv('NRKRECORDER_DOWNLOAD_DIR', os.path.expanduser('~/Downloads/nrkrecorder'))

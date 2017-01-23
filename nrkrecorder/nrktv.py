@@ -281,7 +281,7 @@ def download_programs(programs):
         progress_bar = tqdm.tqdm(desc='Downloading', total=round(total_duration.total_seconds()),
                                  unit='s', unit_scale=True)
 
-        LOG.debug('Starting pool of {} workers'.format(pool._processes))
+        LOG.debug('Starting pool of workers')
         args = [(program, idx, shared_progress) for idx, program in enumerate(programs)]
         result = pool.map_async(download_worker, args)
 

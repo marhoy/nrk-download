@@ -15,5 +15,5 @@ if __name__ == '__main__':
     parser.add_argument('search_string')
     arguments = parser.parse_args()
 
-    nrkrecorder.DOWNLOAD_DIR = os.path.expanduser('~/Downloads/nrktv2')
+    # nrkrecorder.DOWNLOAD_DIR = os.path.expanduser('~/Downloads/nrktv2')
     nrkrecorder.search_from_cmdline(arguments)
