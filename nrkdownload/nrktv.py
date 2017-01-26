@@ -307,4 +307,3 @@ def download_series_metadata(series):
             urllib.request.urlretrieve(series.imageUrl, os.path.join(download_dir, image_filename))
         except Exception as e:
             LOG.error('Could not download metadata for series {}: {}'.format(series.title, e))
-            sys.exit(1)
