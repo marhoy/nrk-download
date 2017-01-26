@@ -32,9 +32,6 @@ SKAM/
     ├── SKAM - S03E01 - 1of10.jpg
     ├── SKAM - S03E01 - 1of10.m4v
     ├── SKAM - S03E01 - 1of10.no.srt
-    ├── SKAM - S03E02 - 2of10.jpg
-    ├── SKAM - S03E02 - 2of10.m4v
-    ├── SKAM - S03E02 - 2of10.no.srt
     ⋮
     ├── SKAM - S03E10 - 10of10.jpg
     ├── SKAM - S03E10 - 10of10.m4v
