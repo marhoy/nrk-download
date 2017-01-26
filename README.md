@@ -1,5 +1,9 @@
-# nrk-opptak
+# nrkdownload
 
+This is yet another tool to download program and series from NRK.
+It is inspired by the already existing tools 
+
+```
 /TV Shows
    /Heroes
       /Season 01
@@ -21,3 +25,4 @@
       show-1.jpg
       show-2.png
       theme.mp3
+```
