@@ -19,7 +19,7 @@ SKAM/
 │   ├── SKAM - S01E02 - 2of11.jpg
 │   ├── SKAM - S01E02 - 2of11.m4v
 │   ├── SKAM - S01E02 - 2of11.no.srt
-...
+⋮
 ├── Season 02 - Sesong 2
 │   ├── SKAM - S02E01 - 1of12.jpg
 │   ├── SKAM - S02E01 - 1of12.m4v
@@ -27,7 +27,7 @@ SKAM/
 │   ├── SKAM - S02E02 - 2of12.jpg
 │   ├── SKAM - S02E02 - 2of12.m4v
 │   ├── SKAM - S02E02 - 2of12.no.srt
-...
+⋮
 └── Season 03 - Sesong 3
     ├── SKAM - S03E01 - 1of10.jpg
     ├── SKAM - S03E01 - 1of10.m4v
@@ -35,7 +35,7 @@ SKAM/
     ├── SKAM - S03E02 - 2of10.jpg
     ├── SKAM - S03E02 - 2of10.m4v
     ├── SKAM - S03E02 - 2of10.no.srt
-...
+    ⋮
     ├── SKAM - S03E10 - 10of10.jpg
     ├── SKAM - S03E10 - 10of10.m4v
     └── SKAM - S03E10 - 10of10.no.srt
