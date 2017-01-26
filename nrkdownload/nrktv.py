@@ -299,7 +299,7 @@ def download_programs(programs):
 
 def download_series_metadata(series):
     download_dir = os.path.join(nrkdownload.DOWNLOAD_DIR, series.dirName)
-    image_filename = 'show.jpg'
+    image_filename = 'poster.jpg'
     if not os.path.exists(os.path.join(download_dir, image_filename)):
         LOG.info('Downloading image for series {}'.format(series.title))
         try:
@@ -308,55 +308,3 @@ def download_series_metadata(series):
         except Exception as e:
             LOG.error('Could not download metadata for series {}: {}'.format(series.title, e))
             sys.exit(1)
-
-
-def download(obj, json=None):
-    image_url = utils.get_image_url(obj.imageId)
-    if type(obj) == Series:
-        download_dir = os.path.join(nrkdownload.DOWNLOAD_DIR, obj.dirName)
-        image_filename = 'show.jpg'
-    elif type(obj) == Program:
-        program_filename = obj.make_filename()
-        download_dir = os.path.dirname(program_filename)
-        image_filename = os.path.basename(program_filename) + '.jpg'
-    else:
-        LOG.error('Download: Unkown datatype: {}'.format(type(obj)))
-        return
-
-    # Download images
-    if not os.path.exists(os.path.join(download_dir, image_filename)):
-        LOG.info('Downloading image for {}'.format(type(obj)))
-        os.makedirs(download_dir, exist_ok=True)
-        urllib.request.urlretrieve(image_url, os.path.join(download_dir, image_filename))
-
-    # We're done with Series, the rest is regarding Programs
-    if type(obj) == Series:
-        return
-
-    # Download subtitles
-    program_filename = obj.make_filename()
-    mp4_filename = program_filename + '.mp4'
-    subtitle_file = program_filename + '.no.srt'
-    if json['hasSubtitles'] and not os.path.exists(subtitle_file):
-        print('Downloading subtitles')
-        cmd = ['ffmpeg', '-loglevel', '8',
-               '-i', urllib.parse.unquote(json['mediaAssets'][0]['webVttSubtitlesUrl']),
-               subtitle_file]
-        subprocess.run(cmd, stderr=subprocess.DEVNULL)
-
-    # Download video
-    if json['mediaUrl'] and not os.path.exists(mp4_filename):
-        video_url = json['mediaUrl']
-        video_url = re.sub('\.net/z/', '.net/i/', video_url)
-        video_url = re.sub('manifest\.f4m$', 'master.m3u8', video_url)
-        cmd = ['ffmpeg', '-loglevel', '8', '-stats', '-i', video_url]
-        if os.path.exists(subtitle_file):
-            cmd += ['-i', subtitle_file, '-c:s', 'mov_text', '-metadata:s:s:0', 'language=nor']
-        cmd += ['-metadata', 'description="{}"'.format(obj.description)]
-        cmd += ['-metadata', 'track="24"']
-        cmd += ['-c:v', 'copy', '-c:a', 'copy', '-bsf:a', 'aac_adtstoasc', mp4_filename]
-        subprocess.run(cmd)
-
-    # Remove subtitle file after including it in the mp4 video
-    if os.path.exists(subtitle_file) and os.path.exists(mp4_filename):
-        os.remove(subtitle_file)
