@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import nrkrecorder
+import nrkdownload
 
 
 if __name__ == '__main__':
@@ -13,7 +13,10 @@ if __name__ == '__main__':
     group1.add_argument('-s', '--series', action='store_true', help='Search for series')
     group1.add_argument('-p', '--program', action='store_true', help='Search for programs')
     parser.add_argument('search_string')
+    parser.add_argument('-d', '--dir', metavar='DIRECTORY', action='store',
+                        help='The directory where the downloaded files will be placed')
     arguments = parser.parse_args()
 
-    # nrkrecorder.DOWNLOAD_DIR = os.path.expanduser('~/Downloads/nrktv2')
-    nrkrecorder.search_from_cmdline(arguments)
+    if arguments.dir:
+        nrkdownload.DOWNLOAD_DIR = os.path.expanduser(arguments.dir)
+    nrkdownload.search_from_cmdline(arguments)

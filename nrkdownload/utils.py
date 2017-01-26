@@ -149,4 +149,3 @@ def ffmpeg_seconds_downloaded(process):
         #    download_rate = rate_match.group(1)
 
     return downloaded_time.total_seconds()
-

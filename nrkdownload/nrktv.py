@@ -11,7 +11,7 @@ import subprocess
 import tqdm
 
 from . import utils, LOG
-import nrkrecorder
+import nrkdownload
 
 NRK_TV_API = 'https://tv.nrk.no'
 NRK_TV_MOBIL_API = 'https://tvapi.nrk.no/v1'
@@ -70,7 +70,7 @@ class Program:
         if self.seriesId:
             series = KNOWN_SERIES[self.seriesId]
             season_number, episode_number = series.programIds[self.programId]
-            basedir = os.path.join(nrkrecorder.DOWNLOAD_DIR, series.dirName, series.seasons[season_number].dirName)
+            basedir = os.path.join(nrkdownload.DOWNLOAD_DIR, series.dirName, series.seasons[season_number].dirName)
 
             filename = series.title
             filename += ' - S{:02}E{:02}'.format(season_number + 1, episode_number + 1)
@@ -84,7 +84,7 @@ class Program:
             else:
                 filename += ' - {}'.format(self.episodeNumberOrDate)
         else:
-            basedir = nrkrecorder.DOWNLOAD_DIR
+            basedir = nrkdownload.DOWNLOAD_DIR
             filename = self.title
 
         return os.path.join(basedir, utils.valid_filename(filename))
@@ -203,9 +203,9 @@ def ask_for_program_download(programs):
     selection = utils.get_slice_input(len(programs))
     LOG.debug('You selected {}'.format(selection))
 
+    print('Getting program details for your selection of {} programs...'.format(len(programs[selection])))
     programs_to_download = []
     for program in programs[selection]:
-
         program.get_details()
         if program.isAvailable:
             programs_to_download.append(program)
@@ -236,7 +236,7 @@ def download_worker(args):
     if not os.path.exists(image_filename):
         try:
             LOG.info('Downloading image for {}'.format(program.title))
-            urllib.request.urlretrieve(program.imageUrl, os.path.join(download_dir, image_filename))
+            urllib.request.urlretrieve(program.imageUrl, image_filename)
         except Exception as e:
             LOG.warning('Could not download image for program {}: {}'.format(program.title, e))
 
@@ -298,7 +298,7 @@ def download_programs(programs):
 
 
 def download_series_metadata(series):
-    download_dir = os.path.join(nrkrecorder.DOWNLOAD_DIR, series.dirName)
+    download_dir = os.path.join(nrkdownload.DOWNLOAD_DIR, series.dirName)
     image_filename = 'show.jpg'
     if not os.path.exists(os.path.join(download_dir, image_filename)):
         LOG.info('Downloading image for series {}'.format(series.title))
@@ -313,7 +313,7 @@ def download_series_metadata(series):
 def download(obj, json=None):
     image_url = utils.get_image_url(obj.imageId)
     if type(obj) == Series:
-        download_dir = os.path.join(nrkrecorder.DOWNLOAD_DIR, obj.dirName)
+        download_dir = os.path.join(nrkdownload.DOWNLOAD_DIR, obj.dirName)
         image_filename = 'show.jpg'
     elif type(obj) == Program:
         program_filename = obj.make_filename()
