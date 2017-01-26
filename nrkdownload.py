@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 
 import nrkdownload
-
+import argparse
+import os
 
 if __name__ == '__main__':
-
-    import os
-    import argparse
 
     parser = argparse.ArgumentParser(description='This script can be used to search tv.nrk.no and download programs.')
     group1 = parser.add_mutually_exclusive_group(required=True)
