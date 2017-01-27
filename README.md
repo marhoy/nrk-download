@@ -49,4 +49,5 @@ Otherwise, they can be installed with
 `pip install requests tqdm`
  
 ### FFmpeg
-The videos and subtitles are downloaded using [FFpeg](https://ffmpeg.org/).
+The videos and subtitles are downloaded using [FFmpeg](https://ffmpeg.org/).
+It is available for all major operating systems.
