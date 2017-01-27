@@ -1,12 +1,11 @@
 # nrkdownload
 
-This is yet another tool to download program and series from NRK.
-It is inspired by the already existing tools. The code is written in Python, and order to be as readable as possible.
+This is yet another commandline tool to download program and series from NRK. It is inspired by the already existing tools that you can find on GitHub. The reason I decided to make yet another tool, was that I found the source code of some of the other tools to be difficult to read and understand. The code is written in Python, and I have tried to make it both readable and understandable.
 
 ## What is different?
-When programs and series are downloaded, a directory hierarchy is created for each series and season.
-Subtitles and images for programs/episodes and series are automatically downloaded.
-The idea is that the subdirectory should integrate seamless into e.g. [Plex](http://www.plex.tv).
+When you download a program with this tool, it doesn't just download that file. If the program is part of a series, a directory for that series and season is created. And the file is automatically named according to its episode and season number.
+
+When programs and series are downloaded, a directory hierarchy is created for each series and season. Subtitles and images for programs/episodes and series are automatically downloaded. The idea is that this directory tree should integrate seamless into you favorite media server, e.g. [Plex](http://www.plex.tv).
 
 
 ```
@@ -34,20 +33,13 @@ SKAM
 
 ## Requirements and installation
 ### Python and packages
-You need an installation of Python 3. If you haven't already got that, download the latest version for your 
-operating system from [python.org](https://www.python.org).
-You could also consider using the [Anaconda](https://www.continuum.io/downloads) Python distribution. It can
-be installed without root (Administrator) privileges, and contains a lot of useful packages. 
+You need an installation of Python 3. If you haven't already got that, download the latest version for your operating system from [python.org](https://www.python.org). You could also consider using the [Anaconda](https://www.continuum.io/downloads) Python distribution. It can be installed without root (Administrator) privileges, and contains a lot of useful packages. 
 
 In addition to the standard packages that are typically distributed with Python, you need:
  - [requests](http://docs.python-requests.org/en/master/) (used for connecting to nrk.no and downloading program information)
  - [tqdm](https://pypi.python.org/pypi/tqdm) (used to create a progress bar when downloading video)
 
-If you are using the Anaconda Python distribution, these packages can be installed with:
-`conda install requests tqdm`
-Otherwise, they can be installed with
-`pip install requests tqdm`
+If you are using the Anaconda Python distribution, these packages can be installed with: `conda install requests tqdm` Otherwise, they can be installed with `pip install requests tqdm`
  
 ### FFmpeg
-The videos and subtitles are downloaded using [FFmpeg](https://ffmpeg.org/).
-It is available for all major operating systems.
+The videos and subtitles are downloaded using [FFmpeg](https://ffmpeg.org/). It is available for all major operating systems.
