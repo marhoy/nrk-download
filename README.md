@@ -36,7 +36,7 @@ In order to download something, you first have to search for it. And you have to
 ### Searching for a series
 Let's say you are interested in downloading all the available episodes about the rescue boat "Elias". You would then use the flag `-s` to specify that you are searching for a series with the name Elias. If there is more than one matching series, you will be asked to specify which one of them you want. You respond to this by typing an integer and pressing Enter.
 
-Then, all of the registered episodes will be listed (due to copyright-issues, some of them might not be available). You then will be asked to specify what episodes you want to download. You respond to this by typing an integer or a range. The range can be specified in different ways:
+Then, all of the registered episodes will be listed (due to copyright-issues, some of them might not be available for download). You then will be asked to specify what episodes you want to download. You respond to this by typing an integer or a range. The range can be specified in different ways:
 - `5-10` or `5:10`, means all episodes from 5 to 10, including both 5 and 10.
 - `-10` or `:10`, means all episodes from the start (0) to 10, including 0 and 10.
 - `10-` or `10:`, means all episodes from 10 to the last, including both 10 and the last.
@@ -57,7 +57,10 @@ Matching programs
 50: Elias (Sesong 2): Elias - 25:26 - S02E25
 51: Elias (Sesong 2): Elias - 26:26 - S02E26
 
-Enter a number or interval (e.g. 8 or 5-10). (q to quit): 0-10
+Enter a number or interval (e.g. 8 or 5-10). (q to quit): -10
+Getting program details for your selection of 11 programs...
+Ready to download 11 programs, with total duration 2:01:02
+Downloading:  35%|█████████                 | 2.52K/7.26K [01:25<02:22, 33.1s/s]
 ```
 
 ## Requirements and installation
