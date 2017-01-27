@@ -41,6 +41,8 @@ Then, all of the registered episodes will be listed (due to copyright-issues, so
 - `-10` or `:10`, means all episodes from the start (0) to 10, including 0 and 10.
 - `10-` or `10:`, means all episodes from 10 to the last, including both 10 and the last.
 - `-` or `:`, means all available episodes.
+
+So the above would typically look like this in your terminal:
 ```
 $ nrkdownload.py -s elias
 
