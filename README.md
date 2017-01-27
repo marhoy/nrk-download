@@ -64,6 +64,8 @@ Getting program details for your selection of 11 programs...
 Ready to download 11 programs, with total duration 2:01:02
 Downloading:  35%|█████████                 | 2.52K/7.26K [01:25<02:22, 33.1s/s]
 ```
+The progress bar shows the number of seconds of video to be downloaded, in this case 2:01:02 = 2*3600 + 62 = 7262 seconds. The next two times are the estimated remaining and total download time. The last number shows how many seconds of video are downloaded per second. So in this snapshot, the video was downloaded at 33x the playback speed. 
+
 
 ## Requirements and installation
 ### Python and packages
