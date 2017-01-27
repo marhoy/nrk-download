@@ -37,18 +37,16 @@ SKAM
 You need an installation of Python 3. If you haven't already got that, download the latest version for your 
 operating system from [python.org](https://www.python.org).
 You could also consider using the [Anaconda](https://www.continuum.io/downloads) Python distribution. It can
-be installed without Administrator (or root) privileges.
+be installed without root (Administrator) privileges, and contains a lot of useful packages. 
 
-In addition to the standard packages that are distributed with Python, you need:
+In addition to the standard packages that are typically distributed with Python, you need:
  - [requests](http://docs.python-requests.org/en/master/) (used for connecting to nrk.no and downloading program information)
- - [tqdm](https://pypi.python.org/pypi/tqdm) (used to create a progress bar when downloading)
- 
+ - [tqdm](https://pypi.python.org/pypi/tqdm) (used to create a progress bar when downloading video)
+
 If you are using the Anaconda Python distribution, these packages can be installed with:
 `conda install requests tqdm`
- 
 Otherwise, they can be installed with
 `pip install requests tqdm`
  
-### ffmpeg
+### FFmpeg
 The videos and subtitles are downloaded using [FFpeg](https://ffmpeg.org/).
- 
