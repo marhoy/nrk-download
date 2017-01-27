@@ -68,6 +68,8 @@ Downloading:  35%|█████████                 | 2.52K/7.26K [01:
 ```
 The progress bar shows the number of seconds of video to be downloaded, in this case 2:01:02 = 2*3600 + 62 = 7262 seconds. The next two times are the estimated remaining and total download time. The last number shows how many seconds of video are downloaded per second. So in this snapshot, the video was downloaded at 33x the playback speed. 
 
+If you have already downloaded some of the episodes, those will be automatically skipped (not overwritten).
+
 ### Searching for a program
 If you were interested in programs where the name "Elias" was mentioned (as opposed to the series "Elias", as described above), you would specify that by using the flag `-p`. The results from the search will be programs, so all you have to do is to specify the program(s) you want by using the range syntax described above.
 
@@ -90,7 +92,9 @@ Enter a number or interval (e.g. 8 or 5-10). (q to quit):
 ### Configurable download directory
 If you don't specify anything, the directories will be created inside `~/Downloads/nrkdownload`, where `~` means your home directory. If you want the downloads somewhere else (e.g. directly to your NAS), there are two ways to specify a different download directory:
 - Define an environment variable named `NRKDOWNLOAD_DIR`
-- Specify the download directory with the option `-d download_dir`
+- Specify the download directory on the command line with the option `-d download_dir`
+
+If you don't know how to define an environment variable, try to Google `create environment variable` and the name of you operating system.
 
 ## Requirements and installation
 ### Python and packages
