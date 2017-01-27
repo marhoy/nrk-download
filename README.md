@@ -71,14 +71,14 @@ If you were interested in programs where the name "Elias" was mentioned (as oppo
 
 In your terminal, that would look like this:
 ```
-$ nrkdownload.py -p elias
+$ nrkdownload.py -p "redningsskøyta elias"
 
 Matching programs
- 0: Kompisboken (Sesong 1): Kompisboken 7:21 - 7:21 - S01E07
- 1: Kompisboken (Sesong 1): Kompisboken 9:21 - 9:21 - S01E09
+ 0: Gratulerer med dagen! (2011): Gratulerer med dagen! 17.05.2011 - 17.05.2011 - S34E01
+ 1: Dagsrevyen (Januar 2013): Dagsrevyen 10.01.2013 - 10.01.2013 - S36E10
 ⋮
-64: Distriktsnyheter Midtnytt (Desember 2016): Distriktsnyheter Midtnytt 14.12.2016 - 14.12.2016 - S64E17
-65: Dagsrevyen 21 (Januar 2017): Dagsrevyen 21 05.01.2017 - 05.01.2017 - S65E05
+ 6: Supernytt (2015): Supernytt 06.05.2015 - 06.05.2015 - S06E80
+ 7: Barne-tv - hele sendinger (2017): Barne-tv - 12.01.2017 - S02E12
 
 Enter a number or interval (e.g. 8 or 5-10). (q to quit): 
 ```
