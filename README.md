@@ -38,12 +38,12 @@ You need an installation of Python 3. In addition to the standard packages that 
  - [requests](http://docs.python-requests.org/en/master/) (used for connecting to nrk.no and downloading program information)
  - [tqdm](https://pypi.python.org/pypi/tqdm) (used to create a progress bar when downloading)
  
- If you are using the Anaconda Python distribution, these packages can be installed with:
- `conda install requests tqdm`
+If you are using the Anaconda Python distribution, these packages can be installed with:
+`conda install requests tqdm`
  
- Otherwise, they can be installed with
- `pip install requests tqdm`
+Otherwise, they can be installed with
+`pip install requests tqdm`
  
- ### ffmpeg
- The videos and subtitles are downloaded using [FFpeg](https://ffmpeg.org/).
+### ffmpeg
+The videos and subtitles are downloaded using [FFpeg](https://ffmpeg.org/).
  
