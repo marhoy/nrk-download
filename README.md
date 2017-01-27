@@ -42,7 +42,16 @@ Matching series:
  0: Elias på eventyr : 1 Sesong(er)
  1: Elias : 2 Sesong(er)
 
-Enter a number in the range 0-1. (q to quit): 
+Enter a number in the range 0-1. (q to quit): 1
+
+Matching programs
+ 0: Elias (Sesong 1): Elias - 1:26 - S01E01
+ 1: Elias (Sesong 1): Elias - 2:26 - S01E02
+⋮
+50: Elias (Sesong 2): Elias - 25:26 - S02E25
+51: Elias (Sesong 2): Elias - 26:26 - S02E26
+
+Enter a number or interval (e.g. 8 or 5-10). (q to quit): 
 ```
 
 ## Requirements and installation
