@@ -5,7 +5,7 @@ This is yet another commandline tool to download programs and series from NRK. I
 The tool is written in Python, and has been tested under both Linux, MacOS and Windows.
 
 ## What is different?
-When you download a program with this tool, it doesn't just download that file. If the program is part of a series, a directory for that series and season is created. And the file is automatically named according to its episode and season number. Subtitles and additional images are also automatically downloaded. The subtitles are also included in the .m4v-file, so you could decide to delete the .srt-file. (I have found that in some tools (like VLC), the support for included subtitles is not perfect. That's why the .srt-file is also there.)
+When you download a program with this tool, it doesn't just download that file. If the program is part of a series, directories for that series and season is created. And the file is automatically named according to its episode and season number. Subtitles and additional images are also automatically downloaded. The subtitles are automatically embedded in the .m4v-file, so you could decide to delete the .srt-file. (I have found that in some tools (like VLC), the support for included subtitles is not perfect. That's why the separate .srt-file is also there.)
 
 The idea behind this is that the downloaded programs should integrate seamlessly into you favorite media server, e.g. [Plex](http://www.plex.tv). If you for example download all the episodes of the very popular series SKAM, you would get a directory-structure like this: 
 
@@ -34,6 +34,23 @@ SKAM
 
 ## Usage
 In order to download something, you first have to search for it. And you have to specify whether you are searching for a particular program, or if you are searching for a series.
+```
+$ nrkdownload.py -h
+usage: nrkdownload.py [-h] (-s | -p) [-d DIRECTORY] search_string
+
+This script can be used to search tv.nrk.no and download programs.
+
+positional arguments:
+  search_string
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -s, --series          Search for series
+  -p, --program         Search for programs
+  -d DIRECTORY, --dir DIRECTORY
+                        The directory where the downloaded files will be
+                        placed
+```
 
 ### Searching for a series
 Let's say you are interested in downloading all the available episodes about the rescue boat "Elias". You would then use the flag `-s` to specify that you are searching for a series with the name Elias. If there is more than one matching series, you will be asked to specify which one of them you want. You respond to this by typing an integer and pressing Enter. If there is only one matching series, it skips directly to the next step:
