@@ -18,3 +18,4 @@ if __name__ == '__main__':
     if arguments.dir:
         nrkdownload.DOWNLOAD_DIR = os.path.expanduser(arguments.dir)
     nrkdownload.search_from_cmdline(arguments)
+
