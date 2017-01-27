@@ -1,9 +1,9 @@
 # nrkdownload
 
-This is yet another commandline tool to download program and series from NRK. It is inspired by the already existing tools that you can find on GitHub. The reason I decided to make yet another tool, was that I found the source code of some of the other tools to be difficult to read and understand. The code is written in Python, and I have tried to make it both readable and understandable.
+This is yet another commandline tool to download program and series from NRK. It is inspired by the already existing tools that you can find on GitHub. The reason I decided to make yet another tool, was that I found the source code of some of the other tools to be difficult to read and understand, and thus difficult to contribute to.
 
 ## What is different?
-When you download a program with this tool, it doesn't just download that file. If the program is part of a series, a directory for that series and season is created. And the file is automatically named according to its episode and season number.
+When you download a program with this tool, it doesn't just download that file. If the program is part of a series, a directory for that series and season is created. And the file is automatically named according to its episode and season number. Subtitles and additional images are also automatically downloaded. The subtitles are also included in the .m4v-file, so you could decide to delete the .srt-file. (I have found that in some tools (like VLC), the support for included subtitles is not perfect. That's why the .srt-file is there.)
 
 When programs and series are downloaded, a directory hierarchy is created for each series and season. Subtitles and images for programs/episodes and series are automatically downloaded. The idea is that this directory tree should integrate seamless into you favorite media server, e.g. [Plex](http://www.plex.tv).
 
