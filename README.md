@@ -115,7 +115,7 @@ If you don't know how to define an environment variable, try to Google `create e
 
 ## Requirements and installation
 ### Python and packages
-You need an installation of Python 3. If you haven't already got that, download the latest version for your operating system from [python.org](https://www.python.org). You could also consider using the [Anaconda](https://www.continuum.io/downloads) Python distribution. It can be installed without root (Administrator) privileges, and contains a lot of useful packages. 
+You need an installation of Python 3. If you haven't already got that, download the latest version for your operating system from [python.org](https://www.python.org). You could also consider using the [Anaconda](https://www.continuum.io/downloads) Python distribution. It can be installed without root (Administrator) privileges, and contains a lot of useful packages like e.g. [Jupyter Notebook](http://jupyter.org/) for interactive programming.
 
 In addition to the standard packages that are typically distributed with Python, you need:
  - [requests](http://docs.python-requests.org/en/master/) (used for connecting to nrk.no and downloading program information)
