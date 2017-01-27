@@ -57,7 +57,7 @@ Let's say you are interested in downloading all the available episodes about the
 
 Then, all of the registered episodes will be listed (due to copyright-issues, some of them might not be available for download). You then will be asked to specify what episodes you want to download. You respond to this by typing an integer or a range. The range can be specified in different ways:
 - `5-10` or `5:10`, means all episodes from 5 to 10, including both 5 and 10.
-- `-10` or `:10`, means all episodes from the start (0) to 10, including 0 and 10.
+- `-10` or `:10`, means all episodes from the start (0) to 10, including both 0 and 10.
 - `10-` or `10:`, means all episodes from 10 to the last, including both 10 and the last.
 - `-` or `:`, means all available episodes.
 
@@ -125,3 +125,12 @@ If you are using the Anaconda Python distribution, these packages can be install
  
 ### FFmpeg
 The videos and subtitles are downloaded using [FFmpeg](https://ffmpeg.org/). It is available for all major operating systems.
+
+
+# TODO
+## URLs as input
+It could be useful to specify an URL instead of a search string. The URLs could be like:
+- `https://tv.nrk.no/program/KOID26004816/president-trump` for a specific program 
+- `https://tv.nrk.no/serie/unge-lovende/KMTE20006115/sesong-2/episode-1` for a specific episode of a series
+- `https://tv.nrk.no/serie/unge-lovende` for a whole series
+For a program or a specific episode, the download could then start without requiring any other input. For a series, one could have a commandline-switch to specify the interval of episodes that you want to download. (The URLs could perhaps also be read from an input-file.) This would enable the download tool to run without requiring input from the user. It could therefore be run as a scheduled job via e.g. cron.
