@@ -70,7 +70,8 @@ class Program:
         if self.seriesId:
             series = KNOWN_SERIES[self.seriesId]
             season_number, episode_number = series.programIds[self.programId]
-            basedir = os.path.join(nrkdownload.DOWNLOAD_DIR, series.dirName, series.seasons[season_number].dirName)
+            basedir = os.path.join(nrkdownload.DOWNLOAD_DIR, series.dirName,
+                                   series.seasons[season_number].dirName)
 
             filename = series.title
             filename += ' - S{:02}E{:02}'.format(season_number + 1, episode_number + 1)
@@ -112,7 +113,9 @@ class Season:
         self.name = re.sub('\s+', ' ', json['name'])
         self.number = idx
         self.episodes = []
-        self.dirName = utils.valid_filename('Season {:02} - {}'.format(self.number + 1, self.name))
+        self.dirName = utils.valid_filename('Season {:02}'.format(self.number + 1))
+        if not self.name.startswith('Sesong'):
+            self.dirName = utils.valid_filename(self.dirName + '- {}'.format(self.name))
 
     def __str__(self):
         string = '{}: {} ({} ep)'.format(self.number, self.name, len(self.episodes))

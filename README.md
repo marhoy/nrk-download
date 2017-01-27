@@ -3,25 +3,24 @@
 This is yet another commandline tool to download programs and series from NRK. It is inspired by the already existing tools that you can find on GitHub. The reason I decided to make yet another tool, was that I found the source code of some of the other tools to be difficult to read and understand, and thus difficult to contribute to.
 
 ## What is different?
-When you download a program with this tool, it doesn't just download that file. If the program is part of a series, a directory for that series and season is created. And the file is automatically named according to its episode and season number. Subtitles and additional images are also automatically downloaded. The subtitles are also included in the .m4v-file, so you could decide to delete the .srt-file. (I have found that in some tools (like VLC), the support for included subtitles is not perfect. That's why the .srt-file is there.)
+When you download a program with this tool, it doesn't just download that file. If the program is part of a series, a directory for that series and season is created. And the file is automatically named according to its episode and season number. Subtitles and additional images are also automatically downloaded. The subtitles are also included in the .m4v-file, so you could decide to delete the .srt-file. (I have found that in some tools (like VLC), the support for included subtitles is not perfect. That's why the .srt-file is also there.)
 
-The idea behind this is that the downloaded programs should be integrate seamlessly into you favorite media server, e.g. [Plex](http://www.plex.tv).
-
+The idea behind this is that the downloaded programs should integrate seamlessly into you favorite media server, e.g. [Plex](http://www.plex.tv). If you for example download all the episodes of the very popular series SKAM, you would get a directory-structure like this: 
 
 ```
 SKAM
 ├── poster.jpg
-├── Season 01 - Sesong 1
+├── Season 01
 │   ├── SKAM - S01E01 - 1of11.jpg
 │   ├── SKAM - S01E01 - 1of11.m4v
 │   ├── SKAM - S01E01 - 1of11.no.srt
 ⋮
-├── Season 02 - Sesong 2
+├── Season 02
 │   ├── SKAM - S02E01 - 1of12.jpg
 │   ├── SKAM - S02E01 - 1of12.m4v
 │   ├── SKAM - S02E01 - 1of12.no.srt
 ⋮
-└── Season 03 - Sesong 3
+└── Season 03
     ├── SKAM - S03E01 - 1of10.jpg
     ├── SKAM - S03E01 - 1of10.m4v
     ├── SKAM - S03E01 - 1of10.no.srt
