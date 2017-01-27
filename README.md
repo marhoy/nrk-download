@@ -30,6 +30,21 @@ SKAM
     └── SKAM - S03E10 - 10of10.no.srt
 ```
 
+## Usage
+In order to download something, you first have to search for it. And you have to specify whether you are searching for a particular program, or if you are searching for a series.
+
+### Searching for a series
+Let's say you are interested in downloading all the available episodes about the rescue boat "Elias".
+```
+$ nrkdownload.py -s elias
+
+Matching series:
+ 0: Elias på eventyr : 1 Sesong(er)
+ 1: Elias : 2 Sesong(er)
+
+Enter a number in the range 0-1. (q to quit): 
+```
+
 ## Requirements and installation
 ### Python and packages
 You need an installation of Python 3. If you haven't already got that, download the latest version for your operating system from [python.org](https://www.python.org). You could also consider using the [Anaconda](https://www.continuum.io/downloads) Python distribution. It can be installed without root (Administrator) privileges, and contains a lot of useful packages. 
