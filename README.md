@@ -133,4 +133,8 @@ It could be useful to specify an URL instead of a search string. The URLs could 
 - `https://tv.nrk.no/program/KOID26004816/president-trump` for a specific program 
 - `https://tv.nrk.no/serie/unge-lovende/KMTE20006115/sesong-2/episode-1` for a specific episode of a series
 - `https://tv.nrk.no/serie/unge-lovende` for a whole series
+
 For a program or a specific episode, the download could then start without requiring any other input. For a series, one could have a commandline-switch to specify the interval of episodes that you want to download. (The URLs could perhaps also be read from an input-file.) This would enable the download tool to run without requiring input from the user. It could therefore be run as a scheduled job via e.g. cron.
+
+## More metadata?
+Both series and programs/episodes have a description at tv.nrk.no. It could possibly be interesting to save these descriptions to a text file.
