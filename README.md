@@ -2,6 +2,8 @@
 
 This is yet another commandline tool to download programs and series from NRK. It is inspired by the already existing tools that you can find on GitHub. The reason I decided to make yet another tool, was that I found the source code of some of the other tools to be difficult to read and understand, and thus difficult to contribute to.
 
+The tool is written in Python, and has been tested under both Linux, MacOS and Windows.
+
 ## What is different?
 When you download a program with this tool, it doesn't just download that file. If the program is part of a series, a directory for that series and season is created. And the file is automatically named according to its episode and season number. Subtitles and additional images are also automatically downloaded. The subtitles are also included in the .m4v-file, so you could decide to delete the .srt-file. (I have found that in some tools (like VLC), the support for included subtitles is not perfect. That's why the .srt-file is also there.)
 
@@ -69,6 +71,8 @@ The progress bar shows the number of seconds of video to be downloaded, in this 
 ### Searching for a program
 If you were interested in programs where the name "Elias" was mentioned (as opposed to the series "Elias", as described above), you would specify that by using the flag `-p`. The results from the search will be programs, so all you have to do is to specify the program(s) you want by using the range syntax described above.
 
+Note that if your search string consists of more than one word, you must surround it with single or double quotes.
+
 In your terminal, that would look like this:
 ```
 $ nrkdownload.py -p "redningsskøyta elias"
@@ -83,6 +87,10 @@ Matching programs
 Enter a number or interval (e.g. 8 or 5-10). (q to quit): 
 ```
 
+### Configurable download directory
+If you don't specify anything, the directories will be created inside `~/Downloads/nrkdownload`, where `~` means your home directory. If you want the downloads somewhere else (e.g. directly to your NAS), there are two ways to specify a different download directory:
+- Define an environment variable named `NRKDOWNLOAD_DIR`
+- Specify the download directory with the option `-d download_dir`
 
 ## Requirements and installation
 ### Python and packages
