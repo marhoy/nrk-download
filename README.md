@@ -10,23 +10,17 @@ The idea is that the subdirectory should integrate seamless into e.g. [Plex](htt
 
 
 ```
-SKAM/
+SKAM
 ├── poster.jpg
 ├── Season 01 - Sesong 1
 │   ├── SKAM - S01E01 - 1of11.jpg
 │   ├── SKAM - S01E01 - 1of11.m4v
 │   ├── SKAM - S01E01 - 1of11.no.srt
-│   ├── SKAM - S01E02 - 2of11.jpg
-│   ├── SKAM - S01E02 - 2of11.m4v
-│   ├── SKAM - S01E02 - 2of11.no.srt
 ⋮
 ├── Season 02 - Sesong 2
 │   ├── SKAM - S02E01 - 1of12.jpg
 │   ├── SKAM - S02E01 - 1of12.m4v
 │   ├── SKAM - S02E01 - 1of12.no.srt
-│   ├── SKAM - S02E02 - 2of12.jpg
-│   ├── SKAM - S02E02 - 2of12.m4v
-│   ├── SKAM - S02E02 - 2of12.no.srt
 ⋮
 └── Season 03 - Sesong 3
     ├── SKAM - S03E01 - 1of10.jpg
