@@ -66,6 +66,23 @@ Downloading:  35%|█████████                 | 2.52K/7.26K [01:
 ```
 The progress bar shows the number of seconds of video to be downloaded, in this case 2:01:02 = 2*3600 + 62 = 7262 seconds. The next two times are the estimated remaining and total download time. The last number shows how many seconds of video are downloaded per second. So in this snapshot, the video was downloaded at 33x the playback speed. 
 
+### Searching for a program
+If you were interested in programs where the name "Elias" was mentioned (as opposed to the series "Elias", as described above), you would specify that by using the flag `-p`. The results from the search will be programs, so all you have to do is to specify the program(s) you want by using the range syntax described above.
+
+In your terminal, that would look like this:
+```
+$ nrkdownload.py -p elias
+
+Matching programs
+ 0: Kompisboken (Sesong 1): Kompisboken 7:21 - 7:21 - S01E07
+ 1: Kompisboken (Sesong 1): Kompisboken 9:21 - 9:21 - S01E09
+⋮
+64: Distriktsnyheter Midtnytt (Desember 2016): Distriktsnyheter Midtnytt 14.12.2016 - 14.12.2016 - S64E17
+65: Dagsrevyen 21 (Januar 2017): Dagsrevyen 21 05.01.2017 - 05.01.2017 - S65E05
+
+Enter a number or interval (e.g. 8 or 5-10). (q to quit): 
+```
+
 
 ## Requirements and installation
 ### Python and packages
