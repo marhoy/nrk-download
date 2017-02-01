@@ -21,8 +21,8 @@ setup(
     # Version number is automatically extracted from Git
     # https://pypi.python.org/pypi/setuptools_scm
     # https://packaging.python.org/en/latest/single_source_version.html
-    use_scm_version=True,
-    setup_requires=['setuptools_scm'],
+    use_scm_version={'write_to': 'nrkdownload/version.py'},
+    setup_requires=['setuptools_scm', 'pypandoc'],
 
     description='Download series or programs from NRK, complete with images and subtitles',
     long_description=read_md('README.md'),

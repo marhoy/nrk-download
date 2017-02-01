@@ -3,7 +3,7 @@
 import nrkdownload
 import argparse
 import os
-from setuptools_scm import get_version
+from .version import version
 
 
 def main():
@@ -14,7 +14,7 @@ def main():
     parser.add_argument('search_string')
     parser.add_argument('-d', '--dir', metavar='DIRECTORY', action='store',
                         help='The directory where the downloaded files will be placed')
-    group1.add_argument('--version', action='version', version='%(prog)s version ' + get_version())
+    group1.add_argument('--version', action='version', version='%(prog)s version ' + version)
     arguments = parser.parse_args()
 
     if arguments.dir:
