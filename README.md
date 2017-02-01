@@ -115,6 +115,12 @@ If you don't know how to define an environment variable, try to Google `create e
 
 ## Installing
 The package and its requirements can be installed in several ways:
+
+### Installing the latest official release
+```
+$ pip install nrkdownload
+```
+
 ### Installing the latest revision directly from GitHub:
 ```
 $ pip install git+https://github.com/marhoy/nrk-download.git#egg=nrkdownload
