@@ -1,3 +1,7 @@
+# In case we are running under Python 2.7
+from __future__ import unicode_literals
+from builtins import input
+
 import re
 import sys
 import datetime
@@ -46,6 +50,7 @@ def get_integer_input(max_allowed):
     while True:
         try:
             string = input('\nEnter a number in the range 0-{}. (q to quit): '.format(max_allowed))
+            print(string)
             index_match = re.match(r'^(\d+)$', string)
             quit_match = re.match(r'^q$', string.lower())
             if index_match:

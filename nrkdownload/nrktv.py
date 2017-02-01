@@ -1,6 +1,7 @@
+# In case we are running under Python 2.7
+from __future__ import unicode_literals
+
 import requests
-import urllib.request
-import urllib.parse
 import os.path
 import re
 import sys
@@ -9,6 +10,13 @@ import time
 import multiprocessing
 import subprocess
 import tqdm
+try:
+    # Python 3
+    from urllib.request import urlretrieve
+    from urllib.parse import unquote
+except ImportError:
+    # Python 2
+    from urllib import unquote, urlretrieve
 
 from . import utils, LOG
 import nrkdownload
@@ -26,9 +34,7 @@ SESSION.headers['app-version-android'] = '999'
 
 class Program:
     def __init__(self, json):
-
         LOG.debug('Creating new Program: {} : {}'.format(json['title'], json['programId']))
-
         self.programId = json['programId']
         self.title = re.sub('\s+', ' ', json['title'])
         self.description = json['description']
@@ -63,7 +69,7 @@ class Program:
                 self.mediaUrl = re.sub('manifest\.f4m$', 'master.m3u8', self.mediaUrl)
             self.hasSubtitles = json.get('hasSubtitles', False)
             if self.hasSubtitles:
-                self.subtitleUrl = urllib.parse.unquote(json['mediaAssets'][0]['webVttSubtitlesUrl'])
+                self.subtitleUrl = unquote(json['mediaAssets'][0]['webVttSubtitlesUrl'])
             self.duration = utils.parse_duration(json['duration'])
 
     def make_filename(self):
@@ -94,7 +100,7 @@ class Program:
         if self.seriesId:
             series = KNOWN_SERIES[self.seriesId]
             season_number, episode_number = series.programIds[self.programId]
-            string = '{} ({}): {} - {}'.format(
+            string = '{} ({}): {} - {}'.format(
                 series.title,
                 series.seasons[season_number].name,
                 self.title,
@@ -239,7 +245,7 @@ def download_worker(args):
     if not os.path.exists(image_filename):
         try:
             LOG.info('Downloading image for {}'.format(program.title))
-            urllib.request.urlretrieve(program.imageUrl, image_filename)
+            urlretrieve(program.imageUrl, image_filename)
         except Exception as e:
             LOG.warning('Could not download image for program {}: {}'.format(program.title, e))
 
@@ -280,7 +286,7 @@ def download_programs(programs):
     total_duration = total_duration - datetime.timedelta(microseconds=total_duration.microseconds)
     print('Ready to download {} programs, with total duration {}'.format(len(programs), total_duration))
 
-    with multiprocessing.Pool(processes=os.cpu_count()) as pool, multiprocessing.Manager() as manager:
+    with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool, multiprocessing.Manager() as manager:
 
         shared_progress = manager.list([0]*len(programs))
         progress_bar = tqdm.tqdm(desc='Downloading', total=round(total_duration.total_seconds()),
@@ -307,6 +313,6 @@ def download_series_metadata(series):
         LOG.info('Downloading image for series {}'.format(series.title))
         try:
             os.makedirs(download_dir, exist_ok=True)
-            urllib.request.urlretrieve(series.imageUrl, os.path.join(download_dir, image_filename))
+            urlretrieve(series.imageUrl, os.path.join(download_dir, image_filename))
         except Exception as e:
             LOG.error('Could not download metadata for series {}: {}'.format(series.title, e))
