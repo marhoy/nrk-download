@@ -122,7 +122,7 @@ $ pip install nrkdownload
 
 ### Installing directly from GitHub:
 ```
-$ pip install -e git+https://git.repo/some_pkg.git#egg=SomeProject
+$ pip install -e git+https://github.com/marhoy/nrk-download.git#egg=nrkdownload
 ```
 
 ### Installing in development mode:
