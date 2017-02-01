@@ -121,13 +121,12 @@ $ pip install git+https://github.com/marhoy/nrk-download.git#egg=nrkdownload
 ```
 
 ### Installing in development mode:
-If you want to change (and possibly contribute to) the code, first clone the repository. Then install in develop mode:
+If you want to change (and possibly contribute to) the code, first clone the repository. This will create a directory containing a local copy of the GitHub-repository. Then install in develop mode from this directory:
 ```
 $ git clone https://github.com/marhoy/nrk-download.git
-$ cd nrk-download
-$ pip install -e .
+$ pip install -e nrk-download
 ```
-You will then be able to use the tool as usual, but the installation will be a pointer to your local repository.
+You will then be able to use the tool as usual, but the installation will be a pointer to your local repository. Whatever changes you do in your local repository will have immediate effect on the "installation".
 
 ## Uninstalling
 ```
