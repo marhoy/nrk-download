@@ -55,7 +55,7 @@ setup(
     # simple. Or you can use find_packages().
     packages=['nrkdownload'],
 
-    exclude_package_data={'': ['API-testing.ipynb']},
+    # exclude_package_data={'': ['API-testing.ipynb']},
 
     # List run-time dependencies here.  These will be installed by pip when
     # your project is installed. For an analysis of "install_requires" vs pip's

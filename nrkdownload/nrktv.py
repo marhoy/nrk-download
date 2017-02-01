@@ -60,7 +60,7 @@ class Program:
             r.raise_for_status()
             json = r.json()
         except Exception as e:
-            LOG.error('Could not get program details: {}', e)
+            LOG.error('Could not get program details: %s', e)
             return
         self.isAvailable = json['isAvailable']
         if self.isAvailable:
@@ -291,8 +291,7 @@ def download_programs(programs):
     total_duration = total_duration - datetime.timedelta(microseconds=total_duration.microseconds)
     print('Ready to download {} programs, with total duration {}'.format(len(programs), total_duration))
 
-    # with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
-        # , multiprocessing.Manager() as manager:
+    # Under Python 2.7, we can't use with .. as, .. as:
     pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
     manager = multiprocessing.Manager()
 
@@ -360,5 +359,3 @@ def search_from_cmdline(args):
             print('Sorry, no matching programs')
     else:
         LOG.error('Unknown state, not sure what to do')
-
-
