@@ -18,7 +18,8 @@ except ImportError:
     # Python 2
     from urllib import unquote, urlretrieve
 
-from . import utils, LOG
+from . import LOG
+from . import utils
 import nrkdownload
 
 NRK_TV_API = 'https://tv.nrk.no'
@@ -34,7 +35,7 @@ SESSION.headers['app-version-android'] = '999'
 
 class Program:
     def __init__(self, json):
-        LOG.debug('Creating new Program: {} : {}'.format(json['title'], json['programId']))
+        LOG.debug('Creating new Program: %s : %s', json['title'], json['programId'])
         self.programId = json['programId']
         self.title = re.sub('\s+', ' ', json['title'])
         self.description = json['description']
@@ -50,7 +51,7 @@ class Program:
 
         if self.seriesId and self.seriesId not in KNOWN_SERIES.keys():
             # This is an episode from a series we haven't seem yet
-            LOG.debug('Program {} is from an unknown series {}'.format(self.programId, self.seriesId))
+            LOG.debug('Program %s is from an unknown series %s', self.programId, self.seriesId)
             Series(self.seriesId)
 
     def get_details(self):
@@ -59,7 +60,7 @@ class Program:
             r.raise_for_status()
             json = r.json()
         except Exception as e:
-            LOG.error('Could not get program details: {}'.format(e))
+            LOG.error('Could not get program details: {}', e)
             return
         self.isAvailable = json['isAvailable']
         if self.isAvailable:
@@ -113,7 +114,7 @@ class Program:
 
 class Season:
     def __init__(self, idx, json):
-        LOG.info('Creating new season: {}: {}'.format(idx, json['name']))
+        LOG.info('Creating new season: %s: %s', idx, json['name'])
 
         self.id = json['id']
         self.name = re.sub('\s+', ' ', json['name'])
@@ -130,7 +131,7 @@ class Season:
 
 class Series:
     def __init__(self, series_id):
-        LOG.info('Creating new series: {}'.format(series_id))
+        LOG.info('Creating new series: %s', series_id)
 
         # Register our seriesId. The object is updated later
         KNOWN_SERIES[series_id] = self
@@ -140,7 +141,7 @@ class Series:
             r.raise_for_status()
             json = r.json()
         except Exception as e:
-            LOG.error('Not able get details for {}: {}'.format(series_id, e))
+            LOG.error('Not able get details for %s: %s', series_id, e)
             sys.exit(1)
 
         self.seriesId = series_id
@@ -166,8 +167,8 @@ class Series:
             season_index = self.seasonId2Idx[item['seasonId']]
             program = Program(item)
             episode_number = len(self.seasons[season_index].episodes)
-            LOG.debug('Series {}: Adding {} to S {}, E {}'.format(
-                self.seriesId, program.title, season_index, episode_number))
+            LOG.debug('Series %s: Adding %s to S %s, E %s',
+                      self.seriesId, program.title, season_index, episode_number)
             self.seasons[season_index].episodes.append(program)
             self.programIds[item['programId']] = (season_index, episode_number)
 
@@ -182,7 +183,7 @@ def search(search_string, search_type):
         r.raise_for_status()
         json = r.json()
     except Exception as e:
-        LOG.error('Not able to parse search-results: {}'.format(e))
+        LOG.error('Not able to parse search-results: %s', e)
         return
 
     series = programs = []
@@ -195,14 +196,14 @@ def search(search_string, search_type):
         elif item['type'] in ['program', 'episode'] and search_type == 'program':
             programs.append(Program(item['hit']))
         if item['type'] not in ['serie', 'program', 'episode']:
-            LOG.warning('Unknown item type: {}'.format(item['type']))
+            LOG.warning('Unknown item type: %s', item['type'])
 
     if search_type == 'series':
         return series
     elif search_type == 'program':
         return programs
     else:
-        LOG.error('Unknown search type: {}'.format(search_type))
+        LOG.error('Unknown search type: %s', search_type)
 
 
 def ask_for_program_download(programs):
@@ -210,7 +211,7 @@ def ask_for_program_download(programs):
     for i, p in enumerate(programs):
         print('{:2}: {}'.format(i, p))
     selection = utils.get_slice_input(len(programs))
-    LOG.debug('You selected {}'.format(selection))
+    LOG.debug('You selected %s', selection)
 
     print('Getting program details for your selection of {} programs...'.format(len(programs[selection])))
     programs_to_download = []
@@ -220,7 +221,7 @@ def ask_for_program_download(programs):
             programs_to_download.append(program)
             download_series_metadata(KNOWN_SERIES[program.seriesId])
         else:
-            LOG.info('Sorry, program not available: {}'.format(program.title))
+            LOG.info('Sorry, program not available: %s', program.title)
 
     download_programs(programs_to_download)
 
@@ -236,27 +237,32 @@ def download_worker(args):
     # Create directory if needed
     if not os.path.exists(download_dir):
         try:
-            os.makedirs(download_dir, exist_ok=True)
+            try:
+                # Can't use exist_ok=True under Python 2.7
+                # And some other thread might have created the directory just before us
+                os.makedirs(download_dir)
+            except OSError:
+                pass
         except Exception as e:
-            LOG.error('Could not create directory {}: {}'.format(download_dir, e))
+            LOG.error('Could not create directory %s: %s', download_dir, e)
             return
 
     # Download image
     if not os.path.exists(image_filename):
         try:
-            LOG.info('Downloading image for {}'.format(program.title))
+            LOG.info('Downloading image for %s', program.title)
             urlretrieve(program.imageUrl, image_filename)
         except Exception as e:
-            LOG.warning('Could not download image for program {}: {}'.format(program.title, e))
+            LOG.warning('Could not download image for program %s: %s', program.title, e)
 
     # Download subtitles
     if program.hasSubtitles and not os.path.exists(subtitle_file):
-        LOG.info('Downloading subtitles for {}'.format(program.title))
+        LOG.info('Downloading subtitles for %s', program.title)
         cmd = ['ffmpeg', '-loglevel', '8', '-i', program.subtitleUrl, subtitle_file]
         try:
-            subprocess.run(cmd, stdin=subprocess.DEVNULL)
+            subprocess.call(cmd, stdin=open(os.devnull, 'r'))
         except Exception as e:
-            LOG.warning('Could not download subtitles for program {}: {}'.format(program.title, e))
+            LOG.warning('Could not download subtitles for program %s: %s', program.title, e)
 
     # Download video
     if not os.path.exists(video_filename):
@@ -267,7 +273,7 @@ def download_worker(args):
         # cmd += ['-metadata', 'track="24"']
         cmd += ['-c:v', 'copy', '-c:a', 'copy', '-bsf:a', 'aac_adtstoasc', video_filename]
         try:
-            process = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdin=subprocess.DEVNULL,
+            process = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdin=open(os.devnull, 'r'),
                                        universal_newlines=True)
             while process.poll() is None:
                 seconds_downloaded = utils.ffmpeg_seconds_downloaded(process)
@@ -275,8 +281,7 @@ def download_worker(args):
                 time.sleep(0.5)
             process.wait()
         except Exception as e:
-            LOG.warning('Unable to download program {}:{}: {}'.format(
-                program.title, program.episodeTitle, e))
+            LOG.warning('Unable to download program %s:%s : %s', program.title, program.episodeTitle, e)
 
 
 def download_programs(programs):
@@ -286,33 +291,74 @@ def download_programs(programs):
     total_duration = total_duration - datetime.timedelta(microseconds=total_duration.microseconds)
     print('Ready to download {} programs, with total duration {}'.format(len(programs), total_duration))
 
-    with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool, multiprocessing.Manager() as manager:
+    # with multiprocessing.Pool(processes=multiprocessing.cpu_count()) as pool:
+        # , multiprocessing.Manager() as manager:
+    pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
+    manager = multiprocessing.Manager()
 
-        shared_progress = manager.list([0]*len(programs))
-        progress_bar = tqdm.tqdm(desc='Downloading', total=round(total_duration.total_seconds()),
-                                 unit='s', unit_scale=True)
+    shared_progress = manager.list([0]*len(programs))
+    progress_bar = tqdm.tqdm(desc='Downloading', total=round(total_duration.total_seconds()),
+                             unit='s', unit_scale=True)
 
-        LOG.debug('Starting pool of workers')
-        args = [(program, idx, shared_progress) for idx, program in enumerate(programs)]
-        result = pool.map_async(download_worker, args)
+    LOG.debug('Starting pool of workers')
+    args = [(program, idx, shared_progress) for idx, program in enumerate(programs)]
+    result = pool.map_async(download_worker, args)
 
-        while not result.ready():
-            LOG.debug('Progress: {}'.format(shared_progress))
-            time.sleep(0.1)
-            progress_bar.update(sum(shared_progress) - progress_bar.n)
-        progress_bar.update(progress_bar.total - progress_bar.n)
-        progress_bar.close()
+    while not result.ready():
+        LOG.debug('Progress: %s', shared_progress)
+        time.sleep(0.1)
+        progress_bar.update(sum(shared_progress) - progress_bar.n)
+    progress_bar.update(progress_bar.total - progress_bar.n)
+    progress_bar.close()
 
-    LOG.debug('All workers finished. Result: {}'.format(result.get()))
+    LOG.debug('All workers finished. Result: %s', result.get())
 
 
 def download_series_metadata(series):
     download_dir = os.path.join(nrkdownload.DOWNLOAD_DIR, series.dirName)
     image_filename = 'poster.jpg'
     if not os.path.exists(os.path.join(download_dir, image_filename)):
-        LOG.info('Downloading image for series {}'.format(series.title))
+        LOG.info('Downloading image for series %s', series.title)
         try:
-            os.makedirs(download_dir, exist_ok=True)
+            try:
+                # Can't use exist_ok = True under Python 2.7
+                os.makedirs(download_dir)
+            except OSError:
+                pass
             urlretrieve(series.imageUrl, os.path.join(download_dir, image_filename))
         except Exception as e:
-            LOG.error('Could not download metadata for series {}: {}'.format(series.title, e))
+            LOG.error('Could not download metadata for series %s: %s', series.title, e)
+
+
+def series_download(series):
+    programs = []
+    for season in series.seasons:
+        for episode in season.episodes:
+            programs.append(episode)
+    ask_for_program_download(programs)
+
+
+def search_from_cmdline(args):
+    if args.series:
+        series = search(args.search_string, 'series')
+        if len(series) == 1:
+            print('\nOnly one matching series: {}'.format(series[0].title))
+            series_download(series[0])
+        elif len(series) > 1:
+            print('\nMatching series:')
+            for i, s in enumerate(series):
+                print('{:2}: {}'.format(i, s))
+            index = utils.get_integer_input(len(series) - 1)
+            series_download(series[index])
+        else:
+            print('Sorry, no matching series')
+    elif args.program:
+        programs = search(args.search_string, 'program')
+        if programs:
+            ask_for_program_download(programs)
+        else:
+            print('Sorry, no matching programs')
+    else:
+        LOG.error('Unknown state, not sure what to do')
+
+

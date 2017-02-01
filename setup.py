@@ -3,11 +3,6 @@ https://packaging.python.org/en/latest/distributing.html
 https://github.com/pypa/sampleproject
 """
 from setuptools import setup
-import sys
-
-install_requires = ['requests', 'tqdm']
-if sys.version_info[0] == 2:
-    install_requires.append('future')
 
 setup(
     name='nrkdownload',
@@ -60,11 +55,13 @@ setup(
     # simple. Or you can use find_packages().
     packages=['nrkdownload'],
 
+    exclude_package_data={'': ['API-testing.ipynb']},
+
     # List run-time dependencies here.  These will be installed by pip when
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=install_requires,
+    install_requires=['requests', 'tqdm', 'setuptools_scm', 'future'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,

@@ -2,7 +2,7 @@ import logging
 import os
 
 # Package-wide logging configuration
-logging.basicConfig(format='{levelname}: {message}', level=logging.WARNING, style='{')
+logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
 LOG = logging.getLogger()
 
 # This is where the files end up

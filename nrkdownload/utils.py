@@ -6,39 +6,7 @@ import re
 import sys
 import datetime
 
-from . import LOG, nrktv
-
-
-def series_download(series):
-    programs = []
-    for season in series.seasons:
-        for episode in season.episodes:
-            programs.append(episode)
-    nrktv.ask_for_program_download(programs)
-
-
-def search_from_cmdline(args):
-    if args.series:
-        series = nrktv.search(args.search_string, 'series')
-        if len(series) == 1:
-            print('\nOnly one matching series')
-            series_download(series[0])
-        elif len(series) > 1:
-            print('\nMatching series:')
-            for i, s in enumerate(series):
-                print('{:2}: {}'.format(i, s))
-            index = get_integer_input(len(series) - 1)
-            series_download(series[index])
-        else:
-            print('Sorry, no matching series')
-    elif args.program:
-        programs = nrktv.search(args.search_string, 'program')
-        if programs:
-            nrktv.ask_for_program_download(programs)
-        else:
-            print('Sorry, no matching programs')
-    else:
-        LOG.error('Unknown state, not sure what to do')
+from . import LOG
 
 
 def valid_filename(string):
@@ -131,7 +99,7 @@ def parse_duration(string):
     try:
         duration = datetime.timedelta(hours=hours, minutes=minutes, seconds=seconds)
     except Exception as e:
-        LOG.warning('Unable to calculate duration: {}: {}'.format(string, e))
+        LOG.warning('Unable to calculate duration: %s: %s', string, e)
         return datetime.timedelta()
 
     return duration
