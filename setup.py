@@ -43,7 +43,7 @@ setup(
 
         # Indicate who your project is intended for
         'Intended Audience :: End Users/Desktop',
-        'Environment :: Console'
+        'Environment :: Console',
         'Topic :: Multimedia :: Video',
 
         # Pick your license as you wish (should match "license" above)
