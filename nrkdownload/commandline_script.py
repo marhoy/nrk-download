@@ -7,7 +7,7 @@ import os
 
 def main():
     from setuptools_scm import get_version
-    version = get_version(root='..', relative_to=__file__)
+    version = get_version(root='.', relative_to=__file__)
 
     parser = argparse.ArgumentParser(description='Download series or programs from NRK, complete with images and subtitles.')
     group1 = parser.add_mutually_exclusive_group(required=True)
