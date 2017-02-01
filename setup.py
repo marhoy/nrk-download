@@ -4,6 +4,17 @@ https://github.com/pypa/sampleproject
 """
 from setuptools import setup
 
+try:
+    import pypandoc
+
+    def read_md(file): pypandoc.convert(file, 'rst')
+
+except ImportError:
+    print("warning: pypandoc module not found, could not convert Markdown to RST")
+
+    def read_md(file): open(file, 'r').read()
+
+
 setup(
     name='nrkdownload',
 
@@ -14,7 +25,7 @@ setup(
     setup_requires=['setuptools_scm'],
 
     description='Download series or programs from NRK, complete with images and subtitles',
-    long_description=open('README.rst').read(),
+    long_description=read_md('README.md'),
 
     # The project's main homepage.
     url='https://github.com/marhoy/nrk-download',
@@ -67,10 +78,10 @@ setup(
     # dependencies). You can install these using the following syntax,
     # for example:
     # $ pip install -e .[dev,test]
-    # extras_require={
-    #    'dev': ['check-manifest'],
-    #    'test': ['coverage'],
-    # },
+    extras_require={
+        'dev': ['pypandoc'],
+        'test': ['coverage'],
+    },
 
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow
