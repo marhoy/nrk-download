@@ -113,16 +113,33 @@ If you don't specify anything, the directories will be created inside `~/Downloa
 
 If you don't know how to define an environment variable, try to Google `create environment variable` and the name of you operating system.
 
-## Requirements and installation
-### Python and packages
-You need an installation of Python 3. If you haven't already got that, download the latest version for your operating system from [python.org](https://www.python.org). You could also consider using the [Anaconda](https://www.continuum.io/downloads) Python distribution. It can be installed without root (Administrator) privileges, and contains a lot of useful packages like e.g. [Jupyter Notebook](http://jupyter.org/) for interactive programming.
+## Installing
+The package and its requirements can be installed in several ways:
+### Installing from the Python Package Index
+```
+$ pip install nrkdownload
+```
 
-In addition to the standard packages that are typically distributed with Python, you need:
- - [requests](http://docs.python-requests.org/en/master/) (used for connecting to nrk.no and downloading program information)
- - [tqdm](https://pypi.python.org/pypi/tqdm) (used to create a progress bar when downloading video)
+### Installing directly from GitHub:
+```
+$ pip install -e git+https://git.repo/some_pkg.git#egg=SomeProject
+```
 
-If you are using the Anaconda Python distribution, these packages can be installed with: `conda install requests tqdm` Otherwise, they can be installed with `pip install requests tqdm`
- 
+### Installing in development mode:
+If you want to change (and possibly contribute to) the code, first clone the repository. Then install in develop mode:
+```
+$ git clone https://github.com/marhoy/nrk-download.git
+$ cd nrk-download
+$ pip install -e .
+```
+You will then be able to use the tool as usual, but the installation will be a pointer to your local repository.
+
+## Uninstalling
+```
+$ pip uninstall nrkdownload
+```
+
+
 ### FFmpeg
 The videos and subtitles are downloaded using [FFmpeg](https://ffmpeg.org/). It is available for all major operating systems.
 
