@@ -35,8 +35,8 @@ SKAM
 ## Usage
 In order to download something, you first have to search for it. And you have to specify whether you are searching for a particular program, or if you are searching for a series.
 ```
-$ nrkdownload.py -h
-usage: nrkdownload.py [-h] (-s | -p) [-d DIRECTORY] search_string
+$ nrkdownload -h
+usage: nrkdownload [-h] (-s | -p) [-d DIRECTORY] search_string
 
 This script can be used to search tv.nrk.no and download programs.
 
@@ -63,7 +63,7 @@ Then, all of the registered episodes will be listed (due to copyright-issues, so
 
 So the above would typically look like this in your terminal:
 ```
-$ nrkdownload.py -s elias
+$ nrkdownload -s elias
 
 Matching series:
  0: Elias på eventyr : 1 Sesong(er)
@@ -94,7 +94,7 @@ Note that if your search string consists of more than one word, you must surroun
 
 In your terminal, that would look like this:
 ```
-$ nrkdownload.py -p "redningsskøyta elias"
+$ nrkdownload -p "redningsskøyta elias"
 
 Matching programs
  0: Gratulerer med dagen! (2011): Gratulerer med dagen! 17.05.2011 - 17.05.2011 - S34E01
