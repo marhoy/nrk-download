@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 
-import nrkdownload
 import argparse
-import os
-from .version import version
+import os.path
+
+# Our own modules
+import nrkdownload
+from nrkdownload.version import version
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Download series or programs from NRK, complete with images and subtitles.')
+    parser = argparse.ArgumentParser(
+        description='Download series or programs from NRK, complete with images and subtitles.')
     group1 = parser.add_mutually_exclusive_group(required=True)
     group1.add_argument('-s', '--series', action='store_true', help='Search for series')
     group1.add_argument('-p', '--program', action='store_true', help='Search for programs')

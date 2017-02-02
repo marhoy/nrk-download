@@ -1,4 +1,4 @@
-# In case we are running under Python 2.7
+# This is needed if we are running under Python 2.7
 from __future__ import unicode_literals
 
 import requests
@@ -10,6 +10,8 @@ import time
 import multiprocessing
 import subprocess
 import tqdm
+
+# The urllib has changed from Python 2 to 3, and thus requires some extra handling
 try:
     # Python 3
     from urllib.request import urlretrieve
@@ -18,9 +20,9 @@ except ImportError:
     # Python 2
     from urllib import unquote, urlretrieve
 
-from . import LOG
+# Our own modules
+from . import LOG, DOWNLOAD_DIR
 from . import utils
-import nrkdownload
 
 NRK_TV_API = 'https://tv.nrk.no'
 NRK_TV_MOBIL_API = 'https://tvapi.nrk.no/v1'
@@ -77,7 +79,7 @@ class Program:
         if self.seriesId:
             series = KNOWN_SERIES[self.seriesId]
             season_number, episode_number = series.programIds[self.programId]
-            basedir = os.path.join(nrkdownload.DOWNLOAD_DIR, series.dirName,
+            basedir = os.path.join(DOWNLOAD_DIR, series.dirName,
                                    series.seasons[season_number].dirName)
 
             filename = series.title
@@ -92,7 +94,7 @@ class Program:
             else:
                 filename += ' - {}'.format(self.episodeNumberOrDate)
         else:
-            basedir = nrkdownload.DOWNLOAD_DIR
+            basedir = DOWNLOAD_DIR
             filename = self.title
 
         return os.path.join(basedir, utils.valid_filename(filename))
@@ -314,7 +316,7 @@ def download_programs(programs):
 
 
 def download_series_metadata(series):
-    download_dir = os.path.join(nrkdownload.DOWNLOAD_DIR, series.dirName)
+    download_dir = os.path.join(DOWNLOAD_DIR, series.dirName)
     image_filename = 'poster.jpg'
     if not os.path.exists(os.path.join(download_dir, image_filename)):
         LOG.info('Downloading image for series %s', series.title)

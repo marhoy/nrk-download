@@ -1,4 +1,4 @@
-# In case we are running under Python 2.7
+# These are needed if we are running under Python 2.7
 from __future__ import unicode_literals
 from builtins import input
 

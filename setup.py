@@ -4,12 +4,14 @@ https://github.com/pypa/sampleproject
 """
 
 from setuptools import setup
+
+# Possibly convert the README.md to .rst-format
 try:
-    from pypandoc import convert
-    read_md = lambda f: convert(f, 'rst')
+    import pypandoc
+    README = pypandoc.convert('README.md', 'rst')
 except ImportError:
     print("warning: pypandoc module not found, could not convert Markdown to RST")
-    read_md = lambda f: open(f, 'r').read()
+    README = open('README.md', 'r').read()
 
 
 setup(
@@ -22,7 +24,7 @@ setup(
     setup_requires=['setuptools_scm', 'pypandoc'],
 
     description='Download series or programs from NRK, complete with images and subtitles',
-    long_description=read_md('README.md'),
+    long_description=README,
 
     # The project's main homepage.
     url='https://github.com/marhoy/nrk-download',
