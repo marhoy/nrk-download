@@ -37,7 +37,7 @@ SKAM
 In order to download something, you first have to search for it. And you have to specify whether you are searching for a particular program, or if you are searching for a series.
 ```
 $ nrkdownload -h
-usage: nrkdownload [-h] [-s] [-p] [-d DIRECTORY] [--version] search_string
+usage: nrkdownload [-h] (-s | -p) [-d DIRECTORY] [--version] search_string
 
 Download series or programs from NRK, complete with images and subtitles.
 
@@ -65,7 +65,7 @@ Then, all of the registered episodes will be listed (due to copyright-issues, so
 
 So the above would typically look like this in your terminal:
 ```
-$ nrkdownload.py -s elias
+$ nrkdownload -s elias
 
 Matching series:
  0: Elias på eventyr : 1 Sesong(er)
@@ -96,7 +96,7 @@ Note that if your search string consists of more than one word, you must surroun
 
 In your terminal, that would look like this:
 ```
-$ nrkdownload.py -p "redningsskøyta elias"
+$ nrkdownload -p "redningsskøyta elias"
 
 Matching programs
  0: Gratulerer med dagen! (2011): Gratulerer med dagen! 17.05.2011 - 17.05.2011 - S34E01
@@ -121,17 +121,17 @@ If you don't know how to define an environment variable under your operating sys
 The nrkdownload package and its requirements can be installed in several ways, depending on whether you want to just use it or whether you want to change the code. And since it is compatible with both Python 2 and 3, you can decide under what version of Python you want to run it.
 
 ## All operating systems
-You should in general avoid installing python packages as root (Administrator), and keep your global Python-installation clean. This can be achieved in several ways:
-1. Install packages under your own home-directory by passing the `--user` option to the `pip` installer.
+In general, you should try to avoid installing python packages as root (Administrator), and keep your global Python-installation clean (and under control of you OS package manager (like rpm or deb)). This can be achieved in several ways:
+1. Install Python packages under your own home-directory by passing the `--user` option to the `pip` installer.
 2. Install your own user-specific Python distribution, where you install packages. [Anaconda](https://www.continuum.io/downloads) is a good choice.
 3. Create a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/) and install packages in there.
 
-In addition, your system might have both Python 2 and 3 installed. This could be the case for some Linux-distributions. If Python 2 is the default, `pip` will be pointing to the Python 2 installation, whereas `pip3` will point to the Python 3 installation. If that is the case for you, and you explicitly want to run this package under Python-3, you must replace `pip` with `pip3` in the examples below.
+In addition, your system might have both Python 2 and 3 installed. This could e.g be the case for some Linux-distributions. If Python 2 is the default, `pip` will be pointing to the Python 2 installation, whereas `pip3` will point to the Python 3 installation. If that is the case for you, and you explicitly want to run this package under Python 3, you must replace `pip` with `pip3` in the examples below.
 
-## MacOS 10.12.x
-MacOS 10.12.x comes default with an installation of Python 2.7. You can decide to run with this (i.e. not installing Anaconda as mentioned above). But in order to install packages, you need the package installer `pip`. And under MacOS, `pip` is not installed by default. You can install it by typing `sudo easy_install pip`. You should also add `~/Library/Python/2.7/bin` to your $PATH (edit your `~/.bash_profile`), such that installed Python scripts are available in the Terminal.
+## MacOS (OS X)
+MacOS comes default with an installation of Python 2.7. You can decide to run with this (i.e. not installing Anaconda as mentioned above). But in order to install packages, you need the package installer `pip`. And under MacOS, `pip` is not installed by default. You can install it by typing `sudo easy_install pip`. You should also add `~/Library/Python/2.7/bin` to your $PATH (edit your `~/.bash_profile`), such that installed Python scripts are available in the Terminal.
 
-### Installing the latest official release
+### Installing the latest release of nrkdownload
 In the following examples, it is assumed that your system has support for [user install directory](https://www.python.org/dev/peps/pep-0370/) (thus, example 1 above). This is true for standard Linux-distribution, Windows and MacOS.
 ```
 $ pip install --user nrkdownload
@@ -153,9 +153,9 @@ If you want to change (and possibly contribute to) the code, first clone the rep
 $ git clone https://github.com/marhoy/nrk-download.git
 $ pip install --user -e nrk-download
 ```
-You will then be able to use the tool as usual, but the installation will be a pointer to your local repository. Whatever changes you do in your local repository will have immediate effect on the "installation".
+You will then be able to use the tool as usual, but the installation will be a pointer to your local repository. Whatever changes you make in your local repository will have immediate effect on the "installation".
 
-# Uninstalling
+# Uninstalling nrkdownload
 To unistall nrkdownload, just type:
 ```
 $ pip uninstall nrkdownload

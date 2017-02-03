@@ -17,7 +17,7 @@ def main():
     parser.add_argument('search_string')
     parser.add_argument('-d', '--dir', metavar='DIRECTORY', action='store',
                         help='The directory where the downloaded files will be placed')
-    group1.add_argument('--version', action='version', version='%(prog)s version ' + version)
+    parser.add_argument('--version', action='version', version='%(prog)s version ' + version)
     arguments = parser.parse_args()
 
     if arguments.dir:
