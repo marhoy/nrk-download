@@ -36,9 +36,9 @@ SKAM
 In order to download something, you first have to search for it. And you have to specify whether you are searching for a particular program, or if you are searching for a series.
 ```
 $ nrkdownload -h
-usage: nrkdownload [-h] (-s | -p) [-d DIRECTORY] search_string
+usage: nrkdownload [-h] [-s] [-p] [-d DIRECTORY] [--version] search_string
 
-This script can be used to search tv.nrk.no and download programs.
+Download series or programs from NRK, complete with images and subtitles.
 
 positional arguments:
   search_string
@@ -50,6 +50,7 @@ optional arguments:
   -d DIRECTORY, --dir DIRECTORY
                         The directory where the downloaded files will be
                         placed
+  --version             show program's version number and exit
 ```
 
 ### Searching for a series
@@ -63,13 +64,13 @@ Then, all of the registered episodes will be listed (due to copyright-issues, so
 
 So the above would typically look like this in your terminal:
 ```
-$ nrkdownload -s elias
+$ **nrkdownload.py -s elias**
 
 Matching series:
  0: Elias på eventyr : 1 Sesong(er)
  1: Elias : 2 Sesong(er)
 
-Enter a number in the range 0-1. (q to quit): 1
+Enter a number in the range 0-1. (q to quit): **1**
 
 Matching programs
  0: Elias (Sesong 1): Elias - 1:26 - S01E01
@@ -78,7 +79,7 @@ Matching programs
 50: Elias (Sesong 2): Elias - 25:26 - S02E25
 51: Elias (Sesong 2): Elias - 26:26 - S02E26
 
-Enter a number or interval (e.g. 8 or 5-10). (q to quit): -10
+Enter a number or interval (e.g. 8 or 5-10). (q to quit): **-10**
 Getting program details for your selection of 11 programs...
 Ready to download 11 programs, with total duration 2:01:02
 Downloading:  35%|█████████                 | 2.52K/7.26K [01:25<02:22, 33.1s/s]
@@ -94,7 +95,7 @@ Note that if your search string consists of more than one word, you must surroun
 
 In your terminal, that would look like this:
 ```
-$ nrkdownload -p "redningsskøyta elias"
+$ **nrkdownload.py -p "redningsskøyta elias"**
 
 Matching programs
  0: Gratulerer med dagen! (2011): Gratulerer med dagen! 17.05.2011 - 17.05.2011 - S34E01
