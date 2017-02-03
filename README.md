@@ -33,7 +33,7 @@ SKAM
     └── SKAM - S03E10 - 10of10.no.srt
 ```
 
-## Usage
+# Usage
 In order to download something, you first have to search for it. And you have to specify whether you are searching for a particular program, or if you are searching for a series.
 ```
 $ nrkdownload -h
@@ -54,7 +54,7 @@ optional arguments:
   --version             show program's version number and exit
 ```
 
-### Searching for a series
+## Searching for a series
 Let's say you are interested in downloading all the available episodes about the rescue boat "Elias". You would then use the flag `-s` to specify that you are searching for a series with the name Elias. If there is more than one matching series, you will be asked to specify which one of them you want. You respond to this by typing an integer and pressing Enter. If there is only one matching series, it skips directly to the next step:
 
 Then, all of the registered episodes will be listed (due to copyright-issues, some of them might not be available for download). You then will be asked to specify what episodes you want to download. You respond to this by typing an integer or a range. The range can be specified in different ways:
@@ -89,7 +89,7 @@ The progress bar shows the number of seconds of video to be downloaded, in this 
 
 If you have already downloaded some of the episodes, those will be automatically skipped (not overwritten).
 
-### Searching for a program
+## Searching for a program
 If you were interested in programs where the name "Elias" was mentioned (as opposed to the series "Elias", as described above), you would specify that by using the flag `-p`. The results from the search will be programs, so all you have to do is to specify the program(s) you want by using the range syntax described above.
 
 Note that if your search string consists of more than one word, you must surround it with single or double quotes.
@@ -108,7 +108,7 @@ Matching programs
 Enter a number or interval (e.g. 8 or 5-10). (q to quit): 
 ```
 
-### Configurable download directory
+## Configurable download directory
 If you don't specify anything, the directories will be created inside `~/Downloads/nrkdownload`, where `~` means your home directory. If you want the downloads somewhere else (e.g. directly to your NAS), there are two ways to specify a different download directory:
 - Define an environment variable named `NRKDOWNLOAD_DIR`
 - Specify the download directory on the command line with the option `-d download_dir`
@@ -117,19 +117,22 @@ If you do both at the same time, the option from the command line will take prec
 
 If you don't know how to define an environment variable under your operating system, try to Google `create environment variable` and the name of you operating system. (Under Linux and MacOS, you would want to edit your `~/.bash_profile`)
 
-## Installing
-The package and its requirements can be installed in several ways, depending on whether you want to just use it or whether you want to change the code. And since it is compatible with both Python 2 and 3, you can decide under what version of Python you want to run it.
+# Installing
+The nrkdownload package and its requirements can be installed in several ways, depending on whether you want to just use it or whether you want to change the code. And since it is compatible with both Python 2 and 3, you can decide under what version of Python you want to run it.
 
-Anyway, you should avoid installing it as root (Administrator), and keep your global Python-installation clean. This can be achieved in several ways:
-1. Install it under you own home-directory by passing the `--user` option to the `pip` installer.
-2. Install your own user-specific Python distribution, [Anaconda](https://www.continuum.io/downloads) is a good choice.
-3. Create a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/) and install in there.
+## All operating systems
+You should in general avoid installing python packages as root (Administrator), and keep your global Python-installation clean. This can be achieved in several ways:
+1. Install packages under your own home-directory by passing the `--user` option to the `pip` installer.
+2. Install your own user-specific Python distribution, where you install packages. [Anaconda](https://www.continuum.io/downloads) is a good choice.
+3. Create a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/) and install packages in there.
 
-In the following examples, it is assumed that your system has support for [user install directory](https://www.python.org/dev/peps/pep-0370/) (thus, example 1 above). This is true for standard Linux-distribution, Windows and MacOS.
+In addition, your system might have both Python 2 and 3 installed. This could be the case for some Linux-distributions. If Python 2 is the default, `pip` will be pointing to the Python 2 installation, whereas `pip3` will point to the Python 3 installation. If that is the case for you, and you explicitly want to run this package under Python-3, you must replace `pip` with `pip3` in the examples below.
 
-If your system has both Python 2 and 3 installed, `pip` could be pointing to the Python-2 installation, whereas `pip3` points to the Python-3 installation. If that is the case for you, and you explicitly want to run this under Python-3, you can replace `pip` with `pip3` in these examples.
+## MacOS 10.12.x
+MacOS 10.12.x comes default with an installation of Python 2.7. You can decide to run with this (i.e. not installing Anaconda as mentioned above). But in order to install packages, you need the package installer `pip`. And under MacOS, `pip` is not installed by default. You can install it by typing `sudo easy_install pip`. You should also add `~/Library/Python/2.7/bin` to your $PATH (edit your `~/.bash_profile`), such that installed Python scripts are available in the Terminal.
 
 ### Installing the latest official release
+In the following examples, it is assumed that your system has support for [user install directory](https://www.python.org/dev/peps/pep-0370/) (thus, example 1 above). This is true for standard Linux-distribution, Windows and MacOS.
 ```
 $ pip install --user nrkdownload
 ```
@@ -152,15 +155,15 @@ $ pip install --user -e nrk-download
 ```
 You will then be able to use the tool as usual, but the installation will be a pointer to your local repository. Whatever changes you do in your local repository will have immediate effect on the "installation".
 
-## Uninstalling
+# Uninstalling
 To unistall nrkdownload, just type:
 ```
 $ pip uninstall nrkdownload
 ```
 NOTE: This will not uninstall the required packages that might have been installed together with nrkdownload. Type `pip list --user` to list all user-installed packages, and uninstall them if you know that you don't need them.
 
-### FFmpeg
-The videos and subtitles are downloaded using [FFmpeg](https://ffmpeg.org/). It is available for all major operating systems.
+# FFmpeg
+The videos and subtitles are downloaded using [FFmpeg](https://ffmpeg.org/). It is available for all major operating systems. You need to install ffmpeg and make it available in your $PATH before you can use nrkdownload.
 
 
 # TODO
