@@ -128,14 +128,14 @@ In general, you should try to avoid installing python packages as root (Administ
 
 1. Install Python packages under your own home-directory by passing the `--user` option to the `pip` installer.
 2. Install your own user-specific Python distribution, where you can later install packages. [Anaconda](https://www.continuum.io/downloads) is a good choice. It also has good support for environments (see next).
-3. Create a virtual environment using [standard Python](http://docs.python-guide.org/en/latest/dev/virtualenvs/) or [conda](https://conda.io/docs/using/envs.html) and install packages in there.
+3. Create a virtual environment using [standard Python](https://docs.python.org/3/tutorial/venv.html) or [conda](https://conda.io/docs/using/envs.html) (used by Anaconda) and install packages in there.
 
 
 ## Special considerations for MacOS (OS X)
-MacOS comes by default with an installation of Python 2.7. You can decide to run with this (i.e. not installing Anaconda as mentioned above). But in order to install packages, you need the package installer `pip`. And under MacOS, `pip` is not installed by default. You can install it by typing `sudo easy_install pip`. You should also add `~/Library/Python/2.7/bin` to your $PATH (edit your `~/.bash_profile`), such that installed Python scripts are available in the Terminal.
+MacOS comes by default with an installation of Python 2.7. You can decide to go with this (i.e. not installing Anaconda as mentioned above). In order to install packages you need the package installer `pip`, and under MacOS, `pip` is not installed by default. You can install it by typing `sudo easy_install pip`. You should also add `~/Library/Python/2.7/bin` to your $PATH (edit your `~/.bash_profile`), such that installed Python scripts (like nrkdownload) are available in the Terminal.
 
 ## Special considerations for Linux
-Your system might have both Python 2 and 3 installed as a part of the Linux-distribution. If Python 2 is the default, `pip` will be pointing to the Python 2 installation, whereas `pip3` will point to the Python 3 installation. If that is the case for you, and you explicitly want to run this package under Python 3, you must replace `pip` with `pip3` in the examples below.
+Your system might have both Python 2 and 3 installed as a part of the Linux-distribution. If Python 2 is the default, `pip` will be pointing to the Python 2 installation, whereas `pip3` will point to the Python 3 installation. If that is the case for you, and you explicitly want to run nrkdownload under Python 3, you must replace `pip` with `pip3` in the examples below.
 
 ## Special considerations for Windows
 Windows does not come with an installation of Python. You can choose to install version 2.7.x or the latest 3.x from [python.org](https://www.python.org/). If you want to learn and develop Python, I would suggest [Anaconda](https://www.continuum.io/downloads), which installs in your home-directory and comes with a nice selection of packages.
@@ -174,6 +174,11 @@ NOTE: This will not uninstall the required packages that might have been install
 # FFmpeg
 The videos and subtitles are downloaded using [FFmpeg](https://ffmpeg.org/). It is available for all major operating systems. You need to install ffmpeg and make it available in your $PATH before you can use nrkdownload.
 
+## For Linux
+Depending on your Linux-distribution, you might have to add a package-repository in order to install ffmpeg. If you are stuck, try too Google `installing ffmpeg for YOUR_LINUX_DISTRO`.
+
+## For MacOS
+Download the static build of the latest release (currently 3.2.2). Open the .dmg-file and copy the binary file `ffmpeg` to e.g. a directory `bin` inside your home directory. Then, add ~/bin to your PATH.
 
 # TODO
 ## URLs as input

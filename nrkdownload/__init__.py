@@ -10,5 +10,6 @@ try:
     subprocess.call(['ffmpeg', '-version'], stdout=open(os.devnull, 'w'))
 except OSError as e:
     print('\nFFmpeg is not installed (or not in PATH):\n  ', e, '\n')
-    print('Please install FFmpeg from https://ffmpeg.org/\n')
+    print('Please install FFmpeg from https://ffmpeg.org/')
+    print('See README on https://github.com/marhoy/nrk-download if you need hints.\n')
     sys.exit(1)
