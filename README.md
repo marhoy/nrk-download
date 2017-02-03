@@ -115,23 +115,31 @@ If you don't specify anything, the directories will be created inside `~/Downloa
 If you don't know how to define an environment variable, try to Google `create environment variable` and the name of you operating system.
 
 ## Installing
-The package and its requirements can be installed in several ways:
+The package and its requirements can be installed in several ways, depending on whether you want to just use it or whether you want to change the code. And since it is compatible with both Python 2 and 3, you can decide under what version of Python you want to run it.
+
+Anyway, you should avoid installing it as root (Administrator), and keep your global Python-installation clean. This can be achieved in several ways:
+1. Install it under you own home-directory by passing the `--user` option to the `pip` installer.
+2. Install your own user-specific Python distribution, [Anaconda](https://www.continuum.io/downloads) is a good choice.
+3. Create a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/) and install in there.
+
+In the following examples, it is assumed that your system has support for [user install directory](https://www.python.org/dev/peps/pep-0370/) (thus, example 1 above). This is true for standard Linux-distribution, Windows and MacOS.
 
 ### Installing the latest official release
 ```
-$ pip install nrkdownload
+$ pip install --user nrkdownload
 ```
+If your system has both Python 2 and 3 installed, `pip` could be pointing to the Python-2 installation, whereas `pip3` points to the Python-3 installation. If that is the case for you, and you explicitly want to run this under Python-3, you can replace `pip` with `pip3` in these examples.
 
 ### Installing the latest revision directly from GitHub:
 ```
-$ pip install git+https://github.com/marhoy/nrk-download.git#egg=nrkdownload
+$ pip install --user git+https://github.com/marhoy/nrk-download.git#egg=nrkdownload
 ```
 
 ### Installing in development mode:
 If you want to change (and possibly contribute to) the code, first clone the repository. This will create a directory containing a local copy of the GitHub-repository. Then install in develop mode from this directory:
 ```
 $ git clone https://github.com/marhoy/nrk-download.git
-$ pip install -e nrk-download
+$ pip install --user -e nrk-download
 ```
 You will then be able to use the tool as usual, but the installation will be a pointer to your local repository. Whatever changes you do in your local repository will have immediate effect on the "installation".
 
