@@ -1,4 +1,5 @@
 # nrkdownload
+![Supports python 2.6, 2.7, 3.3, 3.4, 3.5](https://img.shields.io/badge/python-2.6%2C%202.7%2C%203.3%2C%203.4%2C%203.5-brightgreen.svg "Logo Title Text 1")
 
 This is yet another commandline tool to download programs and series from NRK (Norwegian public broadcaster). It is inspired by the already existing tools that you can find on GitHub. The reason I decided to make yet another tool, was that I found the source code of some of the other tools to be difficult to read and understand, and thus difficult to contribute to.
 
