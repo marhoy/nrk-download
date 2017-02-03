@@ -37,21 +37,24 @@ SKAM
 In order to download something, you first have to search for it. And you have to specify whether you are searching for a particular program, or if you are searching for a series.
 ```
 $ nrkdownload -h
-usage: nrkdownload [-h] (-s | -p) [-d DIRECTORY] [--version] search_string
+usage: nrkdownload [-h] [--version] [-d DIRECTORY] (-s | -p) search_string
 
 Download series or programs from NRK, complete with images and subtitles.
 
 positional arguments:
-  search_string
+  search_string  Whatever you want to search for. Use single or double quotes
+                 if the string contains several words.
 
 optional arguments:
-  -h, --help            show this help message and exit
-  -s, --series          Search for series
-  -p, --program         Search for programs
-  -d DIRECTORY, --dir DIRECTORY
-                        The directory where the downloaded files will be
-                        placed
-  --version             show program's version number and exit
+  -h, --help     show this help message and exit
+  --version      show program's version number and exit
+  -d DIRECTORY   The directory where the downloaded files will be placed
+  -s, --series   Search for series
+  -p, --program  Search for programs
+
+The files are by default downloaded to ~/Downloads/nrkdownload. This can be
+changed by using the option -d as described above, or you can define the
+environment variable NRKDOWNLOAD_DIR
 ```
 
 ## Searching for a series
