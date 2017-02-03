@@ -127,8 +127,8 @@ The nrkdownload package and its requirements can be installed in several ways, d
 In general, you should try to avoid installing python packages as root (Administrator), and keep your global Python-installation clean (and under control of you OS package manager (like rpm or deb)). This can be achieved in several ways:
 
 1. Install Python packages under your own home-directory by passing the `--user` option to the `pip` installer.
-2. Install your own user-specific Python distribution, where you install packages. [Anaconda](https://www.continuum.io/downloads) is a good choice.
-3. Create a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/) and install packages in there.
+2. Install your own user-specific Python distribution, where you can later install packages. [Anaconda](https://www.continuum.io/downloads) is a good choice. It also has good support for environments (see next).
+3. Create a virtual environment using [standard Python](http://docs.python-guide.org/en/latest/dev/virtualenvs/) or [conda](https://conda.io/docs/using/envs.html) and install packages in there.
 
 
 ## Special considerations for MacOS (OS X)
