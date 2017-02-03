@@ -10,14 +10,18 @@ from nrkdownload.version import version
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Download series or programs from NRK, complete with images and subtitles.')
+        description='Download series or programs from NRK, complete with images and subtitles.',
+        epilog='The files are by default downloaded to ~/Downloads/nrkdownload.'
+               ' This can be changed by using the option -d as described above,'
+               ' or you can define the environment variable NRKDOWNLOAD_DIR')
+    parser.add_argument('--version', action='version', version='%(prog)s version ' + version)
+    parser.add_argument('-d', metavar='DIRECTORY', action='store',
+                        help='The directory where the downloaded files will be placed')
     group1 = parser.add_mutually_exclusive_group(required=True)
     group1.add_argument('-s', '--series', action='store_true', help='Search for series')
     group1.add_argument('-p', '--program', action='store_true', help='Search for programs')
-    parser.add_argument('search_string')
-    parser.add_argument('-d', '--dir', metavar='DIRECTORY', action='store',
-                        help='The directory where the downloaded files will be placed')
-    parser.add_argument('--version', action='version', version='%(prog)s version ' + version)
+    parser.add_argument('search_string', help='Whatever you want to search for. Use single or double quotes'
+                                              ' if the string contains several words.')
     arguments = parser.parse_args()
 
     if arguments.dir:
