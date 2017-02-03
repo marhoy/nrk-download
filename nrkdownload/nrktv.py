@@ -21,8 +21,9 @@ except ImportError:
     from urllib import unquote, urlretrieve
 
 # Our own modules
-from . import LOG, DOWNLOAD_DIR
+from . import LOG
 from . import utils
+import nrkdownload
 
 NRK_TV_API = 'https://tv.nrk.no'
 NRK_TV_MOBIL_API = 'https://tvapi.nrk.no/v1'
@@ -79,7 +80,7 @@ class Program:
         if self.seriesId:
             series = KNOWN_SERIES[self.seriesId]
             season_number, episode_number = series.programIds[self.programId]
-            basedir = os.path.join(DOWNLOAD_DIR, series.dirName,
+            basedir = os.path.join(nrkdownload.DOWNLOAD_DIR, series.dirName,
                                    series.seasons[season_number].dirName)
 
             filename = series.title
@@ -94,7 +95,7 @@ class Program:
             else:
                 filename += ' - {}'.format(self.episodeNumberOrDate)
         else:
-            basedir = DOWNLOAD_DIR
+            basedir = nrkdownload.DOWNLOAD_DIR
             filename = self.title
 
         return os.path.join(basedir, utils.valid_filename(filename))
@@ -217,6 +218,7 @@ def ask_for_program_download(programs):
 
     print('Getting program details for your selection of {} programs...'.format(len(programs[selection])))
     programs_to_download = []
+    # TODO: It takes time to call .get_details() sequentially. Should be rewritten to use parallel workers.
     for program in programs[selection]:
         program.get_details()
         if program.isAvailable:
@@ -316,7 +318,7 @@ def download_programs(programs):
 
 
 def download_series_metadata(series):
-    download_dir = os.path.join(DOWNLOAD_DIR, series.dirName)
+    download_dir = os.path.join(nrkdownload.DOWNLOAD_DIR, series.dirName)
     image_filename = 'poster.jpg'
     if not os.path.exists(os.path.join(download_dir, image_filename)):
         LOG.info('Downloading image for series %s', series.title)
