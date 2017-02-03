@@ -152,10 +152,11 @@ $ pip install --user -e nrk-download
 You will then be able to use the tool as usual, but the installation will be a pointer to your local repository. Whatever changes you do in your local repository will have immediate effect on the "installation".
 
 ## Uninstalling
+To unistall nrkdownload, just type:
 ```
 $ pip uninstall nrkdownload
 ```
-
+NOTE: This will not uninstall the required packages that might have been installed together with nrkdownload. Type `pip list --user` to list all user-installed packages, and uninstall them if you know that you don't need them.
 
 ### FFmpeg
 The videos and subtitles are downloaded using [FFmpeg](https://ffmpeg.org/). It is available for all major operating systems.
