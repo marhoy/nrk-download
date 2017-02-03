@@ -1,8 +1,8 @@
 # nrkdownload
 
-This is yet another commandline tool to download programs and series from NRK. It is inspired by the already existing tools that you can find on GitHub. The reason I decided to make yet another tool, was that I found the source code of some of the other tools to be difficult to read and understand, and thus difficult to contribute to.
+This is yet another commandline tool to download programs and series from NRK (Norwegian public broadcaster). It is inspired by the already existing tools that you can find on GitHub. The reason I decided to make yet another tool, was that I found the source code of some of the other tools to be difficult to read and understand, and thus difficult to contribute to.
 
-The tool is written in Python, and has been tested under both Linux, MacOS and Windows.
+The tool is written in Python, and is compatible with Python 2.7 and 3.x. It has been tested under both Linux, MacOS and Windows.
 
 ## What does this tool add?
 When you download a program with this tool, it doesn't just download that file. If the program is part of a series, directories for that series and season is created. And the file is automatically named according to its episode and season number. Subtitles and additional images are also automatically downloaded. The subtitles are automatically embedded in the .m4v-file, so you could decide to delete the .srt-file. (I have found that in some tools (like VLC), the support for included subtitles is not perfect. That's why the separate .srt-file is also there.)
@@ -111,6 +111,7 @@ Enter a number or interval (e.g. 8 or 5-10). (q to quit):
 If you don't specify anything, the directories will be created inside `~/Downloads/nrkdownload`, where `~` means your home directory. If you want the downloads somewhere else (e.g. directly to your NAS), there are two ways to specify a different download directory:
 - Define an environment variable named `NRKDOWNLOAD_DIR`
 - Specify the download directory on the command line with the option `-d download_dir`
+if you do both at the same time, the option from the command line will take precedence.
 
 If you don't know how to define an environment variable, try to Google `create environment variable` and the name of you operating system.
 
