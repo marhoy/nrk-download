@@ -1,3 +1,5 @@
+# coding=UTF-8
+
 """
 https://packaging.python.org/en/latest/distributing.html
 https://github.com/pypa/sampleproject
