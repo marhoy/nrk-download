@@ -111,9 +111,10 @@ Enter a number or interval (e.g. 8 or 5-10). (q to quit):
 If you don't specify anything, the directories will be created inside `~/Downloads/nrkdownload`, where `~` means your home directory. If you want the downloads somewhere else (e.g. directly to your NAS), there are two ways to specify a different download directory:
 - Define an environment variable named `NRKDOWNLOAD_DIR`
 - Specify the download directory on the command line with the option `-d download_dir`
-if you do both at the same time, the option from the command line will take precedence.
 
-If you don't know how to define an environment variable, try to Google `create environment variable` and the name of you operating system.
+If you do both at the same time, the option from the command line will take precedence.
+
+If you don't know how to define an environment variable under your operating system, try to Google `create environment variable` and the name of you operating system. (Under Linux and MacOS, you would want to edit your `~/.bash_profile`)
 
 ## Installing
 The package and its requirements can be installed in several ways, depending on whether you want to just use it or whether you want to change the code. And since it is compatible with both Python 2 and 3, you can decide under what version of Python you want to run it.
@@ -125,16 +126,22 @@ Anyway, you should avoid installing it as root (Administrator), and keep your gl
 
 In the following examples, it is assumed that your system has support for [user install directory](https://www.python.org/dev/peps/pep-0370/) (thus, example 1 above). This is true for standard Linux-distribution, Windows and MacOS.
 
+If your system has both Python 2 and 3 installed, `pip` could be pointing to the Python-2 installation, whereas `pip3` points to the Python-3 installation. If that is the case for you, and you explicitly want to run this under Python-3, you can replace `pip` with `pip3` in these examples.
+
 ### Installing the latest official release
 ```
 $ pip install --user nrkdownload
 ```
-If your system has both Python 2 and 3 installed, `pip` could be pointing to the Python-2 installation, whereas `pip3` points to the Python-3 installation. If that is the case for you, and you explicitly want to run this under Python-3, you can replace `pip` with `pip3` in these examples.
+If you at some point want to upgrade to a newer version, add a `-U` (for Upgrade) just after install:
+```
+$ pip install -U --user nrkdownload
+```
 
 ### Installing the latest revision directly from GitHub:
 ```
 $ pip install --user git+https://github.com/marhoy/nrk-download.git#egg=nrkdownload
 ```
+If you at some point want to upgrade to a newer version, use `-U` as described above.
 
 ### Installing in development mode:
 If you want to change (and possibly contribute to) the code, first clone the repository. This will create a directory containing a local copy of the GitHub-repository. Then install in develop mode from this directory:
