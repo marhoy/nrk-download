@@ -130,12 +130,17 @@ In general, you should try to avoid installing python packages as root (Administ
 2. Install your own user-specific Python distribution, where you install packages. [Anaconda](https://www.continuum.io/downloads) is a good choice.
 3. Create a [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/) and install packages in there.
 
-In addition, your system might have both Python 2 and 3 installed. This could e.g be the case for some Linux-distributions. If Python 2 is the default, `pip` will be pointing to the Python 2 installation, whereas `pip3` will point to the Python 3 installation. If that is the case for you, and you explicitly want to run this package under Python 3, you must replace `pip` with `pip3` in the examples below.
 
-## MacOS (OS X)
-MacOS comes default with an installation of Python 2.7. You can decide to run with this (i.e. not installing Anaconda as mentioned above). But in order to install packages, you need the package installer `pip`. And under MacOS, `pip` is not installed by default. You can install it by typing `sudo easy_install pip`. You should also add `~/Library/Python/2.7/bin` to your $PATH (edit your `~/.bash_profile`), such that installed Python scripts are available in the Terminal.
+## Special considerations for MacOS (OS X)
+MacOS comes by default with an installation of Python 2.7. You can decide to run with this (i.e. not installing Anaconda as mentioned above). But in order to install packages, you need the package installer `pip`. And under MacOS, `pip` is not installed by default. You can install it by typing `sudo easy_install pip`. You should also add `~/Library/Python/2.7/bin` to your $PATH (edit your `~/.bash_profile`), such that installed Python scripts are available in the Terminal.
 
-### Installing the latest release of nrkdownload
+## Special considerations for Linux
+Your system might have both Python 2 and 3 installed as a part of the Linux-distribution. If Python 2 is the default, `pip` will be pointing to the Python 2 installation, whereas `pip3` will point to the Python 3 installation. If that is the case for you, and you explicitly want to run this package under Python 3, you must replace `pip` with `pip3` in the examples below.
+
+## Special considerations for Windows
+Windows does not come with an installation of Python. You can choose to install version 2.7.x or the latest 3.x from [python.org](https://www.python.org/). If you want to learn and develop Python, I would suggest [Anaconda](https://www.continuum.io/downloads), which installs in your home-directory and comes with a nice selection of packages.
+
+## Installing the latest release of nrkdownload
 In the following examples, it is assumed that your system has support for [user install directory](https://www.python.org/dev/peps/pep-0370/) (thus, example 1 above). This is true for standard Linux-distribution, Windows and MacOS.
 ```
 $ pip install --user nrkdownload
@@ -145,13 +150,13 @@ If you at some point want to upgrade to a newer version, add a `-U` (for Upgrade
 $ pip install -U --user nrkdownload
 ```
 
-### Installing the latest revision directly from GitHub:
+## Installing the latest revision directly from GitHub:
 ```
 $ pip install --user git+https://github.com/marhoy/nrk-download.git#egg=nrkdownload
 ```
 If you at some point want to upgrade to a newer version, use `-U` as described above.
 
-### Installing in development mode:
+## Installing in development mode:
 If you want to change (and possibly contribute to) the code, first clone the repository. This will create a directory containing a local copy of the GitHub-repository. Then install in develop mode from this directory:
 ```
 $ git clone https://github.com/marhoy/nrk-download.git
