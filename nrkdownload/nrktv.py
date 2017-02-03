@@ -50,6 +50,7 @@ class Program:
         self.hasSubtitles = False
         self.mediaUrl = None
         self.subtitleUrl = None
+        self.filename = ''
         self.duration = datetime.timedelta()
 
         if self.seriesId and self.seriesId not in KNOWN_SERIES.keys():
@@ -76,6 +77,9 @@ class Program:
                 self.subtitleUrl = unquote(json['mediaAssets'][0]['webVttSubtitlesUrl'])
             self.duration = utils.parse_duration(json['duration'])
 
+        # Update the self.filename
+        self.make_filename()
+
     def make_filename(self):
         if self.seriesId:
             series = KNOWN_SERIES[self.seriesId]
@@ -98,7 +102,7 @@ class Program:
             basedir = nrkdownload.DOWNLOAD_DIR
             filename = self.title
 
-        return os.path.join(basedir, utils.valid_filename(filename))
+        self.filename = os.path.join(basedir, utils.valid_filename(filename))
 
     def __str__(self):
         if self.seriesId:
@@ -232,7 +236,7 @@ def ask_for_program_download(programs):
 
 def download_worker(args):
     program, program_idx, progress_list = args
-    program_filename = program.make_filename()
+    program_filename = program.filename
     download_dir = os.path.dirname(program_filename)
     image_filename = program_filename + '.jpg'
     subtitle_file = program_filename + '.no.srt'
