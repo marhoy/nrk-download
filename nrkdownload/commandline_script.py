@@ -24,7 +24,7 @@ def main():
                                               ' double quotes if the string contains several words.')
     arguments = parser.parse_args()
 
-    if arguments.dir:
+    if arguments.d:
         nrkdownload.DOWNLOAD_DIR = os.path.expanduser(arguments.dir)
 
     nrkdownload.search_from_cmdline(arguments)
