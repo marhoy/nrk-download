@@ -42,8 +42,8 @@ usage: nrkdownload [-h] [--version] [-d DIRECTORY] (-s | -p) search_string
 Download series or programs from NRK, complete with images and subtitles.
 
 positional arguments:
-  search_string  Whatever you want to search for. Use single or double quotes
-                 if the string contains several words.
+  search_string  Whatever you want to search for. Surround the string with
+                 single or double quotes if the string contains several words.
 
 optional arguments:
   -h, --help     show this help message and exit
@@ -112,7 +112,7 @@ Enter a number or interval (e.g. 8 or 5-10). (q to quit):
 ```
 
 ## Configurable download directory
-If you don't specify anything, the directories will be created inside `~/Downloads/nrkdownload`, where `~` means your home directory. If you want the downloads somewhere else (e.g. directly to your NAS), there are two ways to specify a different download directory:
+If you don't specify anything, the files and directories will be created inside `~/Downloads/nrkdownload`, where `~` means your home directory. If you want the downloads somewhere else (e.g. directly to your NAS), there are two ways to specify a different download directory:
 - Define an environment variable named `NRKDOWNLOAD_DIR`
 - Specify the download directory on the command line with the option `-d download_dir`
 
@@ -132,20 +132,20 @@ In general, you should try to avoid installing python packages as root (Administ
 
 
 ## Special considerations for MacOS (OS X)
-MacOS comes by default with an installation of Python 2.7. You can decide to go with this (i.e. not installing Anaconda as mentioned above). In order to install packages you need the package installer `pip`, and under MacOS, `pip` is not installed by default. You can install it by typing `sudo easy_install pip`. You should also add `~/Library/Python/2.7/bin` to your $PATH (edit your `~/.bash_profile`), such that installed Python scripts (like nrkdownload) are available in the Terminal.
+MacOS comes by default with an installation of Python 2.7. You can decide to go with this (i.e. not installing Anaconda as mentioned above). In order to install packages you need the package installer `pip`, and under MacOS `pip` is not installed by default. You can install it by typing `sudo easy_install pip`. In order to utilize the `--user` scheme described above, you must also add `~/Library/Python/2.7/bin` to your $PATH (edit your `~/.bash_profile`). This enables installed Python scripts (like nrkdownload) to be available in the Terminal.
 
 ## Special considerations for Linux
 Your system might have both Python 2 and 3 installed as a part of the Linux-distribution. If Python 2 is the default, `pip` will be pointing to the Python 2 installation, whereas `pip3` will point to the Python 3 installation. If that is the case for you, and you explicitly want to run nrkdownload under Python 3, you must replace `pip` with `pip3` in the examples below.
 
 ## Special considerations for Windows
-Windows does not come with an installation of Python. You can choose to install version 2.7.x or the latest 3.x from [python.org](https://www.python.org/). If you want to learn and develop Python, I would suggest [Anaconda](https://www.continuum.io/downloads), which installs in your home-directory and comes with a nice selection of packages.
+Windows does not come with an installation of Python. You can choose to install version 2.7.x or the latest 3.x from [python.org](https://www.python.org/). If you want to learn and develop Python I would suggest [Anaconda](https://www.continuum.io/downloads), which installs in your home-directory and comes with a nice selection of packages.
 
 ## Installing the latest release of nrkdownload
-In the following examples, it is assumed that your system has support for [user install directory](https://www.python.org/dev/peps/pep-0370/) (thus, example 1 above). This is true for standard Linux-distribution, Windows and MacOS.
+In the following examples, packages are installed with the [user scheme](https://pip.pypa.io/en/stable/user_guide/#user-installs) described in example 1 above.
 ```
 $ pip install --user nrkdownload
 ```
-If you at some point want to upgrade to a newer version, add a `-U` (for Upgrade) just after install:
+If you at some point want to upgrade to a newer version, just add a `-U` (for Upgrade):
 ```
 $ pip install -U --user nrkdownload
 ```
@@ -169,13 +169,13 @@ To unistall nrkdownload, just type:
 ```
 $ pip uninstall nrkdownload
 ```
-NOTE: This will not uninstall the required packages that might have been installed together with nrkdownload. Type `pip list --user` to list all user-installed packages, and uninstall them if you know that you don't need them.
+NOTE: This will not uninstall the required packages that might have been installed together with nrkdownload. Type `pip list --user` to list all user-installed packages, and uninstall them if you know that you don't need them anymore.
 
 # FFmpeg
 The videos and subtitles are downloaded using [FFmpeg](https://ffmpeg.org/). It is available for all major operating systems. You need to install ffmpeg and make it available in your $PATH before you can use nrkdownload.
 
 ## For Linux
-Depending on your Linux-distribution, you might have to add a package-repository in order to install ffmpeg. If you are stuck, try too Google `installing ffmpeg for YOUR_LINUX_DISTRO`.
+Depending on your Linux-distribution, you might have to add a package-repository in order to install ffmpeg. If you get stuck, try too Google `installing ffmpeg for YOUR_LINUX_DISTRO`.
 
 ## For MacOS
 Download the static build of the latest release (currently 3.2.2). Open the .dmg-file and copy the binary file `ffmpeg` to e.g. a directory `bin` inside your home directory. Then, add ~/bin to your PATH.
@@ -190,4 +190,4 @@ It could be useful to specify an URL instead of a search string. The URLs could 
 For a program or a specific episode, the download could then start without requiring any other input. For a series, one could have a commandline-switch to specify the interval of episodes that you want to download. (The URLs could perhaps also be read from an input-file.) This would enable the download tool to run without requiring input from the user. It could therefore be run as a scheduled job via e.g. cron.
 
 ## More metadata?
-Both series and programs/episodes have a description at tv.nrk.no. It could possibly be interesting to save these descriptions to a text file.
+The m4v-format has support for builtin metadata. We could add some information there. Also: Both series and programs/episodes have a description at tv.nrk.no. It could possibly be interesting to save these descriptions to a text file.
