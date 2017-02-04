@@ -25,7 +25,7 @@ def main():
     arguments = parser.parse_args()
 
     if arguments.d:
-        nrkdownload.DOWNLOAD_DIR = os.path.expanduser(arguments.dir)
+        nrkdownload.DOWNLOAD_DIR = os.path.expanduser(arguments.d)
 
     nrkdownload.search_from_cmdline(arguments)
 
