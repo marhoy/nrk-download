@@ -227,7 +227,8 @@ def ask_for_program_download(programs):
         program.get_details()
         if program.isAvailable:
             programs_to_download.append(program)
-            download_series_metadata(KNOWN_SERIES[program.seriesId])
+            if program.seriesId:
+                download_series_metadata(KNOWN_SERIES[program.seriesId])
         else:
             LOG.info('Sorry, program not available: %s', program.title)
 
