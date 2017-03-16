@@ -14,30 +14,22 @@ def main():
         epilog='The files are by default downloaded to ~/Downloads/nrkdownload.'
                ' This can be changed by using the option -d as described above,'
                ' or you can define the environment variable NRKDOWNLOAD_DIR')
-
     parser.add_argument('--version', action='version', version='%(prog)s version ' + version)
     parser.add_argument('-d', metavar='DIRECTORY', action='store',
                         help='The directory where the downloaded files will be placed')
-
-    mutex = parser.add_mutually_exclusive_group(required=True)
-    mutex.add_argument('-p', '--program',
-                       help="Search for a program that matches the string PROGRAM. Interactive download.")
-    mutex.add_argument('-s', '--series',
-                       help="Search for a series that matches the string SERIES. Interactive download")
-    mutex.add_argument('-u', '--url',
-                       help="Download whatever is specified by URLs, no questions asked. "
-                            "URLs can be copied from https://tv.nrk.no/")
-
+    group1 = parser.add_mutually_exclusive_group(required=True)
+    group1.add_argument('-s', '--series', action='store_true', help='Search for series')
+    group1.add_argument('-p', '--program', action='store_true', help='Search for programs')
+    group1.add_argument('-u', '--url', action='store_true', help='The search_string is an URL')
+    parser.add_argument('search_string',
+                        help='Whatever you want to search for. Surround the string with single or'
+                             ' double quotes if the string contains several words.')
     arguments = parser.parse_args()
 
     if arguments.d:
         nrkdownload.DOWNLOAD_DIR = os.path.expanduser(arguments.d)
 
-    if arguments.series or arguments.program:
-        nrkdownload.search_from_cmdline(arguments)
-
-    if arguments.url:
-        nrkdownload.parse_urls(arguments)
+    nrkdownload.search_from_cmdline(arguments)
 
 
 if __name__ == '__main__':
