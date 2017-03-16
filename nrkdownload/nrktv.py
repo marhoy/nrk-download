@@ -193,7 +193,7 @@ def search(search_string, search_type):
         LOG.error('Not able to parse search-results: %s', e)
         return
 
-    series = programs = []
+    series, programs = [], []
     hits = json.get('hits', [])
     if hits is None:
         hits = []
@@ -366,5 +366,14 @@ def search_from_cmdline(args):
             ask_for_program_download(programs)
         else:
             print('Sorry, no matching programs')
+    elif args.url:
+        print('Searching based on url', args.search_string)
+        """
+        https://tv.nrk.no/serie/trygdekontoret/MUHH48000516/sesong-12/episode-5
+        https://tv.nrk.no/serie/trygdekontoret
+        https://tv.nrk.no/program/KOIF42005206/the-queen
+        https://tv.nrk.no/program/KOID20001217/geert-wilders-nederlands-hoeyrenasjonalist
+        https://tv.nrk.no/program/KOID76002309/the-act-of-killing
+        """
     else:
         LOG.error('Unknown state, not sure what to do')

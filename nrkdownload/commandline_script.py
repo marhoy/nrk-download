@@ -20,6 +20,7 @@ def main():
     group1 = parser.add_mutually_exclusive_group(required=True)
     group1.add_argument('-s', '--series', action='store_true', help='Search for series')
     group1.add_argument('-p', '--program', action='store_true', help='Search for programs')
+    group1.add_argument('-u', '--url', action='store_true', help='The search_string is an URL')
     parser.add_argument('search_string',
                         help='Whatever you want to search for. Surround the string with single or'
                              ' double quotes if the string contains several words.')
