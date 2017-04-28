@@ -134,6 +134,9 @@ In general, you should try to avoid installing python packages as root (Administ
 ## Special considerations for MacOS (OS X)
 MacOS comes by default with an installation of Python 2.7. You can decide to go with this (i.e. not installing Anaconda as mentioned above). In order to install packages you need the package installer `pip`, and under MacOS `pip` is not installed by default. You can install it by typing `sudo easy_install pip`. In order to utilize the `--user` scheme described above, you must also add `~/Library/Python/2.7/bin` to your $PATH (edit your `~/.bash_profile`). This enables installed Python scripts (like nrkdownload) to be available in the Terminal.
 
+Also, if you get an `UnicodeEncodeError`, add the following line to your  `~/.bash_profile`:
+`export LC_CTYPE=en_US.UTF-8`
+
 ## Special considerations for Linux
 Your system might have both Python 2 and 3 installed as a part of the Linux-distribution. If Python 2 is the default, `pip` will be pointing to the Python 2 installation, whereas `pip3` will point to the Python 3 installation. If that is the case for you, and you explicitly want to run nrkdownload under Python 3, you must replace `pip` with `pip3` in the examples below.
 
