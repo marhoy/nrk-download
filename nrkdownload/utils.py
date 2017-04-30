@@ -1,6 +1,6 @@
 # These are needed if we are running under Python 2.7
 from __future__ import unicode_literals
-from builtins import input
+from future.builtins import input
 
 import re
 import sys
