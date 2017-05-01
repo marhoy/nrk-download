@@ -1,7 +1,8 @@
 # These are needed if we are running under Python 2.7
 from __future__ import unicode_literals
-from builtins import input
+from future.builtins import input
 
+import os.path
 import re
 import sys
 import datetime
@@ -122,3 +123,11 @@ def ffmpeg_seconds_downloaded(process):
         #    download_rate = rate_match.group(1)
 
     return downloaded_time.total_seconds()
+
+
+def parse_url(args):
+    if os.path.isfile(args.search_string):
+        print("Reading URL input from file")
+    else:
+        print("Reading input from stdin")
+    print(args)
