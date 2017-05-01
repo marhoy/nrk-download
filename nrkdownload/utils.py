@@ -1,22 +1,13 @@
 # These are needed if we are running under Python 2.7
 from __future__ import unicode_literals
-from __future__ import print_function
 from future.builtins import input
 
-try:
-    # Python 3
-    from urllib.parse import urlparse
-except ImportError:
-    # Python 2
-    from urlparse import urlparse
-
-
+import os.path
 import re
 import sys
 import datetime
 
 from . import LOG
-from . import nrktv
 
 
 def valid_filename(string):
@@ -134,29 +125,9 @@ def ffmpeg_seconds_downloaded(process):
     return downloaded_time.total_seconds()
 
 
-def parse_urls(args):
-
-    if is_valid_url(args.url):
-        nrktv.download_from_url(args.url)
+def parse_url(args):
+    if os.path.isfile(args.search_string):
+        print("Reading URL input from file")
     else:
-        try:
-            file = open(args.url, 'r')
-        except FileNotFoundError:
-            LOG.error("The string %s is neither a valid URL nor a valid filename", args.url)
-            sys.exit(1)
-
-        for line in file:
-            line = line.strip()
-            if is_valid_url(line):
-                nrktv.download_from_url(line)
-            else:
-                LOG.warning("Skipping invalid URL: %s", line)
-
-
-def is_valid_url(url):
-    parsed_url = urlparse(url)
-    if parsed_url.netloc == "tv.nrk.no" and parsed_url.scheme == 'https' \
-       and parsed_url.path.startswith(('/serie/', '/program/')):
-        return True
-    else:
-        return False
+        print("Reading input from stdin")
+    print(args)
