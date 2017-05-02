@@ -9,7 +9,6 @@ except ImportError:
     from urlparse import urlparse
 
 
-import os.path
 import re
 import sys
 import datetime
