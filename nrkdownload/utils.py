@@ -1,6 +1,13 @@
 # These are needed if we are running under Python 2.7
 from __future__ import unicode_literals
+from __future__ import print_function
 from future.builtins import input
+
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
+
 
 import os.path
 import re
@@ -125,9 +132,44 @@ def ffmpeg_seconds_downloaded(process):
     return downloaded_time.total_seconds()
 
 
-def parse_url(args):
-    if os.path.isfile(args.search_string):
-        print("Reading URL input from file")
+def parse_urls(args):
+
+    if is_valid_url(args.url):
+        download_from_url(args.url)
     else:
-        print("Reading input from stdin")
-    print(args)
+        try:
+            file = open(args.url, 'r')
+        except FileNotFoundError:
+            LOG.error("The string %s is neither a valid URL nor a valid filename", args.url)
+            sys.exit(1)
+
+        for line in file:
+            line = line.strip()
+            if is_valid_url(line):
+                download_from_url(line)
+            else:
+                LOG.warning("Skipping invalid URL: %s", line)
+
+
+def is_valid_url(url):
+    parsed_url = urlparse(url)
+    if parsed_url.netloc == "tv.nrk.no" and parsed_url.scheme == 'https' \
+       and parsed_url.path.startswith(('/serie/', '/program/')):
+        return True
+    else:
+        return False
+
+
+def download_from_url(url):
+
+    parsed_url = urlparse(url)
+    print(parsed_url)
+    """
+    https://tv.nrk.no/serie/trygdekontoret/MUHH48000516/sesong-12/episode-5
+    https://tv.nrk.no/serie/trygdekontoret
+    https://tv.nrk.no/program/KOIF42005206/the-queen
+    https://tv.nrk.no/program/KOID20001217/geert-wilders-nederlands-hoeyrenasjonalist
+    https://tv.nrk.no/program/KOID76002309/the-act-of-killing
+    """
+
+    print("Downloading from URL:", url)

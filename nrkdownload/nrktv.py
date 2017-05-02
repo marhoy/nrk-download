@@ -348,7 +348,7 @@ def series_download(series):
 
 def search_from_cmdline(args):
     if args.series:
-        series = search(args.search_string, 'series')
+        series = search(args.series, 'series')
         if len(series) == 1:
             print('\nOnly one matching series: {}'.format(series[0].title))
             series_download(series[0])
@@ -361,19 +361,10 @@ def search_from_cmdline(args):
         else:
             print('Sorry, no matching series')
     elif args.program:
-        programs = search(args.search_string, 'program')
+        programs = search(args.program, 'program')
         if programs:
             ask_for_program_download(programs)
         else:
             print('Sorry, no matching programs')
-    elif args.url:
-        print('Searching based on url', args.search_string)
-        """
-        https://tv.nrk.no/serie/trygdekontoret/MUHH48000516/sesong-12/episode-5
-        https://tv.nrk.no/serie/trygdekontoret
-        https://tv.nrk.no/program/KOIF42005206/the-queen
-        https://tv.nrk.no/program/KOID20001217/geert-wilders-nederlands-hoeyrenasjonalist
-        https://tv.nrk.no/program/KOID76002309/the-act-of-killing
-        """
     else:
         LOG.error('Unknown state, not sure what to do')
