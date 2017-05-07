@@ -4,8 +4,10 @@ from __future__ import print_function
 from future.builtins import input
 
 try:
+    # Python 3
     from urllib.parse import urlparse
 except ImportError:
+    # Python 2
     from urlparse import urlparse
 
 
@@ -14,6 +16,7 @@ import sys
 import datetime
 
 from . import LOG
+from . import nrktv
 
 
 def valid_filename(string):
@@ -134,7 +137,7 @@ def ffmpeg_seconds_downloaded(process):
 def parse_urls(args):
 
     if is_valid_url(args.url):
-        download_from_url(args.url)
+        nrktv.download_from_url(args.url)
     else:
         try:
             file = open(args.url, 'r')
@@ -145,7 +148,7 @@ def parse_urls(args):
         for line in file:
             line = line.strip()
             if is_valid_url(line):
-                download_from_url(line)
+                nrktv.download_from_url(line)
             else:
                 LOG.warning("Skipping invalid URL: %s", line)
 
@@ -157,18 +160,3 @@ def is_valid_url(url):
         return True
     else:
         return False
-
-
-def download_from_url(url):
-
-    parsed_url = urlparse(url)
-    print(parsed_url)
-    """
-    https://tv.nrk.no/serie/trygdekontoret/MUHH48000516/sesong-12/episode-5
-    https://tv.nrk.no/serie/trygdekontoret
-    https://tv.nrk.no/program/KOIF42005206/the-queen
-    https://tv.nrk.no/program/KOID20001217/geert-wilders-nederlands-hoeyrenasjonalist
-    https://tv.nrk.no/program/KOID76002309/the-act-of-killing
-    """
-
-    print("Downloading from URL:", url)
