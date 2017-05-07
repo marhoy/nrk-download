@@ -15,10 +15,11 @@ import tqdm
 try:
     # Python 3
     from urllib.request import urlretrieve
-    from urllib.parse import unquote
+    from urllib.parse import unquote, urlparse
 except ImportError:
     # Python 2
     from urllib import unquote, urlretrieve
+    from urlparse import urlparse
 
 # Our own modules
 from . import LOG
@@ -82,6 +83,7 @@ class Program:
 
     def make_filename(self):
         if self.seriesId:
+            LOG.debug("Making filename for series %s", self.seriesId)
             series = KNOWN_SERIES[self.seriesId]
             season_number, episode_number = series.programIds[self.programId]
             basedir = os.path.join(nrkdownload.DOWNLOAD_DIR, series.dirName,
@@ -185,6 +187,10 @@ class Series:
 
 
 def search(search_string, search_type):
+
+    if search_type not in ['series', 'program']:
+        LOG.error('Unknown search type: %s', search_type)
+
     try:
         r = SESSION.get(NRK_TV_MOBIL_API + '/search/' + search_string)
         r.raise_for_status()
@@ -193,24 +199,19 @@ def search(search_string, search_type):
         LOG.error('Not able to parse search-results: %s', e)
         return
 
-    series, programs = [], []
+    results = []
     hits = json.get('hits', [])
     if hits is None:
         hits = []
     for item in reversed(hits):
         if item['type'] == 'serie' and search_type == 'series':
-            series.append(Series(item['hit']['seriesId']))
+            results.append(Series(item['hit']['seriesId']))
         elif item['type'] in ['program', 'episode'] and search_type == 'program':
-            programs.append(Program(item['hit']))
+            results.append(Program(item['hit']))
         if item['type'] not in ['serie', 'program', 'episode']:
             LOG.warning('Unknown item type: %s', item['type'])
 
-    if search_type == 'series':
-        return series
-    elif search_type == 'program':
-        return programs
-    else:
-        LOG.error('Unknown search type: %s', search_type)
+    return results
 
 
 def ask_for_program_download(programs):
@@ -338,12 +339,12 @@ def download_series_metadata(series):
             LOG.error('Could not download metadata for series %s: %s', series.title, e)
 
 
-def series_download(series):
+def find_all_episodes(series):
     programs = []
     for season in series.seasons:
         for episode in season.episodes:
             programs.append(episode)
-    ask_for_program_download(programs)
+    return programs
 
 
 def search_from_cmdline(args):
@@ -351,13 +352,15 @@ def search_from_cmdline(args):
         series = search(args.series, 'series')
         if len(series) == 1:
             print('\nOnly one matching series: {}'.format(series[0].title))
-            series_download(series[0])
+            programs = find_all_episodes(series[0])
+            ask_for_program_download(programs)
         elif len(series) > 1:
             print('\nMatching series:')
             for i, s in enumerate(series):
                 print('{:2}: {}'.format(i, s))
             index = utils.get_integer_input(len(series) - 1)
-            series_download(series[index])
+            programs = find_all_episodes(series[index])
+            ask_for_program_download(programs)
         else:
             print('Sorry, no matching series')
     elif args.program:
@@ -368,3 +371,54 @@ def search_from_cmdline(args):
             print('Sorry, no matching programs')
     else:
         LOG.error('Unknown state, not sure what to do')
+
+
+def download_from_url(url):
+
+    parsed_url = urlparse(url)
+
+    "https://tv.nrk.no/serie/p3-sjekker-ut/MYNT12000317/sesong-1/episode-3"
+    "https://tv.nrk.no/serie/paa-fylla"
+
+    series_match = re.match("/serie/([\w-]+)$", parsed_url.path)
+    program_match = re.match("/program/(\w+)/", parsed_url.path)
+    episode_match = re.match("/serie/([\w-]+)/(\w+)/", parsed_url.path)
+    if program_match:
+        seriesId = None
+        programId = program_match.group(1).lower()
+    elif episode_match:
+        seriesId = episode_match.group(1)
+        programId = episode_match.group(2).lower()
+    else:
+        LOG.error("Don't know what to do with URL: %s", url)
+        sys.exit(1)
+
+    try:
+        r = SESSION.get(NRK_PS_API + '/mediaelement/' + programId)
+        r.raise_for_status()
+        json = r.json()
+    except Exception as e:
+        LOG.error('Could not get program details: %s', e)
+        return
+
+    if seriesId:
+        series = Series(seriesId)
+        download_series_metadata(series)
+
+    json['programId'] = programId
+    json['imageId'] = json['image']['id']
+    program = Program(json)
+    program.get_details()
+
+    if program.isAvailable:
+        download_programs([program])
+    else:
+        LOG.info('Sorry, program not available: %s', program.title)
+
+    """
+    https://tv.nrk.no/serie/trygdekontoret/MUHH48000516/sesong-12/episode-5
+    https://tv.nrk.no/serie/trygdekontoret
+    https://tv.nrk.no/program/KOIF42005206/the-queen
+    https://tv.nrk.no/program/KOID20001217/geert-wilders-nederlands-hoeyrenasjonalist
+    https://tv.nrk.no/program/KOID76002309/the-act-of-killing
+    """
