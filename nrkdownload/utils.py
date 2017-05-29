@@ -10,7 +10,6 @@ except ImportError:
     # Python 2
     from urlparse import urlparse
 
-
 import re
 import sys
 import datetime
