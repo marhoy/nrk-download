@@ -34,23 +34,29 @@ SKAM
 ```
 
 # Usage
-In order to download something, you first have to search for it. And you have to specify whether you are searching for a particular program, or if you are searching for a series.
+There are two ways do download things:
+1. You can interactively search for content. You have to specify whether you are searching for a particular program, or if you are searching for a series. You will go through a selection process in order to identify what is to be downloaded.
+1. You can specify an URL that identifies the content that you want to dowload. The URL is typically copied from https://tv.nrk.no/. In this case, the download starts with no questions asked.
 ```
 $ nrkdownload -h
-usage: nrkdownload [-h] [--version] [-d DIRECTORY] (-s | -p) search_string
+usage: nrkdownload [-h] [--version] [-d DIRECTORY]
+                   (-p PROGRAM | -s SERIES | -u URL)
 
 Download series or programs from NRK, complete with images and subtitles.
 
-positional arguments:
-  search_string  Whatever you want to search for. Surround the string with
-                 single or double quotes if the string contains several words.
-
 optional arguments:
-  -h, --help     show this help message and exit
-  --version      show program's version number and exit
-  -d DIRECTORY   The directory where the downloaded files will be placed
-  -s, --series   Search for series
-  -p, --program  Search for programs
+  -h, --help            show this help message and exit
+  --version             show program's version number and exit
+  -d DIRECTORY          The directory where the downloaded files will be
+                        placed
+  -p PROGRAM, --program PROGRAM
+                        Search for a program that matches the string PROGRAM.
+                        Interactive download.
+  -s SERIES, --series SERIES
+                        Search for a series that matches the string SERIES.
+                        Interactive download
+  -u URL, --url URL     Download whatever is specified by URLs, no questions
+                        asked. URLs can be copied from https://tv.nrk.no/
 
 The files are by default downloaded to ~/Downloads/nrkdownload. This can be
 changed by using the option -d as described above, or you can define the
@@ -110,6 +116,16 @@ Matching programs
 
 Enter a number or interval (e.g. 8 or 5-10). (q to quit): 
 ```
+
+## Download target specified by URL
+If you know exactly what you want to download, there is no need to go through the interactive search described above. Instead, you can just specify the download target directly with an URL. You will typically find these URLs by browsing https://tv.nrk.no. Examples of such URLs could be:
+* https://tv.nrk.no/serie/skam: This will download ALL the episodes of ALL the seasons of this series.
+* https://tv.nrk.no/serie/skam/MYNT15000117/sesong-4/episode-1 (or just https://tv.nrk.no/serie/skam/MYNT15000117): This will dowload the specified episode of that series.
+* https://tv.nrk.no/program/KMTE50001515/svartedauden (or just https://tv.nrk.no/program/KMTE50001515): This will download the specified program.
+
+The download is not interactive when you specify an URL, which means you can automatically download content from scripts or cron-jobs. Files that are already downloaded will be skipped.
+
+TODO: Support will be added for specifying several URLs at the same time, either from stdin or from file.
 
 ## Configurable download directory
 If you don't specify anything, the files and directories will be created inside `~/Downloads/nrkdownload`, where `~` means your home directory. If you want the downloads somewhere else (e.g. directly to your NAS), there are two ways to specify a different download directory:
@@ -183,14 +199,6 @@ Depending on your Linux-distribution, you might have to add a package-repository
 ## For MacOS
 Download the static build of the latest release (currently 3.2.2). Open the .dmg-file and copy the binary file `ffmpeg` to e.g. a directory `bin` inside your home directory. Then, add ~/bin to your PATH.
 
-# TODO
-## URLs as input
-It could be useful to specify an URL instead of a search string. The URLs could be like:
-- `https://tv.nrk.no/program/KOID26004816/president-trump` for a specific program 
-- `https://tv.nrk.no/serie/unge-lovende/KMTE20006115/sesong-2/episode-1` for a specific episode of a series
-- `https://tv.nrk.no/serie/unge-lovende` for a whole series
-
-For a program or a specific episode, the download could then start without requiring any other input. For a series, one could have a commandline-switch to specify the interval of episodes that you want to download. (The URLs could perhaps also be read from an input-file.) This would enable the download tool to run without requiring input from the user. It could therefore be run as a scheduled job via e.g. cron.
 
 ## More metadata?
 The m4v-format has support for builtin metadata. We could add some information there. Also: Both series and programs/episodes have a description at tv.nrk.no. It could possibly be interesting to save these descriptions to a text file.
