@@ -387,34 +387,34 @@ def download_from_url(url):
     program_match = re.match("/program/(\w+)", parsed_url.path)
     episode_match = re.match("/serie/([\w-]+)/(\w+)", parsed_url.path)
     if program_match:
-        seriesId = None
-        programId = program_match.group(1).lower()
+        series_id = None
+        program_id = program_match.group(1).lower()
     elif episode_match:
-        seriesId = episode_match.group(1)
-        programId = episode_match.group(2).lower()
+        series_id = episode_match.group(1)
+        program_id = episode_match.group(2).lower()
     elif series_match:
-        seriesId = series_match.group(1)
-        programId = None
+        series_id = series_match.group(1)
+        program_id = None
     else:
         LOG.error("Don't know what to do with URL: %s", url)
         sys.exit(1)
 
-    if seriesId:
-        series = Series(seriesId)
+    if series_id:
+        series = Series(series_id)
         download_series_metadata(series)
-        if not programId:
+        if not program_id:
             episodes = [ep for season in series.seasons for ep in season.episodes]
             # TODO: As above, this should be done in parallel
             for episode in episodes:
                 episode.get_details()
             download_programs(episodes)
 
-    if programId:
+    if program_id:
         try:
-            r = SESSION.get(NRK_PS_API + '/mediaelement/' + programId)
+            r = SESSION.get(NRK_PS_API + '/mediaelement/' + program_id)
             r.raise_for_status()
             json = r.json()
-            json['programId'] = programId
+            json['programId'] = program_id
             json['imageId'] = json['image']['id']
             program = Program(json)
             program.get_details()
@@ -425,7 +425,6 @@ def download_from_url(url):
             download_programs([program])
         else:
             LOG.info('Sorry, program not available: %s', program.title)
-
 
     """
     https://tv.nrk.no/serie/trygdekontoret/MUHH48000516/sesong-12/episode-5

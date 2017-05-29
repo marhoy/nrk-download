@@ -25,7 +25,8 @@ def main():
     mutex.add_argument('-s', '--series',
                        help="Search for a series that matches the string SERIES. Interactive download")
     mutex.add_argument('-u', '--url',
-                       help="Download whatever is specified by URLs. No questions asked.")
+                       help="Download whatever is specified by URLs, no questions asked. "
+                            "URLs can be copied from https://tv.nrk.no/")
 
     arguments = parser.parse_args()
 
