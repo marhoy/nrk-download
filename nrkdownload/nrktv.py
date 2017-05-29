@@ -40,7 +40,7 @@ SESSION.headers['app-version-android'] = '999'
 class Program:
     def __init__(self, json):
         LOG.debug('Creating new Program: %s : %s', json['title'], json['programId'])
-        self.programId = json['programId']
+        self.programId = json['programId'].lower()
         self.title = re.sub('\s+', ' ', json['title'])
         self.description = json['description']
         self.imageUrl = utils.get_image_url(json['imageId'])
@@ -176,10 +176,12 @@ class Series:
             season_index = self.seasonId2Idx[item['seasonId']]
             program = Program(item)
             episode_number = len(self.seasons[season_index].episodes)
-            LOG.debug('Series %s: Adding %s to S %s, E %s',
+            LOG.debug('Series %s: Adding %s to S%d, E%d',
                       self.seriesId, program.title, season_index, episode_number)
+            self.programIds[item['programId'].lower()] = (season_index, episode_number)
+            program.make_filename()
             self.seasons[season_index].episodes.append(program)
-            self.programIds[item['programId']] = (season_index, episode_number)
+        LOG.debug("In get_episodes, added %d episodes", len(self.programIds.keys()))
 
     def __str__(self):
         string = '{} : {} Sesong(er)'.format(self.title, len(self.seasons))
@@ -283,6 +285,7 @@ def download_worker(args):
         # cmd += ['-metadata', 'track="24"']
         cmd += ['-c:v', 'copy', '-c:a', 'copy', '-bsf:a', 'aac_adtstoasc', video_filename]
         try:
+            LOG.info("Starting command: %s", cmd)
             process = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdin=open(os.devnull, 'r'),
                                        universal_newlines=True)
             while process.poll() is None:
@@ -381,39 +384,48 @@ def download_from_url(url):
     "https://tv.nrk.no/serie/paa-fylla"
 
     series_match = re.match("/serie/([\w-]+)$", parsed_url.path)
-    program_match = re.match("/program/(\w+)/", parsed_url.path)
-    episode_match = re.match("/serie/([\w-]+)/(\w+)/", parsed_url.path)
+    program_match = re.match("/program/(\w+)", parsed_url.path)
+    episode_match = re.match("/serie/([\w-]+)/(\w+)", parsed_url.path)
     if program_match:
         seriesId = None
         programId = program_match.group(1).lower()
     elif episode_match:
         seriesId = episode_match.group(1)
         programId = episode_match.group(2).lower()
+    elif series_match:
+        seriesId = series_match.group(1)
+        programId = None
     else:
         LOG.error("Don't know what to do with URL: %s", url)
         sys.exit(1)
 
-    try:
-        r = SESSION.get(NRK_PS_API + '/mediaelement/' + programId)
-        r.raise_for_status()
-        json = r.json()
-    except Exception as e:
-        LOG.error('Could not get program details: %s', e)
-        return
-
     if seriesId:
         series = Series(seriesId)
         download_series_metadata(series)
+        if not programId:
+            episodes = [ep for season in series.seasons for ep in season.episodes]
+            # TODO: As above, this should be done in parallel
+            for episode in episodes:
+                episode.get_details()
+            download_programs(episodes)
 
-    json['programId'] = programId
-    json['imageId'] = json['image']['id']
-    program = Program(json)
-    program.get_details()
+    if programId:
+        try:
+            r = SESSION.get(NRK_PS_API + '/mediaelement/' + programId)
+            r.raise_for_status()
+            json = r.json()
+            json['programId'] = programId
+            json['imageId'] = json['image']['id']
+            program = Program(json)
+            program.get_details()
+        except Exception as e:
+            LOG.error('Could not get program details: %s', e)
+            return
+        if program.isAvailable:
+            download_programs([program])
+        else:
+            LOG.info('Sorry, program not available: %s', program.title)
 
-    if program.isAvailable:
-        download_programs([program])
-    else:
-        LOG.info('Sorry, program not available: %s', program.title)
 
     """
     https://tv.nrk.no/serie/trygdekontoret/MUHH48000516/sesong-12/episode-5
