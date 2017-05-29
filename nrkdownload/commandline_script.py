@@ -3,6 +3,7 @@
 import argparse
 import os.path
 
+
 # Our own modules
 import nrkdownload
 from nrkdownload.version import version
