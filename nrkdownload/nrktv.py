@@ -15,10 +15,11 @@ import tqdm
 try:
     # Python 3
     from urllib.request import urlretrieve
-    from urllib.parse import unquote
+    from urllib.parse import unquote, urlparse
 except ImportError:
     # Python 2
     from urllib import unquote, urlretrieve
+    from urlparse import urlparse
 
 # Our own modules
 from . import LOG
@@ -39,7 +40,7 @@ SESSION.headers['app-version-android'] = '999'
 class Program:
     def __init__(self, json):
         LOG.debug('Creating new Program: %s : %s', json['title'], json['programId'])
-        self.programId = json['programId']
+        self.programId = json['programId'].lower()
         self.title = re.sub('\s+', ' ', json['title'])
         self.description = json['description']
         self.imageUrl = utils.get_image_url(json['imageId'])
@@ -82,6 +83,7 @@ class Program:
 
     def make_filename(self):
         if self.seriesId:
+            LOG.debug("Making filename for series %s", self.seriesId)
             series = KNOWN_SERIES[self.seriesId]
             season_number, episode_number = series.programIds[self.programId]
             basedir = os.path.join(nrkdownload.DOWNLOAD_DIR, series.dirName,
@@ -174,10 +176,12 @@ class Series:
             season_index = self.seasonId2Idx[item['seasonId']]
             program = Program(item)
             episode_number = len(self.seasons[season_index].episodes)
-            LOG.debug('Series %s: Adding %s to S %s, E %s',
+            LOG.debug('Series %s: Adding %s to S%d, E%d',
                       self.seriesId, program.title, season_index, episode_number)
+            self.programIds[item['programId'].lower()] = (season_index, episode_number)
+            program.make_filename()
             self.seasons[season_index].episodes.append(program)
-            self.programIds[item['programId']] = (season_index, episode_number)
+        LOG.debug("In get_episodes, added %d episodes", len(self.programIds.keys()))
 
     def __str__(self):
         string = '{} : {} Sesong(er)'.format(self.title, len(self.seasons))
@@ -185,6 +189,10 @@ class Series:
 
 
 def search(search_string, search_type):
+
+    if search_type not in ['series', 'program']:
+        LOG.error('Unknown search type: %s', search_type)
+
     try:
         r = SESSION.get(NRK_TV_MOBIL_API + '/search/' + search_string)
         r.raise_for_status()
@@ -193,24 +201,19 @@ def search(search_string, search_type):
         LOG.error('Not able to parse search-results: %s', e)
         return
 
-    series = programs = []
+    results = []
     hits = json.get('hits', [])
     if hits is None:
         hits = []
     for item in reversed(hits):
         if item['type'] == 'serie' and search_type == 'series':
-            series.append(Series(item['hit']['seriesId']))
+            results.append(Series(item['hit']['seriesId']))
         elif item['type'] in ['program', 'episode'] and search_type == 'program':
-            programs.append(Program(item['hit']))
+            results.append(Program(item['hit']))
         if item['type'] not in ['serie', 'program', 'episode']:
             LOG.warning('Unknown item type: %s', item['type'])
 
-    if search_type == 'series':
-        return series
-    elif search_type == 'program':
-        return programs
-    else:
-        LOG.error('Unknown search type: %s', search_type)
+    return results
 
 
 def ask_for_program_download(programs):
@@ -282,6 +285,7 @@ def download_worker(args):
         # cmd += ['-metadata', 'track="24"']
         cmd += ['-c:v', 'copy', '-c:a', 'copy', '-bsf:a', 'aac_adtstoasc', video_filename]
         try:
+            LOG.info("Starting command: %s", cmd)
             process = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdin=open(os.devnull, 'r'),
                                        universal_newlines=True)
             while process.poll() is None:
@@ -338,33 +342,94 @@ def download_series_metadata(series):
             LOG.error('Could not download metadata for series %s: %s', series.title, e)
 
 
-def series_download(series):
+def find_all_episodes(series):
     programs = []
     for season in series.seasons:
         for episode in season.episodes:
             programs.append(episode)
-    ask_for_program_download(programs)
+    return programs
 
 
 def search_from_cmdline(args):
     if args.series:
-        series = search(args.search_string, 'series')
+        series = search(args.series, 'series')
         if len(series) == 1:
             print('\nOnly one matching series: {}'.format(series[0].title))
-            series_download(series[0])
+            programs = find_all_episodes(series[0])
+            ask_for_program_download(programs)
         elif len(series) > 1:
             print('\nMatching series:')
             for i, s in enumerate(series):
                 print('{:2}: {}'.format(i, s))
             index = utils.get_integer_input(len(series) - 1)
-            series_download(series[index])
+            programs = find_all_episodes(series[index])
+            ask_for_program_download(programs)
         else:
             print('Sorry, no matching series')
     elif args.program:
-        programs = search(args.search_string, 'program')
+        programs = search(args.program, 'program')
         if programs:
             ask_for_program_download(programs)
         else:
             print('Sorry, no matching programs')
     else:
         LOG.error('Unknown state, not sure what to do')
+
+
+def download_from_url(url):
+
+    parsed_url = urlparse(url)
+
+    "https://tv.nrk.no/serie/p3-sjekker-ut/MYNT12000317/sesong-1/episode-3"
+    "https://tv.nrk.no/serie/paa-fylla"
+
+    series_match = re.match("/serie/([\w-]+)$", parsed_url.path)
+    program_match = re.match("/program/(\w+)", parsed_url.path)
+    episode_match = re.match("/serie/([\w-]+)/(\w+)", parsed_url.path)
+    if program_match:
+        series_id = None
+        program_id = program_match.group(1).lower()
+    elif episode_match:
+        series_id = episode_match.group(1)
+        program_id = episode_match.group(2).lower()
+    elif series_match:
+        series_id = series_match.group(1)
+        program_id = None
+    else:
+        LOG.error("Don't know what to do with URL: %s", url)
+        sys.exit(1)
+
+    if series_id:
+        series = Series(series_id)
+        download_series_metadata(series)
+        if not program_id:
+            episodes = [ep for season in series.seasons for ep in season.episodes]
+            # TODO: As above, this should be done in parallel
+            for episode in episodes:
+                episode.get_details()
+            download_programs(episodes)
+
+    if program_id:
+        try:
+            r = SESSION.get(NRK_PS_API + '/mediaelement/' + program_id)
+            r.raise_for_status()
+            json = r.json()
+            json['programId'] = program_id
+            json['imageId'] = json['image']['id']
+            program = Program(json)
+            program.get_details()
+        except Exception as e:
+            LOG.error('Could not get program details: %s', e)
+            return
+        if program.isAvailable:
+            download_programs([program])
+        else:
+            LOG.info('Sorry, program not available: %s', program.title)
+
+    """
+    https://tv.nrk.no/serie/trygdekontoret/MUHH48000516/sesong-12/episode-5
+    https://tv.nrk.no/serie/trygdekontoret
+    https://tv.nrk.no/program/KOIF42005206/the-queen
+    https://tv.nrk.no/program/KOID20001217/geert-wilders-nederlands-hoeyrenasjonalist
+    https://tv.nrk.no/program/KOID76002309/the-act-of-killing
+    """
