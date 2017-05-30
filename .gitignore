@@ -73,6 +73,8 @@ target/
 # PyCharm
 .idea/workspace.xml
 .idea/tasks.xml
+.idea/misc.xml
+.idea/modules.xml
 
 # pyenv
 .python-version
