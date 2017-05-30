@@ -41,7 +41,7 @@ class Program:
     def __init__(self, json):
         LOG.debug('Creating new Program: %s : %s', json['title'], json['programId'])
         self.programId = json['programId'].lower()
-        self.title = re.sub('\s+', ' ', json['title'])
+        self.title = re.sub(r'\s+', ' ', json['title'])
         self.description = json['description']
         self.imageUrl = utils.get_image_url(json['imageId'])
         self.seriesId = json.get('seriesId', None)
@@ -71,8 +71,8 @@ class Program:
         if self.isAvailable:
             self.mediaUrl = json.get('mediaUrl', None)
             if self.mediaUrl:
-                self.mediaUrl = re.sub('\.net/z/', '.net/i/', self.mediaUrl)
-                self.mediaUrl = re.sub('manifest\.f4m$', 'master.m3u8', self.mediaUrl)
+                self.mediaUrl = re.sub(r'\.net/z/', '.net/i/', self.mediaUrl)
+                self.mediaUrl = re.sub(r'manifest\.f4m$', 'master.m3u8', self.mediaUrl)
             self.hasSubtitles = json.get('hasSubtitles', False)
             if self.hasSubtitles:
                 self.subtitleUrl = unquote(json['mediaAssets'][0]['webVttSubtitlesUrl'])
@@ -126,7 +126,7 @@ class Season:
         LOG.info('Creating new season: %s: %s', idx, json['name'])
 
         self.id = json['id']
-        self.name = re.sub('\s+', ' ', json['name'])
+        self.name = re.sub(r'\s+', ' ', json['name'])
         self.number = idx
         self.episodes = []
         self.dirName = utils.valid_filename('Season {:02}'.format(self.number + 1))
@@ -154,7 +154,7 @@ class Series:
             sys.exit(1)
 
         self.seriesId = series_id
-        self.title = re.sub('\s+', ' ', json['title'])
+        self.title = re.sub(r'\s+', ' ', json['title'])
         self.description = json['description']
         self.imageUrl = utils.get_image_url(json['imageId'])
         self.dirName = utils.valid_filename(self.title)
@@ -383,9 +383,9 @@ def download_from_url(url):
     "https://tv.nrk.no/serie/p3-sjekker-ut/MYNT12000317/sesong-1/episode-3"
     "https://tv.nrk.no/serie/paa-fylla"
 
-    series_match = re.match("/serie/([\w-]+)$", parsed_url.path)
-    program_match = re.match("/program/(\w+)", parsed_url.path)
-    episode_match = re.match("/serie/([\w-]+)/(\w+)", parsed_url.path)
+    series_match = re.match(r"/serie/([\w-]+)$", parsed_url.path)
+    program_match = re.match(r"/program/(\w+)", parsed_url.path)
+    episode_match = re.match(r"/serie/([\w-]+)/(\w+)", parsed_url.path)
     if program_match:
         series_id = None
         program_id = program_match.group(1).lower()
@@ -427,6 +427,7 @@ def download_from_url(url):
             LOG.info('Sorry, program not available: %s', program.title)
 
     """
+    https://tv.nrk.no/serie/paa-fylla
     https://tv.nrk.no/serie/trygdekontoret/MUHH48000516/sesong-12/episode-5
     https://tv.nrk.no/serie/trygdekontoret
     https://tv.nrk.no/program/KOIF42005206/the-queen
