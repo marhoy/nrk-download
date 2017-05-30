@@ -15,7 +15,7 @@ import sys
 import datetime
 
 from . import LOG
-from . import nrktv
+import nrkdownload.nrktv  # We have to do it this way due to circular imports and Python2
 
 
 def valid_filename(string):
@@ -136,7 +136,7 @@ def ffmpeg_seconds_downloaded(process):
 def parse_urls(args):
 
     if is_valid_url(args.url):
-        nrktv.download_from_url(args.url)
+        nrkdownload.nrktv.download_from_url(args.url)
     else:
         try:
             file = open(args.url, 'r')
@@ -147,7 +147,7 @@ def parse_urls(args):
         for line in file:
             line = line.strip()
             if is_valid_url(line):
-                nrktv.download_from_url(line)
+               nrkdownload.nrktv.download_from_url(line)
             else:
                 LOG.warning("Skipping invalid URL: %s", line)
 
