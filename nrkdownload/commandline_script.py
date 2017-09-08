@@ -2,7 +2,7 @@
 
 import argparse
 import os.path
-
+import platform
 
 # Our own modules
 import nrkdownload
@@ -16,7 +16,9 @@ def main():
                ' This can be changed by using the option -d as described above,'
                ' or you can define the environment variable NRKDOWNLOAD_DIR')
 
-    parser.add_argument('--version', action='version', version='%(prog)s version ' + version)
+    parser.add_argument('--version', action='version',
+                        version='%(prog)s version {}, running under {} with Python {}'.format(
+                            version, platform.system(), platform.python_version()))
     parser.add_argument('-d', metavar='DIRECTORY', action='store',
                         help='The directory where the downloaded files will be placed')
 
