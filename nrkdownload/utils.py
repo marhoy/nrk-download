@@ -3,6 +3,8 @@ from __future__ import unicode_literals
 from __future__ import print_function
 from future.builtins import input
 
+import logging
+
 try:
     # Python 3
     from urllib.parse import urlparse
@@ -14,77 +16,15 @@ import re
 import sys
 import datetime
 
-from . import LOG
 import nrkdownload.nrktv  # We have to do it this way due to circular imports and Python2
+
+# Module wide logger
+LOG = logging.getLogger(__name__)
 
 
 def valid_filename(string):
     filename = re.sub(r'[/\\?<>:*|!"\']', '', string)
     return filename
-
-
-def get_integer_input(max_allowed):
-    while True:
-        try:
-            string = input('\nEnter a number in the range 0-{}. (q to quit): '.format(max_allowed))
-            print(string)
-            index_match = re.match(r'^(\d+)$', string)
-            quit_match = re.match(r'^q$', string.lower())
-            if index_match:
-                index = int(index_match.group(1))
-            elif quit_match:
-                print('OK, quitting program\n')
-                sys.exit(0)
-            else:
-                raise SyntaxError('Syntax not allowed')
-
-            if index > max_allowed:
-                raise ValueError('Value is too high')
-
-        except Exception as e:
-            # An exception was generated above
-            print('Sorry, not a valid input: {}\n'.format(e))
-            continue
-        else:
-            # No exception generated above, we're done
-            break
-    return index
-
-
-def get_slice_input(num_elements):
-    while True:
-        try:
-            string = input('\nEnter a number or interval (e.g. 8 or 5-10). (q to quit): ')
-            slice_match = re.match(r'^(\d*)[:-](\d*)$', string)
-            index_match = re.match(r'^(\d+)$', string)
-            quit_match = re.match(r'^q$', string.lower())
-            if slice_match:
-                slice_min = int(slice_match.group(1) or 0)
-                slice_max = int(slice_match.group(2) or num_elements - 1)
-            elif index_match:
-                slice_min = int(index_match.group(1))
-                slice_max = slice_min
-            elif quit_match:
-                print('OK, quitting program\n')
-                sys.exit(0)
-            else:
-                raise SyntaxError('Syntax not allowed')
-
-            # Check the values of the ints
-            if slice_min > slice_max:
-                raise ValueError('Max is not larger than min')
-            if slice_max >= num_elements or slice_min > num_elements - 1:
-                raise ValueError('Value is too high')
-
-        except Exception as e:
-            # An exception was generated above
-            print('Sorry, not a valid input: {}\n'.format(e))
-            continue
-        else:
-            # No exception generated above, we're done
-            break
-
-    return slice(slice_min, slice_max + 1)
 
 
 def get_image_url(image_id):
