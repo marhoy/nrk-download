@@ -3,10 +3,7 @@ import os
 import sys
 import logging
 
-
-# from .constants import DOWNLOAD_DIR
-# from .nrktv import search_from_cmdline
-# from .utils import parse_urls
+from . import nrktv
 
 # Before we continue, make sure that ffmpeg is available
 try:
@@ -18,9 +15,5 @@ except OSError as exception:
     sys.exit(1)
 
 # Set up package-wide logging configuration
-# logging.basicConfig(format='%(levelname)s: %(message)s', level=logging.WARNING)
 logging.basicConfig(format='[%(levelname)s] %(name)s(%(lineno)s): %(message)s',
                     level=logging.WARNING)
-
-# This is where the files end up
-DOWNLOAD_DIR = os.getenv('NRKDOWNLOAD_DIR', os.path.expanduser('~/Downloads/nrkdownload'))

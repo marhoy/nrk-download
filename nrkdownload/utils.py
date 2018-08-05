@@ -27,7 +27,7 @@ def valid_filename(string):
     return filename
 
 
-def get_image_url(image_id):
+def create_image_url(image_id):
     return 'http://m.nrk.no/m/img?kaleidoId={}&width={}'.format(image_id, 960)
 
 

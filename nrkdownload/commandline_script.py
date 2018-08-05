@@ -8,10 +8,10 @@ import re
 import sys
 
 # Our own modules
-import nrkdownload
 from . import version
 from . import nrktv
 from . import utils
+from . import config
 
 LOG = logging.getLogger(__name__)
 
@@ -45,14 +45,12 @@ def main():
     # Possibly change logging level of the top-level logger
     if arguments.verbose:
         if arguments.verbose == 1:
-            LOG.setLevel(logging.INFO)
+            logging.getLogger().setLevel(logging.INFO)
         if arguments.verbose >= 2:
-            LOG.setLevel(logging.DEBUG)
-
-    LOG.debug("Verbosity is %d", LOG.getEffectiveLevel())
+            logging.getLogger().setLevel(logging.DEBUG)
 
     if arguments.d:
-        nrkdownload.DOWNLOAD_DIR = os.path.expanduser(arguments.d)
+        config.DOWNLOAD_DIR = os.path.expanduser(arguments.d)
 
     if arguments.series or arguments.program:
         search_from_cmdline(arguments)

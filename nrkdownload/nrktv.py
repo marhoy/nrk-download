@@ -25,7 +25,7 @@ except ImportError:
 
 # Our own modules
 from . import utils
-import nrkdownload
+from . import config
 
 # Module wide logger
 LOG = logging.getLogger(__name__)
@@ -40,45 +40,31 @@ NRK_PS_API = 'http://v8.psapi.nrk.no'
 SESSION = requests.Session()
 SESSION.headers['app-version-android'] = '999'
 
-from . import DOWNLOAD_DIR
-LOG.debug("Download dir is %s", DOWNLOAD_DIR)
-
-
-def new_program_from_json(json):
-    title = re.sub(r'\s+', ' ', json['title'])
-    program_id = json['programId'].lower()
-    description = json['description']
-    image_url = utils.get_image_url(json['imageId'])
-    series_id = json.get('seriesId', None)
-    episode_number_or_date = json.get('episodeNumberOrDate', None)
-    episode_title = json.get('episodeTitle', None)
-
-    program = Program(title=title, program_id=program_id, description=description, image_url=image_url,
-                      series_id=series_id, episode_number_or_date=episode_number_or_date, episode_title=episode_title)
-    return program
-
 
 class Program:
-    def __init__(self, title, program_id, description, image_url, series_id=None, episode_number_or_date=None, episode_title=None):
-        LOG.debug('Creating new Program: %s : %s', title, program_id)
+    def __init__(self, title, program_id, description, image_url,
+                 series_id=None, episode_number_or_date=None, episode_title=None):
+        LOG.info('Creating new Program: %s : %s', title, program_id)
+
         self.programId = program_id
         self.title = title
         self.description = description
         self.image_url = image_url
-        self.seriesId = series_id
-        self.episodeNumberOrDate = episode_number_or_date
-        self.episodeTitle = episode_title
-        self.isAvailable = False
+        self.series_id = series_id
+        self.episode_number_or_date = episode_number_or_date
+        self.episode_title = episode_title
+        self.is_available = False
         self.hasSubtitles = False
         self.mediaUrl = None
         self.subtitleUrl = None
         self.filename = ''
         self.duration = datetime.timedelta()
 
-        if self.seriesId and self.seriesId not in Series.known_series.keys():
+        if self.series_id and self.series_id not in config.KNOWN_SERIES.keys():
             # This is an episode from a series we haven't seem yet
-            LOG.debug('Program %s is from an unknown series %s', self.programId, self.seriesId)
-            Series(self.seriesId)
+            LOG.error('Program %s is from an unknown series %s', self.programId, self.series_id)
+            new_series_from_search_result()
+            Series(self.series_id)
 
     def get_details(self):
         try:
@@ -88,8 +74,9 @@ class Program:
         except Exception as e:
             LOG.error('Could not get program details: %s', e)
             return
-        self.isAvailable = json['isAvailable']
-        if self.isAvailable:
+
+        self.is_available = json['isAvailable']
+        if self.is_available:
             self.mediaUrl = json.get('mediaUrl', None)
             if self.mediaUrl:
                 self.mediaUrl = re.sub(r'\.net/z/', '.net/i/', self.mediaUrl)
@@ -103,12 +90,12 @@ class Program:
         self.make_filename()
 
     def make_filename(self):
-        if self.seriesId:
-            LOG.debug("Making filename for series %s", self.seriesId)
-            series = Series.known_series[self.seriesId]
+        if self.series_id:
+            LOG.debug("Making filename for series %s", self.series_id)
+            series = config.KNOWN_SERIES[self.series_id]
             season_number, episode_number = series.programIds[self.programId]
-            basedir = os.path.join(nrkdownload.DOWNLOAD_DIR, series.dirName,
-                                   series.seasons[season_number].dirName)
+            basedir = os.path.join(config.DOWNLOAD_DIR, series.dir_name,
+                                   series.seasons[season_number].dir_name)
 
             filename = series.title
             filename += ' - S{:02}E{:02}'.format(season_number + 1, episode_number + 1)
@@ -116,26 +103,26 @@ class Program:
             if not self.title.lower().startswith(series.title.lower()):
                 filename += ' - {}'.format(self.title)
 
-            regex_match = re.match('^(\d+):(\d+)$', self.episodeNumberOrDate)
+            regex_match = re.match('^(\d+):(\d+)$', self.episode_number_or_date)
             if regex_match:
                 filename += ' - {}of{}'.format(regex_match.group(1), regex_match.group(2))
             else:
-                filename += ' - {}'.format(self.episodeNumberOrDate)
+                filename += ' - {}'.format(self.episode_number_or_date)
         else:
-            basedir = nrkdownload.DOWNLOAD_DIR
+            basedir = config.DOWNLOAD_DIR
             filename = self.title
 
         self.filename = os.path.join(basedir, utils.valid_filename(filename))
 
     def __str__(self):
-        if self.seriesId:
-            series = Series.known_series[self.seriesId]
+        if self.series_id:
+            series = config.KNOWN_SERIES[self.series_id]
             season_number, episode_number = series.programIds[self.programId]
             string = '{} ({}): {} - {}'.format(
                 series.title,
                 series.seasons[season_number].name,
                 self.title,
-                self.episodeNumberOrDate)
+                self.episode_number_or_date)
             string += ' - S{:02}E{:02}'.format(season_number + 1, episode_number + 1)
         else:
             string = self.title
@@ -143,82 +130,104 @@ class Program:
 
 
 class Season:
-    def __init__(self, idx, json):
-        LOG.info('Creating new season: %s: %s', idx, json['name'])
+    def __init__(self, idx, season_id, name):
+        LOG.info('Creating new season: %s: %s: %s', idx, season_id, name)
 
-        self.id = json['id']
-        self.name = re.sub(r'\s+', ' ', json['name'])
         self.number = idx
+        self.id = season_id
+        self.name = name
         self.episodes = []
-        self.dirName = utils.valid_filename('Season {:02}'.format(self.number + 1))
+        self.dir_name = utils.valid_filename('Season {:02}'.format(self.number + 1))
         if not self.name.startswith('Sesong'):
-            self.dirName = utils.valid_filename(self.dirName + '- {}'.format(self.name))
+            self.dir_name = utils.valid_filename(self.dir_name + '- {}'.format(self.name))
 
     def __str__(self):
-        string = '{}: {} ({} ep)'.format(self.number, self.name, len(self.episodes))
+        string = '{}: {} ({} episoder)'.format(self.number + 1, self.name, len(self.episodes))
         return string
 
 
 class Series:
-    known_series = {}
-
-    def __init__(self, series_id):
+    def __init__(self, series_id, title, description, season_ids, image_url, dir_name):
         LOG.info('Creating new series: %s', series_id)
 
-        # # Register our seriesId. The object is updated later
-        # KNOWN_SERIES[series_id] = self
-
-        try:
-            r = SESSION.get(NRK_TV_MOBIL_API + '/series/' + series_id)
-            r.raise_for_status()
-            json = r.json()
-        except Exception as e:
-            LOG.error('Not able get details for %s: %s', series_id, e)
-            sys.exit(1)
-
-        self.seriesId = series_id
-        self.title = re.sub(r'\s+', ' ', json['title'])
-        self.description = json['description']
-        self.imageUrl = utils.get_image_url(json['imageId'])
-        self.dirName = utils.valid_filename(self.title)
+        self.series_id = series_id
+        self.title = title
+        self.description = description
+        self.image_url = image_url
+        self.dir_name = dir_name
+        self.season_ids = season_ids
         self.seasons = []
         self.seasonId2Idx = {}
         self.programIds = {}
-        self.json = json
 
+        # Update the known series with our instance
+        config.add_to_known_series(self)
+
+    def get_seasons_and_episodes(self):
+        LOG.debug("Downloading detailed info on %s", self.series_id)
+        try:
+            r = SESSION.get(NRK_TV_MOBIL_API + '/series/' + self.series_id)
+            r.raise_for_status()
+            json = r.json()
+        except Exception as e:
+            LOG.error('Not able get details for %s: %s', self.series_id, e)
+            sys.exit(1)
+
+        LOG.debug("Adding seasons to  %s", self.series_id)
+        self.seasons = []
         for idx, season in enumerate(reversed(json['seasonIds'])):
-            self.seasons.append(Season(idx, season))
+            season_name = re.sub(r'\s+', ' ', season['name'])
+            season_id = season['id']
+            self.seasons.append(Season(idx=idx, season_id=season_id, name=season_name))
             self.seasonId2Idx[season['id']] = idx
-        self.get_episodes()
 
-        # # Update the known series with our object
-        # KNOWN_SERIES[series_id] = self
-        self.add_to_known_series(self)
-
-    @classmethod
-    def add_to_known_series(cls, instance):
-        if instance.seriesId not in cls.known_series.keys():
-            cls.known_series[instance.seriesId] = instance
-
-    def get_episodes(self):
-        for item in reversed(self.json['programs']):
+        LOG.debug("Adding episodes to  %s", self.series_id)
+        for item in reversed(json['programs']):
             season_index = self.seasonId2Idx[item['seasonId']]
-            program = new_program_from_json(item)
+            program = new_program_from_search_result(item)
             episode_number = len(self.seasons[season_index].episodes)
             LOG.debug('Series %s: Adding %s to S%d, E%d',
-                      self.seriesId, program.title, season_index, episode_number)
+                      self.series_id, program.title, season_index, episode_number)
             self.programIds[item['programId'].lower()] = (season_index, episode_number)
-            program.make_filename()
+            # program.make_filename()
             self.seasons[season_index].episodes.append(program)
         LOG.debug("In get_episodes, added %d episodes", len(self.programIds.keys()))
 
     def __str__(self):
-        string = '{} : {} Sesong(er)'.format(self.title, len(self.seasons))
+        string = '{} : {} Sesong'.format(self.title, len(self.season_ids))
+        if len(self.season_ids) > 1:
+            string += 'er'
         return string
 
 
-def search(search_string, search_type):
+def new_program_from_search_result(json):
+    program_id = json['programId'].lower()
+    title = re.sub(r'\s+', ' ', json['title'])
+    description = json['description']
+    image_url = utils.create_image_url(json['imageId'])
+    series_id = json.get('seriesId', None)
+    episode_number_or_date = json.get('episodeNumberOrDate', None)
+    episode_title = json.get('episodeTitle', None)
 
+    program = Program(title=title, program_id=program_id, description=description, image_url=image_url,
+                      series_id=series_id, episode_number_or_date=episode_number_or_date, episode_title=episode_title)
+    return program
+
+
+def new_series_from_search_result(json):
+    series_id = json['seriesId'].lower()
+    title = re.sub(r'\s+', ' ', json['title'])
+    description = json['description']
+    season_ids = {season['id'] for season in json['seasons']}
+    image_url = utils.create_image_url(json['imageId'])
+    dir_name = utils.valid_filename(title)
+
+    series = Series(series_id=series_id, title=title, description=description, season_ids=season_ids,
+                    image_url=image_url, dir_name=dir_name)
+    return series
+
+
+def search(search_string, search_type):
     if search_type not in ['series', 'program']:
         LOG.error('Unknown search type: %s', search_type)
 
@@ -236,9 +245,9 @@ def search(search_string, search_type):
         hits = []
     for item in reversed(hits):
         if item['type'] == 'serie' and search_type == 'series':
-            results.append(Series(item['hit']['seriesId']))
+            results.append(new_series_from_search_result(item['hit']))
         elif item['type'] in ['program', 'episode'] and search_type == 'program':
-            results.append(new_program_from_json(item['hit']))
+            results.append(new_program_from_search_result(item['hit']))
         if item['type'] not in ['serie', 'program', 'episode']:
             LOG.warning('Unknown item type: %s', item['type'])
 
@@ -351,6 +360,7 @@ def download_series_metadata(series):
 
 def find_all_episodes(series):
     programs = []
+    series.get_seasons_and_episodes()
     for season in series.seasons:
         for episode in season.episodes:
             programs.append(episode)
@@ -397,12 +407,12 @@ def download_from_url(url):
             json = r.json()
             json['programId'] = program_id
             json['imageId'] = json['image']['id']
-            program = new_program_from_json(json)
+            program = new_program_from_search_result(json)
             program.get_details()
         except Exception as e:
             LOG.error('Could not get program details: %s', e)
             return
-        if program.isAvailable:
+        if program.is_available:
             download_programs([program])
         else:
             LOG.info('Sorry, program not available: %s', program.title)
