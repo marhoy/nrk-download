@@ -34,8 +34,6 @@ NRK_TV_API = 'https://tv.nrk.no'
 NRK_TV_MOBIL_API = 'https://tvapi.nrk.no/v1'
 NRK_PS_API = 'http://v8.psapi.nrk.no'
 
-# KNOWN_SERIES = {}
-
 # Initialize requests session
 SESSION = requests.Session()
 SESSION.headers['app-version-android'] = '999'
@@ -54,17 +52,17 @@ class Program:
         self.episode_number_or_date = episode_number_or_date
         self.episode_title = episode_title
         self.is_available = False
-        self.hasSubtitles = False
-        self.mediaUrl = None
-        self.subtitleUrl = None
-        self.filename = ''
-        self.duration = datetime.timedelta()
+        self.has_subtitles = False
+        self.media_urls = None
+        self.subtitle_urls = None
+        self.filename = None
+        self.duration = None
 
-        if self.series_id and self.series_id not in config.KNOWN_SERIES.keys():
-            # This is an episode from a series we haven't seem yet
-            LOG.error('Program %s is from an unknown series %s', self.programId, self.series_id)
-            new_series_from_search_result()
-            Series(self.series_id)
+        # if self.series_id and self.series_id not in config.KNOWN_SERIES.keys():
+        #     # This is an episode from a series we haven't seem yet
+        #     LOG.error('Program %s is from an unknown series %s', self.programId, self.series_id)
+        #     new_series_from_search_result()
+        #     Series(self.series_id)
 
     def get_details(self):
         try:
@@ -77,13 +75,13 @@ class Program:
 
         self.is_available = json['isAvailable']
         if self.is_available:
-            self.mediaUrl = json.get('mediaUrl', None)
-            if self.mediaUrl:
-                self.mediaUrl = re.sub(r'\.net/z/', '.net/i/', self.mediaUrl)
-                self.mediaUrl = re.sub(r'manifest\.f4m$', 'master.m3u8', self.mediaUrl)
-            self.hasSubtitles = json.get('hasSubtitles', False)
-            if self.hasSubtitles:
-                self.subtitleUrl = unquote(json['mediaAssets'][0]['webVttSubtitlesUrl'])
+            self.media_urls = json.get('media_urls', None)
+            if self.media_urls:
+                self.media_urls = re.sub(r'\.net/z/', '.net/i/', self.media_urls)
+                self.media_urls = re.sub(r'manifest\.f4m$', 'master.m3u8', self.media_urls)
+            self.has_subtitles = json.get('has_subtitles', False)
+            if self.has_subtitles:
+                self.subtitle_urls = unquote(json['mediaAssets'][0]['webVttSubtitlesUrl'])
             self.duration = utils.parse_duration(json['duration'])
 
         # Update the self.filename
