@@ -158,9 +158,9 @@ def ask_for_program_download(programs):
 
     print('Getting program details for your selection of {} programs...'.format(len(programs[selection])))
     programs_to_download = []
-    # TODO: It takes time to call .get_details() sequentially. Should be rewritten to use parallel workers.
+    # TODO: It takes time to call .get_download_details() sequentially. Should be rewritten to use parallel workers.
     for program in programs[selection]:
-        program.get_details()
+        program.get_download_details()
         if program.isAvailable:
             programs_to_download.append(program)
             if program.seriesId:
@@ -168,7 +168,7 @@ def ask_for_program_download(programs):
         else:
             LOG.info('Sorry, program not available: %s', program.title)
 
-    nrktv.download_programs(programs_to_download)
+    nrktv.download_programs_in_parallel(programs_to_download)
 
 
 if __name__ == '__main__':

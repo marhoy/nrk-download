@@ -34,6 +34,10 @@ def create_image_url(image_id):
 def parse_duration(string):
     # PT28M39S : 28m39s
     # PT3H12M41.6S : 3h12m41.6s
+    if not string:
+        LOG.warning('No duration given')
+        return datetime.timedelta()
+
     hours = minutes = seconds = 0
     hours_search = re.search('(\d+)H', string)
     minutes_search = re.search('(\d+)M', string)

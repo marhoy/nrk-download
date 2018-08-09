@@ -6,7 +6,6 @@ DOWNLOAD_DIR = os.getenv('NRKDOWNLOAD_DIR', os.path.expanduser('~/Downloads/nrkd
 # This keeps track of the series we have seen
 KNOWN_SERIES = {}
 
+# What is the maximum string length in the list output when searching?
+MAX_OUTPUT_STRING_LENGTH = 70
 
-def add_to_known_series(instance):
-    if instance.series_id not in KNOWN_SERIES:
-        KNOWN_SERIES[instance.series_id] = instance

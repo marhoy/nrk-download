@@ -44,54 +44,51 @@ class Program:
                  series_id=None, episode_number_or_date=None, episode_title=None):
         LOG.info('Creating new Program: %s : %s', title, program_id)
 
-        self.programId = program_id
+        self.program_id = program_id
         self.title = title
         self.description = description
         self.image_url = image_url
         self.series_id = series_id
         self.episode_number_or_date = episode_number_or_date
         self.episode_title = episode_title
-        self.is_available = False
-        self.has_subtitles = False
         self.media_urls = None
         self.subtitle_urls = None
         self.filename = None
         self.duration = None
 
-        # if self.series_id and self.series_id not in config.KNOWN_SERIES.keys():
-        #     # This is an episode from a series we haven't seem yet
-        #     LOG.error('Program %s is from an unknown series %s', self.programId, self.series_id)
-        #     new_series_from_search_result()
-        #     Series(self.series_id)
-
-    def get_details(self):
+    def get_download_details(self):
         try:
-            r = SESSION.get(NRK_PS_API + '/mediaelement/' + self.programId)
+            r = SESSION.get(NRK_PS_API + '/mediaelement/' + self.program_id)
             r.raise_for_status()
             json = r.json()
         except Exception as e:
             LOG.error('Could not get program details: %s', e)
-            return
+            sys.exit(1)
 
-        self.is_available = json['isAvailable']
-        if self.is_available:
-            self.media_urls = json.get('media_urls', None)
-            if self.media_urls:
-                self.media_urls = re.sub(r'\.net/z/', '.net/i/', self.media_urls)
-                self.media_urls = re.sub(r'manifest\.f4m$', 'master.m3u8', self.media_urls)
-            self.has_subtitles = json.get('has_subtitles', False)
-            if self.has_subtitles:
-                self.subtitle_urls = unquote(json['mediaAssets'][0]['webVttSubtitlesUrl'])
-            self.duration = utils.parse_duration(json['duration'])
+        is_available = json.get('isAvailable', False)
+        self.duration = utils.parse_duration(json.get('duration', None))
 
-        # Update the self.filename
-        self.make_filename()
+        if is_available:
+            self.media_urls = []
+            self.subtitle_urls = []
+            for media in json.get('mediaAssets', None):
+                url = media.get('url', None)
+                url = re.sub(r'\.net/z/', '.net/i/', url)
+                url = re.sub(r'manifest\.f4m$', 'master.m3u8', url)
+                subtitle_url = media.get('webVttSubtitlesUrl', None)
+
+                if url:
+                    self.media_urls.append(url)
+                if subtitle_url:
+                    self.subtitle_urls.append(unquote(subtitle_url))
+        else:
+            LOG.warning("%s is not available for download", self.title)
 
     def make_filename(self):
         if self.series_id:
             LOG.debug("Making filename for series %s", self.series_id)
-            series = config.KNOWN_SERIES[self.series_id]
-            season_number, episode_number = series.programIds[self.programId]
+            series = series_from_series_id(self.series_id)
+            season_number, episode_number = series.get_program_ids()[self.program_id]
             basedir = os.path.join(config.DOWNLOAD_DIR, series.dir_name,
                                    series.seasons[season_number].dir_name)
 
@@ -113,7 +110,7 @@ class Program:
         self.filename = os.path.join(basedir, utils.valid_filename(filename))
 
     def __str__(self):
-        if self.series_id:
+        if False:
             series = config.KNOWN_SERIES[self.series_id]
             season_number, episode_number = series.programIds[self.programId]
             string = '{} ({}): {} - {}'.format(
@@ -124,6 +121,10 @@ class Program:
             string += ' - S{:02}E{:02}'.format(season_number + 1, episode_number + 1)
         else:
             string = self.title
+            if self.episode_number_or_date and not string.endswith(self.episode_number_or_date):
+                string += ': ' + self.episode_number_or_date
+        if len(string) > config.MAX_OUTPUT_STRING_LENGTH:
+            string = string[:config.MAX_OUTPUT_STRING_LENGTH - 3] + '...'
         return string
 
 
@@ -156,10 +157,15 @@ class Series:
         self.season_ids = season_ids
         self.seasons = []
         self.seasonId2Idx = {}
-        self.programIds = {}
+        self.program_ids = {}
 
         # Update the known series with our instance
-        config.add_to_known_series(self)
+        add_to_known_series(self)
+
+    def get_program_ids(self):
+        if not self.program_ids:
+            self.get_seasons_and_episodes()
+        return self.program_ids
 
     def get_seasons_and_episodes(self):
         LOG.debug("Downloading detailed info on %s", self.series_id)
@@ -186,10 +192,9 @@ class Series:
             episode_number = len(self.seasons[season_index].episodes)
             LOG.debug('Series %s: Adding %s to S%d, E%d',
                       self.series_id, program.title, season_index, episode_number)
-            self.programIds[item['programId'].lower()] = (season_index, episode_number)
-            # program.make_filename()
+            self.program_ids[item['programId'].lower()] = (season_index, episode_number)
             self.seasons[season_index].episodes.append(program)
-        LOG.debug("In get_episodes, added %d episodes", len(self.programIds.keys()))
+        LOG.debug("In get_episodes, added %d episodes", len(self.program_ids.keys()))
 
     def __str__(self):
         string = '{} : {} Sesong'.format(self.title, len(self.season_ids))
@@ -225,6 +230,25 @@ def new_series_from_search_result(json):
     return series
 
 
+def series_from_series_id(series_id):
+    if series_id in config.KNOWN_SERIES:
+        return config.KNOWN_SERIES[series_id]
+
+    r = SESSION.get(NRK_TV_MOBIL_API + '/series/' + series_id)
+    r.raise_for_status()
+    json = r.json()
+    json['seasons'] = json['seasonIds']
+
+    series = new_series_from_search_result(json)
+    add_to_known_series(series)
+    return series
+
+
+def add_to_known_series(instance):
+    if instance.series_id not in config.KNOWN_SERIES:
+        config.KNOWN_SERIES[instance.series_id] = instance
+
+
 def search(search_string, search_type):
     if search_type not in ['series', 'program']:
         LOG.error('Unknown search type: %s', search_type)
@@ -254,6 +278,8 @@ def search(search_string, search_type):
 
 def download_worker(args):
     program, program_idx, progress_list = args
+    if not program.filename:
+        program.make_filename()
     program_filename = program.filename
     download_dir = os.path.dirname(program_filename)
     image_filename = program_filename + '.jpg'
@@ -318,6 +344,14 @@ def download_programs(programs):
     total_duration = total_duration - datetime.timedelta(microseconds=total_duration.microseconds)
     print('Ready to download {} programs, with total duration {}'.format(len(programs), total_duration))
 
+
+def download_programs_in_parallel(programs):
+    total_duration = datetime.timedelta()
+    for program in programs:
+        total_duration += program.duration
+    total_duration = total_duration - datetime.timedelta(microseconds=total_duration.microseconds)
+    print('Ready to download {} programs, with total duration {}'.format(len(programs), total_duration))
+
     # Under Python 2.7, we can't use with .. as, .. as:
     pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
     manager = multiprocessing.Manager()
@@ -341,7 +375,7 @@ def download_programs(programs):
 
 
 def download_series_metadata(series):
-    download_dir = os.path.join(nrkdownload.DOWNLOAD_DIR, series.dirName)
+    download_dir = os.path.join(config.DOWNLOAD_DIR, series.dirName)
     image_filename = 'poster.jpg'
     if not os.path.exists(os.path.join(download_dir, image_filename)):
         LOG.info('Downloading image for series %s', series.title)
@@ -389,29 +423,26 @@ def download_from_url(url):
         sys.exit(1)
 
     if series_id:
-        series = Series(series_id)
+        series = series_from_series_id(series_id)
         download_series_metadata(series)
         if not program_id:
             episodes = [ep for season in series.seasons for ep in season.episodes]
-            # TODO: As above, this should be done in parallel
-            for episode in episodes:
-                episode.get_details()
-            download_programs(episodes)
+            download_programs_in_parallel(episodes)
 
     if program_id:
         try:
             r = SESSION.get(NRK_PS_API + '/mediaelement/' + program_id)
             r.raise_for_status()
             json = r.json()
-            json['programId'] = program_id
+            json['program_id'] = program_id
             json['imageId'] = json['image']['id']
             program = new_program_from_search_result(json)
-            program.get_details()
+            program.get_download_details()
         except Exception as e:
             LOG.error('Could not get program details: %s', e)
             return
         if program.is_available:
-            download_programs([program])
+            download_programs_in_parallel([program])
         else:
             LOG.info('Sorry, program not available: %s', program.title)
 
