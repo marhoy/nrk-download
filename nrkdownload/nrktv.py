@@ -445,6 +445,8 @@ def download_from_url(url):
     "https://tv.nrk.no/serie/p3-sjekker-ut/MYNT12000317/sesong-1/episode-3"
     "https://tv.nrk.no/serie/paa-fylla"
 
+    # TODO: Format for episode URL have changed
+
     series_match = re.match(r"/serie/([\w-]+)$", parsed_url.path)
     program_match = re.match(r"/program/(\w+)", parsed_url.path)
     episode_match = re.match(r"/serie/([\w-]+)/(\w+)", parsed_url.path)
