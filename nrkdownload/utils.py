@@ -98,7 +98,7 @@ def parse_urls(args):
 
 def is_valid_url(url):
     parsed_url = urlparse(url)
-    if parsed_url.netloc == "tv.nrk.no" and parsed_url.scheme == 'https' \
+    if parsed_url.netloc in ["tv.nrk.no", "radio.nrk.no"] and parsed_url.scheme == 'https' \
        and parsed_url.path.startswith(('/serie/', '/program/')):
         return True
     else:

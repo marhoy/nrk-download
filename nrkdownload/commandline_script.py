@@ -161,10 +161,11 @@ def ask_for_program_download(programs):
     # TODO: It takes time to call .get_download_details() sequentially. Should be rewritten to use parallel workers.
     for program in programs[selection]:
         program.get_download_details()
-        if program.isAvailable:
+        if program.media_urls:
             programs_to_download.append(program)
-            if program.seriesId:
-                nrktv.download_series_metadata(nrktv.Series.known_series[program.seriesId])
+            if program.series_id:
+                series = nrktv.series_from_series_id(program.series_id)
+                nrktv.download_series_metadata(series)
         else:
             LOG.info('Sorry, program not available: %s', program.title)
 

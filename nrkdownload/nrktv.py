@@ -56,14 +56,16 @@ class Program:
         self.filename = None
         self.duration = None
 
-    def get_download_details(self):
-        try:
-            r = SESSION.get(NRK_PS_API + '/mediaelement/' + self.program_id)
-            r.raise_for_status()
-            json = r.json()
-        except Exception as e:
-            LOG.error('Could not get program details: %s', e)
-            sys.exit(1)
+    def get_download_details(self, json=None):
+
+        if json is None:
+            try:
+                r = SESSION.get(NRK_PS_API + '/mediaelement/' + self.program_id)
+                r.raise_for_status()
+                json = r.json()
+            except Exception as e:
+                LOG.error('Could not get program details: %s', e)
+                sys.exit(1)
 
         is_available = json.get('isAvailable', False)
         self.duration = utils.parse_duration(json.get('duration', None))
@@ -73,20 +75,22 @@ class Program:
             self.subtitle_urls = []
             for media in json.get('mediaAssets', None):
                 url = media.get('url', None)
-                url = re.sub(r'\.net/z/', '.net/i/', url)
-                url = re.sub(r'manifest\.f4m$', 'master.m3u8', url)
                 subtitle_url = media.get('webVttSubtitlesUrl', None)
 
                 if url:
+                    url = re.sub(r'\.net/z/', '.net/i/', url)
+                    url = re.sub(r'manifest\.f4m$', 'master.m3u8', url)
                     self.media_urls.append(url)
                 if subtitle_url:
-                    self.subtitle_urls.append(unquote(subtitle_url))
+                    subtitle_url = unquote(subtitle_url)
+                    subtitle_url = re.sub(r'^https', 'http', subtitle_url)
+                    self.subtitle_urls.append(subtitle_url)
         else:
             LOG.warning("%s is not available for download", self.title)
 
     def make_filename(self):
         if self.series_id:
-            LOG.debug("Making filename for series %s", self.series_id)
+            LOG.debug("Making filename for program %s", self.title)
             series = series_from_series_id(self.series_id)
             season_number, episode_number = series.get_program_ids()[self.program_id]
             basedir = os.path.join(config.DOWNLOAD_DIR, series.dir_name,
@@ -167,17 +171,19 @@ class Series:
             self.get_seasons_and_episodes()
         return self.program_ids
 
-    def get_seasons_and_episodes(self):
-        LOG.debug("Downloading detailed info on %s", self.series_id)
-        try:
-            r = SESSION.get(NRK_TV_MOBIL_API + '/series/' + self.series_id)
-            r.raise_for_status()
-            json = r.json()
-        except Exception as e:
-            LOG.error('Not able get details for %s: %s', self.series_id, e)
-            sys.exit(1)
+    def get_seasons_and_episodes(self, json=None):
 
-        LOG.debug("Adding seasons to  %s", self.series_id)
+        if json is None:
+            LOG.info("Downloading detailed info on %s", self.series_id)
+            try:
+                r = SESSION.get(NRK_TV_MOBIL_API + '/series/' + self.series_id)
+                r.raise_for_status()
+                json = r.json()
+            except Exception as e:
+                LOG.error('Not able get details for %s: %s', self.series_id, e)
+                sys.exit(1)
+
+        LOG.info("Adding seasons to  %s", self.series_id)
         self.seasons = []
         for idx, season in enumerate(reversed(json['seasonIds'])):
             season_name = re.sub(r'\s+', ' ', season['name'])
@@ -185,7 +191,7 @@ class Series:
             self.seasons.append(Season(idx=idx, season_id=season_id, name=season_name))
             self.seasonId2Idx[season['id']] = idx
 
-        LOG.debug("Adding episodes to  %s", self.series_id)
+        LOG.info("Adding episodes to  %s", self.series_id)
         for item in reversed(json['programs']):
             season_index = self.seasonId2Idx[item['seasonId']]
             program = new_program_from_search_result(item)
@@ -234,18 +240,21 @@ def series_from_series_id(series_id):
     if series_id in config.KNOWN_SERIES:
         return config.KNOWN_SERIES[series_id]
 
+    LOG.info("Getting info on unkown series %s", series_id)
     r = SESSION.get(NRK_TV_MOBIL_API + '/series/' + series_id)
     r.raise_for_status()
     json = r.json()
     json['seasons'] = json['seasonIds']
 
     series = new_series_from_search_result(json)
+    series.get_seasons_and_episodes(json=json)
     add_to_known_series(series)
     return series
 
 
 def add_to_known_series(instance):
     if instance.series_id not in config.KNOWN_SERIES:
+        LOG.info("Adding unknown series to global dict: %s", instance.series_id)
         config.KNOWN_SERIES[instance.series_id] = instance
 
 
@@ -303,14 +312,14 @@ def download_worker(args):
     if not os.path.exists(image_filename):
         try:
             LOG.info('Downloading image for %s', program.title)
-            urlretrieve(program.imageUrl, image_filename)
+            urlretrieve(program.image_url, image_filename)
         except Exception as e:
             LOG.warning('Could not download image for program %s: %s', program.title, e)
 
     # Download subtitles
-    if program.hasSubtitles and not os.path.exists(subtitle_file):
+    if program.subtitle_urls and not os.path.exists(subtitle_file):
         LOG.info('Downloading subtitles for %s', program.title)
-        cmd = ['ffmpeg', '-loglevel', '8', '-i', program.subtitleUrl, subtitle_file]
+        cmd = ['ffmpeg', '-loglevel', '8', '-i', program.subtitle_urls[0], subtitle_file]
         try:
             subprocess.call(cmd, stdin=open(os.devnull, 'r'))
         except Exception as e:
@@ -318,23 +327,51 @@ def download_worker(args):
 
     # Download video
     if not os.path.exists(video_filename):
-        cmd = ['ffmpeg', '-loglevel', '8', '-stats', '-i', program.mediaUrl]
-        if os.path.exists(subtitle_file):
-            cmd += ['-i', subtitle_file, '-c:s', 'mov_text', '-metadata:s:s:0', 'language=nor']
-        # cmd += ['-metadata', 'description="{}"'.format(obj.description)]
-        # cmd += ['-metadata', 'track="24"']
-        cmd += ['-c:v', 'copy', '-c:a', 'copy', '-bsf:a', 'aac_adtstoasc', video_filename]
-        try:
-            LOG.info("Starting command: %s", cmd)
-            process = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdin=open(os.devnull, 'r'),
-                                       universal_newlines=True)
-            while process.poll() is None:
-                seconds_downloaded = utils.ffmpeg_seconds_downloaded(process)
-                progress_list[program_idx] = round(seconds_downloaded)
-                time.sleep(0.5)
+
+        # The video might be in several parts
+        output_filenames = []
+        downloaded_seconds = []
+        for media_url_idx, media_url in enumerate(program.media_urls):
+            if len(program.media_urls) > 1:
+                output_filename = program_filename + '-part{}'.format(media_url_idx) + '.m4v'
+            else:
+                output_filename = video_filename
+            downloaded_seconds.append(0)
+
+            cmd = ['ffmpeg', '-loglevel', '8', '-stats', '-i', media_url]
+            if os.path.exists(subtitle_file):
+                cmd += ['-i', subtitle_file, '-c:s', 'mov_text', '-metadata:s:s:0', 'language=nor']
+            # cmd += ['-metadata', 'description="{}"'.format(obj.description)]
+            # cmd += ['-metadata', 'track="24"']
+            cmd += ['-c:v', 'copy', '-c:a', 'copy', '-bsf:a', 'aac_adtstoasc', output_filename]
+            try:
+                LOG.debug("Starting command: %s", ' '.join(cmd))
+                process = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdin=open(os.devnull, 'r'),
+                                           universal_newlines=True)
+                while process.poll() is None:
+                    downloaded_seconds[media_url_idx] = utils.ffmpeg_seconds_downloaded(process)
+                    progress_list[program_idx] = round(sum(downloaded_seconds))
+                    time.sleep(0.5)
+                process.wait()
+                output_filenames.append(output_filename)
+            except Exception as e:
+                LOG.warning('Unable to download program %s:%s : %s', program.title, program.episodeTitle, e)
+
+        # If the program was divided in parts, we need to concatenate them
+        if len(output_filenames) > 1:
+            LOG.info("Concatenating the %d parts of %s", len(output_filenames), program.title)
+            with open(program_filename + '-parts.txt', "w") as file:
+                for output_filename in output_filenames:
+                    file.write("file '" + output_filename + "'\n")
+            cmd = ['ffmpeg', '-f', 'concat', '-safe', '0', '-i', program_filename + '-parts.txt']
+            cmd += ['-c', 'copy', video_filename]
+            process = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdin=open(os.devnull, 'r'), universal_newlines=True)
             process.wait()
-        except Exception as e:
-            LOG.warning('Unable to download program %s:%s : %s', program.title, program.episodeTitle, e)
+
+            # Remove the temporary file list and the -part files
+            os.remove(program_filename + '-parts.txt')
+            for file in output_filenames:
+                os.remove(file)
 
 
 def download_programs(programs):
@@ -348,6 +385,8 @@ def download_programs(programs):
 def download_programs_in_parallel(programs):
     total_duration = datetime.timedelta()
     for program in programs:
+        if program.duration is None:
+            program.get_download_details()
         total_duration += program.duration
     total_duration = total_duration - datetime.timedelta(microseconds=total_duration.microseconds)
     print('Ready to download {} programs, with total duration {}'.format(len(programs), total_duration))
@@ -375,7 +414,7 @@ def download_programs_in_parallel(programs):
 
 
 def download_series_metadata(series):
-    download_dir = os.path.join(config.DOWNLOAD_DIR, series.dirName)
+    download_dir = os.path.join(config.DOWNLOAD_DIR, series.dir_name)
     image_filename = 'poster.jpg'
     if not os.path.exists(os.path.join(download_dir, image_filename)):
         LOG.info('Downloading image for series %s', series.title)
@@ -385,7 +424,7 @@ def download_series_metadata(series):
                 os.makedirs(download_dir)
             except OSError:
                 pass
-            urlretrieve(series.imageUrl, os.path.join(download_dir, image_filename))
+            urlretrieve(series.image_url, os.path.join(download_dir, image_filename))
         except Exception as e:
             LOG.error('Could not download metadata for series %s: %s', series.title, e)
 
@@ -409,6 +448,7 @@ def download_from_url(url):
     series_match = re.match(r"/serie/([\w-]+)$", parsed_url.path)
     program_match = re.match(r"/program/(\w+)", parsed_url.path)
     episode_match = re.match(r"/serie/([\w-]+)/(\w+)", parsed_url.path)
+
     if program_match:
         series_id = None
         program_id = program_match.group(1).lower()
@@ -422,29 +462,34 @@ def download_from_url(url):
         LOG.error("Don't know what to do with URL: %s", url)
         sys.exit(1)
 
-    if series_id:
-        series = series_from_series_id(series_id)
-        download_series_metadata(series)
-        if not program_id:
-            episodes = [ep for season in series.seasons for ep in season.episodes]
-            download_programs_in_parallel(episodes)
-
     if program_id:
         try:
             r = SESSION.get(NRK_PS_API + '/mediaelement/' + program_id)
             r.raise_for_status()
             json = r.json()
-            json['program_id'] = program_id
+            json['programId'] = program_id
             json['imageId'] = json['image']['id']
             program = new_program_from_search_result(json)
-            program.get_download_details()
+            program.get_download_details(json=json)
         except Exception as e:
             LOG.error('Could not get program details: %s', e)
             return
-        if program.is_available:
+
+        if program.media_urls:
             download_programs_in_parallel([program])
         else:
             LOG.info('Sorry, program not available: %s', program.title)
+
+        if program.series_id:
+            series_id = program.series_id
+
+    elif series_id:
+        series = series_from_series_id(series_id)
+        download_series_metadata(series)
+        series.get_seasons_and_episodes()
+        episodes = [ep for season in series.seasons for ep in season.episodes]
+        download_programs_in_parallel(episodes)
+
 
     """
     https://tv.nrk.no/serie/paa-fylla
