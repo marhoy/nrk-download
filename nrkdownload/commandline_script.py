@@ -169,7 +169,7 @@ def ask_for_program_download(programs):
         else:
             LOG.info('Sorry, program not available: %s', program.title)
 
-    nrktv.download_programs_in_parallel(programs_to_download)
+    nrktv.download_programs(programs_to_download)
 
 
 if __name__ == '__main__':

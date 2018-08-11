@@ -377,14 +377,6 @@ def download_worker(args):
 def download_programs(programs):
     total_duration = datetime.timedelta()
     for program in programs:
-        total_duration += program.duration
-    total_duration = total_duration - datetime.timedelta(microseconds=total_duration.microseconds)
-    print('Ready to download {} programs, with total duration {}'.format(len(programs), total_duration))
-
-
-def download_programs_in_parallel(programs):
-    total_duration = datetime.timedelta()
-    for program in programs:
         if program.duration is None:
             program.get_download_details()
         total_duration += program.duration
@@ -478,7 +470,7 @@ def download_from_url(url):
             return
 
         if program.media_urls:
-            download_programs_in_parallel([program])
+            download_programs([program])
         else:
             LOG.info('Sorry, program not available: %s', program.title)
 
@@ -490,7 +482,7 @@ def download_from_url(url):
         download_series_metadata(series)
         series.get_seasons_and_episodes()
         episodes = [ep for season in series.seasons for ep in season.episodes]
-        download_programs_in_parallel(episodes)
+        download_programs(episodes)
 
 
     """
