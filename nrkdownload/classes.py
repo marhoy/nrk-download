@@ -44,6 +44,20 @@ class Program:
     def __init__(self, program_id, title, description, image_url,
                  duration, media_urls, subtitle_urls,
                  series_id=None, episode_number_or_date=None, episode_title=None):
+        """
+        Create a new Program or Episode (part of a series)
+
+        :param program_id:
+        :param title:
+        :param description:
+        :param image_url:
+        :param duration:
+        :param media_urls:
+        :param subtitle_urls:
+        :param series_id:
+        :param episode_number_or_date:
+        :param episode_title:
+        """
         LOG.info('Creating new Program: %s : %s', title, program_id)
 
         self.program_id = program_id
@@ -56,24 +70,34 @@ class Program:
         self.media_urls = media_urls
         self.subtitle_urls = subtitle_urls
         self.duration = duration
+        self._series = series_from_series_id(self.series_id)
         self._season_number = None
         self._episode_number = None
         self._filename = None
 
     @property
     def season_number(self):
+        """
+        Loop over the seasons of the series and find the one which contains our program_id
+
+        :return: Season number: int
+        """
         if not self._season_number:
-            series = series_from_series_id(self.series_id)
-            for i, season in enumerate(series.seasons):
+            for i, season in enumerate(self._series.seasons):
                 if self.program_id in season.episode_ids:
                     self._season_number = i
         return self._season_number
 
     @property
     def episode_number(self):
+        """
+        For our known season number, find our episode number
+
+        :return: Episode number: int
+        """
         if not self._episode_number:
-            series = series_from_series_id(self.series_id)
-            self._episode_number = series.seasons[self.season_number].episode_ids.index(self.program_id)
+            self._episode_number = self._series.seasons[self.season_number].\
+                episode_ids.index(self.program_id)
         return self._episode_number
 
     @property
@@ -90,15 +114,14 @@ class Program:
             # This program is part of a series
             LOG.debug("Making filename for program %s", self.title)
 
-            series = series_from_series_id(self.series_id)
-            basedir = os.path.join(config.DOWNLOAD_DIR, series.dir_name,
-                                   series.seasons[self.season_number].dir_name)
+            basedir = os.path.join(config.DOWNLOAD_DIR, self._series.dir_name,
+                                   self._series.seasons[self.season_number].dir_name)
 
-            filename = series.title
+            filename = self._series.title
             filename += ' - S{:02}E{:02}'.format(self.season_number + 1,
                                                  self.episode_number + 1)
 
-            if not self.title.lower().startswith(series.title.lower()):
+            if not self.title.lower().startswith(self._series.title.lower()):
                 filename += ' - {}'.format(self.title)
 
             regex_match = re.match('^(\d+):(\d+)$', self.episode_number_or_date)
@@ -116,9 +139,8 @@ class Program:
 
     def __str__(self):
         string = ''
-        if self.series_id:
-            series = series_from_series_id(self.series_id)
-            string += "{} - ".format(series.title)
+        if self._series:
+            string += "{} - ".format(self._series.title)
         string += self.title
         if self.episode_number_or_date and not string.endswith(self.episode_number_or_date):
             string += ': ' + self.episode_number_or_date
@@ -236,6 +258,8 @@ def new_program_from_mediaelement_id(mediaelement_id, imagesize=960):
 
 
 def series_from_series_id(series_id, image_size=960):
+    if series_id is None:
+        return None
     if series_id in Series.known_series:
         LOG.info("Returning known series %s", series_id)
         return Series.known_series[series_id]
