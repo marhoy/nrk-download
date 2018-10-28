@@ -3,7 +3,7 @@ import os
 import sys
 import logging
 
-from . import nrktv
+from . import classes
 
 # Before we continue, make sure that ffmpeg is available
 try:

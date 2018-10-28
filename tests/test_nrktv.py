@@ -2,7 +2,7 @@
 
 from __future__ import unicode_literals
 
-import nrkdownload.nrktv as nrktv
+import nrkdownload.classes as nrktv
 
 
 def test_search():

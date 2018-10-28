@@ -16,7 +16,7 @@ import re
 import sys
 import datetime
 
-import nrkdownload.nrktv  # We have to do it this way due to circular imports and Python2
+import nrkdownload.classes  # We have to do it this way due to circular imports and Python2
 
 # Module wide logger
 LOG = logging.getLogger(__name__)
@@ -80,7 +80,7 @@ def ffmpeg_seconds_downloaded(process):
 def parse_urls(args):
 
     if is_valid_url(args.url):
-        nrkdownload.nrktv.download_from_url(args.url)
+        nrkdownload.classes.download_from_url(args.url)
     else:
         try:
             file = open(args.url, 'r')
@@ -91,7 +91,7 @@ def parse_urls(args):
         for line in file:
             line = line.strip()
             if is_valid_url(line):
-               nrkdownload.nrktv.download_from_url(line)
+               nrkdownload.classes.download_from_url(line)
             else:
                 LOG.warning("Skipping invalid URL: %s", line)
 
