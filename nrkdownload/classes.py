@@ -82,6 +82,9 @@ class Program:
 
         :return: Season number: int
         """
+        if not self.series_id:
+            LOG.warning("%s is not part of a series", self.title)
+            return None
         if not self._season_number:
             for i, season in enumerate(self._series.seasons):
                 if self.program_id in season.episode_ids:
@@ -95,6 +98,9 @@ class Program:
 
         :return: Episode number: int
         """
+        if not self.series_id:
+            LOG.warning("%s is not part of a series", self.title)
+            return None
         if not self._episode_number:
             self._episode_number = self._series.seasons[self.season_number].\
                 episode_ids.index(self.program_id)
