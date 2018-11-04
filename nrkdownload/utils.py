@@ -15,8 +15,9 @@ except ImportError:
 import re
 import sys
 import datetime
+import dateutil.parser
 
-import nrkdownload.classes  # We have to do it this way due to circular imports and Python2
+import nrkdownload.tv  # We have to do it this way due to circular imports and Python2
 
 # Module wide logger
 LOG = logging.getLogger(__name__)
@@ -29,6 +30,10 @@ def valid_filename(string):
 
 def create_image_url(image_id):
     return 'http://m.nrk.no/m/img?kaleidoId={}&width={}'.format(image_id, 960)
+
+
+def parse_datetime(string):
+    return dateutil.parser.parse(string)
 
 
 def parse_duration(string):
@@ -80,7 +85,7 @@ def ffmpeg_seconds_downloaded(process):
 def parse_urls(args):
 
     if is_valid_url(args.url):
-        nrkdownload.classes.download_from_url(args.url)
+        nrkdownload.tv.download_from_url(args.url)
     else:
         try:
             file = open(args.url, 'r')
@@ -91,7 +96,7 @@ def parse_urls(args):
         for line in file:
             line = line.strip()
             if is_valid_url(line):
-               nrkdownload.classes.download_from_url(line)
+               nrkdownload.tv.download_from_url(line)
             else:
                 LOG.warning("Skipping invalid URL: %s", line)
 
@@ -103,3 +108,18 @@ def is_valid_url(url):
         return True
     else:
         return False
+
+
+class ClassProperty(property):
+    """
+    Python doesn't have class properties (yet?), but this should do the trick.
+    We need this to keep track of known (previously seen) series.
+    """
+    def __get__(self, obj, obj_type=None):
+        return super(ClassProperty, self).__get__(obj_type)
+
+    def __set__(self, obj, value):
+        super(ClassProperty, self).__set__(type(obj), value)
+
+    def __delete__(self, obj):
+        super(ClassProperty, self).__delete__(type(obj))

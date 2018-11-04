@@ -5,10 +5,10 @@ import sys
 import requests
 try:
     # Python 3
-    from urllib.parse import unquote
+    from urllib.parse import quote, unquote
 except ImportError:
     # Python 2
-    from urllib import unquote
+    from urllib import quote, unquote
 
 from . import config
 
@@ -18,17 +18,17 @@ LOG = logging.getLogger(__name__)
 
 
 def _api_url(path):
+    # This is the Granitt API: Nrk.Programspiller.Backend.WebAPI
+    # http://v8.psapi.nrk.no  Now requires a key
+    granitt_url = 'http://nrkpswebapi2ne.cloudapp.net'
+    # This is the Snapshot API: Nrk.PsApi
+    snapshot_url = 'http://psapi3-webapp-prod-we.azurewebsites.net'
     if path.startswith('/mediaelement'):
-        # This is the Granitt API
-        # AKA Nrk.Programspiller.Backend.WebAPI
-        #
-        # http://v8.psapi.nrk.no  Now requires a key
-        #
-        base_url = 'http://nrkpswebapi2ne.cloudapp.net'
+        base_url = granitt_url
     elif path.startswith('/series'):
-        # This is the Snapshot API
-        # AKA Nrk.PsApi
-        base_url = 'http://psapi3-webapp-prod-we.azurewebsites.net'
+        base_url = snapshot_url
+    elif path.startswith('/podcast'):
+        base_url = snapshot_url
     else:
         LOG.error("No baseurl defined for %s", path)
         sys.exit(1)
@@ -42,7 +42,7 @@ def get_mediaelement(element_id):
     :param element_id: The elementid you want information on
     :return: A dictionary with the JSON information
     """
-    LOG.info("Getting json-data on media element %s", element_id)
+    LOG.debug("Getting json-data on media element %s", element_id)
     r = requests.get(_api_url('/mediaelement/{:s}'.format(element_id)))
     r.raise_for_status()
     json = r.json()
@@ -76,12 +76,11 @@ def get_series(series_id):
     :param series_id: str
     :return: json
     """
-    LOG.info("Getting json-data on series %s", series_id)
+    LOG.debug("Getting json-data on series %s", series_id)
     r = requests.get(_api_url('/series/{:s}'.format(series_id)))
     r.raise_for_status()
     json = r.json()
     json['title'] = re.sub(r'\s+', ' ', json['title'])
-
     return json
 
 
@@ -92,3 +91,28 @@ def get_episode_ids_of_series_season(series_id, season_id):
     json = r.json()
     episode_ids = [episode['id'] for episode in reversed(json)]
     return episode_ids
+
+
+def get_podcast_series(podcast_id):
+    LOG.debug("Getting json-data of podcast series %s", podcast_id)
+    r = requests.get(_api_url("/podcasts/{}".format(podcast_id)))
+    r.raise_for_status()
+    json = r.json()
+    return json
+
+
+def get_podcast_episodes(podcast_id):
+    LOG.debug("Getting json-data for all episodes of podcast %s", podcast_id)
+    params = {'paging.cursor': '1900-01-01T00:00:00Z', 'paging.pageCount': 10000}
+    r = requests.get(_api_url("/podcasts/{}/episodes/".format(podcast_id)), params=params)
+    r.raise_for_status()
+    json = r.json()
+    return json
+
+
+def get_podcast_episode(podcast_id, episode_id):
+    LOG.debug("Getting json-data of podcast series %s: episode %s", episode_id, podcast_id)
+    r = requests.get(_api_url("/podcasts/{}/episodes/{}".format(podcast_id, episode_id)))
+    r.raise_for_status()
+    json = r.json()
+    return json

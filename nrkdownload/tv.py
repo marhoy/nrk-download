@@ -6,6 +6,7 @@ import os.path
 import re
 
 # The urllib has changed from Python 2 to 3, and thus requires some extra handling
+
 try:
     # Python 3
     from urllib.request import urlretrieve
@@ -19,25 +20,10 @@ except ImportError:
 from . import utils
 from . import config
 from . import nrkapi
-
+from .utils import ClassProperty
 
 # Module wide logger
 LOG = logging.getLogger(__name__)
-
-
-class ClassProperty(property):
-    """
-    Python doesn't have class properties (yet?), but this should do the trick.
-    We need this to keep track of known (previously seen) series.
-    """
-    def __get__(self, obj, obj_type=None):
-        return super(ClassProperty, self).__get__(obj_type)
-
-    def __set__(self, obj, value):
-        super(ClassProperty, self).__set__(type(obj), value)
-
-    def __delete__(self, obj):
-        super(ClassProperty, self).__delete__(type(obj))
 
 
 class Program:
@@ -58,7 +44,7 @@ class Program:
         :param episode_number_or_date:
         :param episode_title:
         """
-        LOG.info('Creating new Program: %s : %s', title, program_id)
+        LOG.debug('Creating new Program: %s : %s', title, program_id)
 
         self.program_id = program_id
         self.title = title
@@ -83,7 +69,7 @@ class Program:
         :return: Season number: int
         """
         if not self.series_id:
-            LOG.warning("%s is not part of a series", self.title)
+            LOG.debug("%s is not part of a series", self.title)
             return None
         if not self._season_number:
             for i, season in enumerate(self._series.seasons):
@@ -147,6 +133,8 @@ class Program:
         string = ''
         if self._series:
             string += "{} - ".format(self._series.title)
+        if self.season_number:
+            string += "Sesong {} - ".format(self.season_number + 1)
         string += self.title
         if self.episode_number_or_date and not string.endswith(self.episode_number_or_date):
             string += ': ' + self.episode_number_or_date
@@ -157,7 +145,7 @@ class Program:
 
 class Season:
     def __init__(self, series_id, idx, season_id, name):
-        LOG.info('Creating new season of %s: %s: %s: %s', series_id, idx, season_id, name)
+        LOG.debug('Creating new season of %s: %s: %s: %s', series_id, idx, season_id, name)
         self.series_id = series_id
         self.idx = idx
         self.season_id = season_id
@@ -203,7 +191,7 @@ class Series:
     _known_series = dict()
 
     def __init__(self, series_id, title, description, image_url, seasons):
-        LOG.info('Creating new series: %s', series_id)
+        LOG.debug('Creating new series: %s', series_id)
 
         self.series_id = series_id
         self.title = title
@@ -267,7 +255,7 @@ def series_from_series_id(series_id, image_size=960):
     if series_id is None:
         return None
     if series_id in Series.known_series:
-        LOG.info("Returning known series %s", series_id)
+        LOG.debug("Returning known series %s", series_id)
         return Series.known_series[series_id]
 
     json = nrkapi.get_series(series_id)

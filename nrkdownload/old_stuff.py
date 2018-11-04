@@ -170,3 +170,68 @@ def find_all_episodes(series):
         for episode in season.episodes:
             programs.append(episode)
     return programs
+
+
+# def download_from_url(url):
+#
+#     parsed_url = urlparse(url)
+#
+#     "https://tv.nrk.no/serie/p3-sjekker-ut/MYNT12000317/sesong-1/episode-3"
+#     "https://tv.nrk.no/serie/paa-fylla"
+#
+#     # TODO: Format for episode URL have changed
+#
+#     series_match = re.match(r"/serie/([\w-]+)$", parsed_url.path)
+#     program_match = re.match(r"/program/(\w+)", parsed_url.path)
+#     episode_match = re.match(r"/serie/([\w-]+)/(\w+)", parsed_url.path)
+#
+#     if program_match:
+#         series_id = None
+#         program_id = program_match.group(1).lower()
+#     elif episode_match:
+#         series_id = episode_match.group(1)
+#         program_id = episode_match.group(2).lower()
+#     elif series_match:
+#         series_id = series_match.group(1)
+#         program_id = None
+#     else:
+#         LOG.error("Don't know what to do with URL: %s", url)
+#         sys.exit(1)
+#
+#     if program_id:
+#         try:
+#             r = SESSION.get(NRK_PS_API + '/mediaelement/' + program_id)
+#             r.raise_for_status()
+#             json = r.json()
+#             json['programId'] = program_id
+#             json['imageId'] = json['image']['id']
+#             program = new_program_from_search_result(json)
+#             program.get_download_details(json=json)
+#         except Exception as e:
+#             LOG.error('Could not get program details: %s', e)
+#             return
+#
+#         if program.media_urls:
+#             download_programs([program])
+#         else:
+#             LOG.info('Sorry, program not available: %s', program.title)
+#
+#         if program.series_id:
+#             series_id = program.series_id
+#
+#     elif series_id:
+#         series = series_from_series_id(series_id)
+#         download_series_metadata(series)
+#         series.get_seasons_and_episodes()
+#         episodes = [ep for season in series.seasons for ep in season.episodes]
+#         download_programs(episodes)
+#
+#
+#     """
+#     https://tv.nrk.no/serie/paa-fylla
+#     https://tv.nrk.no/serie/trygdekontoret/MUHH48000516/sesong-12/episode-5
+#     https://tv.nrk.no/serie/trygdekontoret
+#     https://tv.nrk.no/program/KOIF42005206/the-queen
+#     https://tv.nrk.no/program/KOID20001217/geert-wilders-nederlands-hoeyrenasjonalist
+#     https://tv.nrk.no/program/KOID76002309/the-act-of-killing
+#     """

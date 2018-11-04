@@ -9,7 +9,7 @@ import sys
 
 # Our own modules
 from . import version
-from . import classes
+from . import tv
 from . import utils
 from . import config
 
@@ -61,22 +61,22 @@ def main():
 
 def search_from_cmdline(args):
     if args.series:
-        matching_series = classes.search(args.series, 'series')
+        matching_series = tv.search(args.series, 'series')
         if len(matching_series) == 1:
             print('\nOnly one matching series: {}'.format(matching_series[0].title))
-            programs = classes.find_all_episodes(matching_series[0])
+            programs = tv.find_all_episodes(matching_series[0])
             ask_for_program_download(programs)
         elif len(matching_series) > 1:
             print('\nMatching series:')
             for i, s in enumerate(matching_series):
                 print('{:2}: {}'.format(i, s))
             index = get_integer_input(len(matching_series) - 1)
-            programs = classes.find_all_episodes(matching_series[index])
+            programs = tv.find_all_episodes(matching_series[index])
             ask_for_program_download(programs)
         else:
             print('Sorry, no matching series')
     elif args.program:
-        programs = classes.search(args.program, 'program')
+        programs = tv.search(args.program, 'program')
         if programs:
             ask_for_program_download(programs)
         else:
@@ -164,12 +164,12 @@ def ask_for_program_download(programs):
         if program.media_urls:
             programs_to_download.append(program)
             if program.series_id:
-                series = classes.series_from_series_id(program.series_id)
-                classes.download_series_metadata(series)
+                series = tv.series_from_series_id(program.series_id)
+                tv.download_series_metadata(series)
         else:
             LOG.info('Sorry, program not available: %s', program.title)
 
-    classes.download_programs(programs_to_download)
+    tv.download_programs(programs_to_download)
 
 
 if __name__ == '__main__':
