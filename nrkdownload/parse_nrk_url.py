@@ -12,7 +12,7 @@ except ImportError:
     from urlparse import urlparse
 
 from . import tv
-
+from . import radio
 
 # Module wide logger
 LOG = logging.getLogger(__name__)
@@ -121,8 +121,18 @@ def parse_url(url):
         return [program]
 
     if podcast_episode_match:
-        return ["Podcast episode {} of podcast {}".format(podcast_episode_match.group(2),
-                                                          podcast_episode_match.group(1))]
+        # This matches a specific episode of a podcast
+        #   https://radio.nrk.no/podkast/saann_er_du/nrkno-poddkast-25555-141668-15092018140000
+        podcast_id = podcast_episode_match.group(1)
+        episode_id = podcast_episode_match.group(2)
+        episode = radio.episode_from_episode_id(podcast_id, episode_id)
+        LOG.info("URL mathces episode %s of podcast %s", episode_id, podcast_id)
+        return [episode]
 
     if podcast_match:
-        return ["Podcast {}".format(podcast_match.group(1))]
+        # This matches a whole podcast, with many episodes
+        #   https://radio.nrk.no/podkast/saann_er_du/
+        podcast_id = podcast_match.group(1)
+        podcast = radio.podcast_from_podcast_id(podcast_id)
+        LOG.info("URL mathces podcast %s", podcast_id)
+        return podcast.episodes

@@ -2,10 +2,12 @@
 from __future__ import unicode_literals
 
 import logging
+import os.path
 
 # Our own modules
 from . import nrkapi
 from . import utils
+from . import config
 
 # Module wide logger
 LOG = logging.getLogger(__name__)
@@ -21,6 +23,7 @@ class Podcast:
         self.subtitle = subtitle
         self.image_url = image_url
         self._episodes = None
+        self.dir_name = utils.valid_filename(self.title)
 
         # Add our instance to dict with known podcasts
         self.add_known_podcast(podcast_id, self)
@@ -62,6 +65,13 @@ class PodcastEpisode:
     def episode_number(self):
         episode_ids = [episode.episode_id for episode in self.podcast.episodes]
         return episode_ids.index(self.episode_id)
+
+    @property
+    def filename(self):
+        basedir = os.path.join(config.DOWNLOAD_DIR, self.podcast.dir_name)
+        file = utils.valid_filename(self.__str__())
+        string = os.path.join(basedir, file)
+        return string
 
     def __str__(self):
         string = "{} - Episode {} ({}): {}".format(self.podcast.title,
