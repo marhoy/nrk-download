@@ -235,3 +235,31 @@ def find_all_episodes(series):
 #     https://tv.nrk.no/program/KOID20001217/geert-wilders-nederlands-hoeyrenasjonalist
 #     https://tv.nrk.no/program/KOID76002309/the-act-of-killing
 #     """
+
+
+def search_from_cmdline(args):
+    if args.series:
+        matching_series = tv.search(args.series, 'series')
+        if len(matching_series) == 1:
+            print('\nOnly one matching series: {}'.format(matching_series[0].title))
+            programs = tv.find_all_episodes(matching_series[0])
+            ask_for_program_download(programs)
+        elif len(matching_series) > 1:
+            print('\nMatching series:')
+            for i, s in enumerate(matching_series):
+                print('{:2}: {}'.format(i, s))
+            index = get_integer_input(len(matching_series) - 1)
+            programs = tv.find_all_episodes(matching_series[index])
+            ask_for_program_download(programs)
+        else:
+            print('Sorry, no matching series')
+    elif args.program:
+        programs = tv.search(args.program, 'program')
+        if programs:
+            ask_for_program_download(programs)
+        else:
+            print('Sorry, no matching programs')
+    else:
+        LOG.error('Unknown state, not sure what to do')
+
+

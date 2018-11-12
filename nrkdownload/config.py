@@ -9,3 +9,5 @@ DOWNLOAD_DIR = os.getenv('NRKDOWNLOAD_DIR', os.path.expanduser('~/Downloads/nrkd
 # What is the maximum string length in the list output when searching?
 MAX_OUTPUT_STRING_LENGTH = 70
 
+DOWNLOAD_ALL = False
+DOWNLOAD_LAST = False

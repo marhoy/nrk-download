@@ -31,14 +31,15 @@ def main():
     parser.add_argument('-v', '--verbose', action='count',
                         help="Increase verbosity. Can be repeated up to two times.")
 
-    mutex = parser.add_mutually_exclusive_group(required=True)
-    mutex.add_argument('-p', '--program',
-                       help="Search for a program that matches the string PROGRAM. Interactive download.")
-    mutex.add_argument('-s', '--series',
-                       help="Search for a series that matches the string SERIES. Interactive download")
-    mutex.add_argument('-u', '--url',
-                       help="Download whatever is specified by URLs, no questions asked. "
-                            "URLs can be copied from https://tv.nrk.no/")
+    mutex = parser.add_mutually_exclusive_group()
+    mutex.add_argument('-a', '--all', action='store_true',
+                       help="If URL matches several episodes: Download all episodes without asking.")
+    mutex.add_argument('-l', '--last', action='store_true',
+                       help="If URL matches several episodes: Download the latest without asking.")
+
+    parser.add_argument('URL', nargs='+',
+                        help="Specify download source(s). Browse https://tv.nrk.no/ or https://radio.nrk.no/ and copy"
+                             " the URL. The URL can point to a whole series, or just one episode.")
 
     arguments = parser.parse_args()
 
@@ -52,37 +53,14 @@ def main():
     if arguments.d:
         config.DOWNLOAD_DIR = os.path.expanduser(arguments.d)
 
-    if arguments.series or arguments.program:
-        search_from_cmdline(arguments)
+    if arguments.all:
+        config.DOWNLOAD_ALL = True
 
-    if arguments.url:
-        utils.parse_urls(arguments)
+    if arguments.last:
+        config.DOWNLOAD_LAST = True
 
-
-def search_from_cmdline(args):
-    if args.series:
-        matching_series = tv.search(args.series, 'series')
-        if len(matching_series) == 1:
-            print('\nOnly one matching series: {}'.format(matching_series[0].title))
-            programs = tv.find_all_episodes(matching_series[0])
-            ask_for_program_download(programs)
-        elif len(matching_series) > 1:
-            print('\nMatching series:')
-            for i, s in enumerate(matching_series):
-                print('{:2}: {}'.format(i, s))
-            index = get_integer_input(len(matching_series) - 1)
-            programs = tv.find_all_episodes(matching_series[index])
-            ask_for_program_download(programs)
-        else:
-            print('Sorry, no matching series')
-    elif args.program:
-        programs = tv.search(args.program, 'program')
-        if programs:
-            ask_for_program_download(programs)
-        else:
-            print('Sorry, no matching programs')
-    else:
-        LOG.error('Unknown state, not sure what to do')
+    for url in arguments.URL:
+        print(url)
 
 
 def get_integer_input(max_allowed):
