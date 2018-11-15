@@ -3,7 +3,7 @@
 
 As of autumn 2018, NRK has started to require a secret key in the header of the API requests. As far as I know, this is currently the only download-tool that works with the new restrictions.
 
-This is yet another commandline tool to download programs and series from NRK (Norwegian public broadcaster). It is inspired by the already existing tools that you can find on GitHub. The reason I decided to make yet another tool, was that I found the source code of some of the other tools to be difficult to read and understand, and thus difficult to contribute to.
+This is yet another commandline tool to download programs and series from NRK (Norwegian public broadcaster). It supports both TV, Radio and PodCast content.
 
 The tool is written in Python, and is compatible with Python 2.7 and 3.x. It has been tested under both Linux, MacOS and Windows.
 
@@ -36,7 +36,7 @@ SKAM
 ```
 
 # Usage
-Before NRK restricted the API, it was possible to search for content. With the current restrictions, you will need to specify an URL for the content you want to download. Start by browsing https://tv.nrk.no or https://radio.nrk.no until you find what you want. Copy the URL and give it as argument for this tool, either on the command-line or from a file.
+Before NRK restricted the API, it was possible to search for content. With the current restrictions, you will need to specify an URL for the content you want to download: Start by browsing https://tv.nrk.no or https://radio.nrk.no until you find what you want. Copy the URLs and give it as arguments for this tool, either on the command-line or one per line in a file. Files that are already downloaded will be skipped.
 
 ```
 $ nrkdownload -h
@@ -70,7 +70,10 @@ environment variable NRKDOWNLOAD_DIR
 ```
 
 ## Downloading a series
-Let's say you are interested in downloading all the available episodes about the rescue boat "Elias". You would then search for "Elias" on https://tv.nrk.no and end up at a page with the URL https://tv.nrk.no/serie/elias
+Let's say you are interested in downloading all the available episodes about the rescue boat "Elias". You would then search for "Elias" on https://tv.nrk.no and end up at a page with the URL https://tv.nrk.no/serie/elias. This is the URL you want to give as argument to `nrkdownload`.
+
+* If you want to download all available episodes with no questions asked, use the `--all` option.
+* If you want to download only the latest episode, use the `--last` option.
 
 Then, all of the registered episodes will be listed (due to copyright-issues, some of them might not be available for download). You then will be asked to specify what episodes you want to download. You respond to this by typing an integer or a range. The range can be specified in different ways:
 - `5-10` or `5:10`, means all episodes from 5 to 10, including both 5 and 10.
