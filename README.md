@@ -1,16 +1,14 @@
 # nrkdownload
 ![Supports python 2.7, 3.3, 3.4, 3.5, 3.6](https://img.shields.io/badge/python-2.7%2C%203.3%2C%203.4%2C%203.5%2C%203.6-brightgreen.svg "Supported Python versions")
 
-As of autumn 2018, NRK has started to require a secret key in the header of the API requests. As far as I know, this is currently the only download-tool that works even after these restrictions.
+This is a commandline tool to download programs and series from NRK (Norwegian public broadcaster). It supports both TV, Radio and PodCast content. The tool is written in Python, and is compatible with Python 2.7 and 3.x. It has been tested under both Linux, Mac OS X and Windows.
 
-This is yet another commandline tool to download programs and series from NRK (Norwegian public broadcaster). It supports both TV, Radio and PodCast content.
-
-The tool is written in Python, and is compatible with Python 2.7 and 3.x. It has been tested under both Linux, MacOS and Windows.
+As of autumn 2018, NRK has started to require a secret key in the header of the API requests. As far as I know, this is currently the only download-tool that works even after these restrictions. There is also geo-restrictions on some of the content, so some content might not be available outside Norway.
 
 ## How is this tools different than others?
 When you download a program with this tool, it doesn't just download that file. If the program is part of a series, directories for that series and season is created. And the file is automatically named according to its episode and season number. Subtitles and additional images are also automatically downloaded. The subtitles are automatically embedded in the .m4v-file, so you could decide to delete the .srt-file. (I have found that in some tools (like VLC), the support for included subtitles is not perfect. That's why the separate .srt-file is also there.)
 
-The idea behind this is that the downloaded programs should integrate seamlessly into you favorite media server, e.g. [Plex](http://www.plex.tv). If you for example download all the episodes of the very popular series SKAM, you would get a directory-structure like this: 
+The idea behind all of this is that the downloaded programs should integrate seamlessly into you favorite media server, e.g. [Plex](http://www.plex.tv). If you for example download all the episodes of the popular series SKAM, you would get a directory-structure like this: 
 
 ```
 SKAM
@@ -143,21 +141,23 @@ If you don't specify anything, the files and directories will be created inside 
 
 If you do both at the same time, the option from the command line will take precedence.
 
-If you don't know how to define an environment variable under your operating system, try to Google `create environment variable` and the name of you operating system. (Under Linux and MacOS, you would want to edit your `~/.bash_profile`)
+If you don't know how to define an environment variable under your operating system, try to Google `create environment variable` and the name of you operating system. (Under Linux and macOS, you would want to edit your `~/.bash_profile`)
 
 # Installing
 The nrkdownload package and its requirements can be installed in several ways, depending on whether you want to just use it or whether you want to change the code. And since it is compatible with both Python 2 and 3, you can decide under what version of Python you want to run it.
 
 ## All operating systems
+This tool is compatible with both Python 2 and 3. But unless you have other reasons to use Python 2, I will encourage you to use the latest version of Python 3.x.
+
 In general, you should try to avoid installing python packages as root (Administrator), and keep your global Python-installation clean (and under control of you OS package manager (like rpm or deb)). This can be achieved in several ways:
 
 1. Install Python packages under your own home-directory by passing the `--user` option to the `pip` installer.
 2. Install your own user-specific Python distribution, where you can later install packages. [Anaconda](https://www.continuum.io/downloads) is a good choice. It also has good support for environments (see next).
-3. Create a virtual environment using [standard Python](https://docs.python.org/3/tutorial/venv.html) or [conda](https://conda.io/docs/using/envs.html) (used by Anaconda) and install packages in there.
+3. Create a virtual environment using [standard Python](https://docs.python.org/3/tutorial/venv.html) or [conda](https://conda.io/docs/using/envs.html) (used by Anaconda) and install packages in that environment.
 
 
 ## Special considerations for MacOS (OS X)
-MacOS comes by default with an installation of Python 2.7. You can decide to go with this (i.e. not installing Anaconda as mentioned above). In order to install packages you need the package installer `pip`, and under MacOS `pip` is not installed by default. You can install it by typing `sudo easy_install pip`. In order to utilize the `--user` scheme described above, you must also add `~/Library/Python/2.7/bin` to your $PATH (edit your `~/.bash_profile`). This enables installed Python scripts (like nrkdownload) to be available in the Terminal.
+MacOS comes by default with an installation of Python 2.7. You can decide to go with this (i.e. not installing Anaconda as mentioned above). In order to install packages you need the package installer `pip`, and under macOS `pip` is not installed by default. You can install it by typing `sudo easy_install pip`. In order to utilize the `--user` scheme described above, you must also add `~/Library/Python/2.7/bin` to your $PATH (edit your `~/.bash_profile`). This enables installed Python scripts (like nrkdownload) to be available in the Terminal.
 
 Also, if you get an `UnicodeEncodeError`, add the following line to your  `~/.bash_profile`:
 `export LC_CTYPE=en_US.UTF-8`
