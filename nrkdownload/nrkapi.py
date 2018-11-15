@@ -3,6 +3,8 @@ import logging
 import sys
 
 import requests
+import requests_cache
+
 try:
     # Python 3
     from urllib.parse import quote, unquote
@@ -10,11 +12,12 @@ except ImportError:
     # Python 2
     from urllib import quote, unquote
 
-from . import config
-
 
 # Module wide logger
 LOG = logging.getLogger(__name__)
+
+# Use local, persistent cache for the requests
+requests_cache.install_cache(cache_name='nrk_cache', backend='sqlite', expire_after=600)
 
 
 def _api_url(path):

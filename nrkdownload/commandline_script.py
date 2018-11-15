@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 
 import argparse
+import logging
 import os.path
 import platform
-import logging
 import re
 import sys
 
 # Our own modules
-from . import version
-from . import tv
-from . import utils
 from . import config
+from . import parse_nrk_url
+from . import version
+from . import download
 
 LOG = logging.getLogger(__name__)
 
@@ -37,9 +37,13 @@ def main():
     mutex.add_argument('-l', '--last', action='store_true',
                        help="If URL matches several episodes: Download the latest without asking.")
 
-    parser.add_argument('URL', nargs='+',
+    parser.add_argument('URL', nargs='*',
                         help="Specify download source(s). Browse https://tv.nrk.no/ or https://radio.nrk.no/ and copy"
                              " the URL. The URL can point to a whole series, or just one episode.")
+
+    parser.add_argument('-f', '--file',
+                        help="Specify a file containing URLs, one URL per line. Specifying urls from a file will"
+                              " automatically enable --all and download all episodes from series.")
 
     arguments = parser.parse_args()
 
@@ -53,69 +57,54 @@ def main():
     if arguments.d:
         config.DOWNLOAD_DIR = os.path.expanduser(arguments.d)
 
-    if arguments.all:
-        config.DOWNLOAD_ALL = True
-
-    if arguments.last:
-        config.DOWNLOAD_LAST = True
-
     for url in arguments.URL:
-        print(url)
+        download_url(url, download_all=arguments.all, download_last=arguments.last)
 
-
-def get_integer_input(max_allowed):
-    while True:
-        try:
-            string = input('\nEnter a number in the range 0-{}. (q to quit): '.format(max_allowed))
-            print(string)
-            index_match = re.match(r'^(\d+)$', string)
-            quit_match = re.match(r'^q$', string.lower())
-            if index_match:
-                index = int(index_match.group(1))
-            elif quit_match:
-                print('OK, quitting program\n')
-                sys.exit(0)
-            else:
-                raise SyntaxError('Syntax not allowed')
-
-            if index > max_allowed:
-                raise ValueError('Value is too high')
-
-        except Exception as e:
-            # An exception was generated above
-            print('Sorry, not a valid input: {}\n'.format(e))
-            continue
+    if arguments.file:
+        if os.path.isfile(arguments.file):
+            config.DOWNLOAD_ALL = True
+            with open(arguments.file) as file:
+                for line in file:
+                    url = line.strip()
+                    download_url(url, download_all=arguments.all, download_last=arguments.last)
         else:
-            # No exception generated above, we're done
-            break
-    return index
+            print("{} is not a valid filename".format(arguments.file))
+
+
+def download_url(url, download_all=False, download_last=False):
+    LOG.debug("Looking at %s", url)
+    programs = parse_nrk_url.parse_url(url)
+    if len(programs) > 1:
+        if (download_all is False) and (download_last is False) :
+            programs = ask_for_program_download(programs)
+        elif download_last is True:
+            programs = programs[-1:]
+    for program in programs:
+        print("Will download: ", program)
+        download.download_programs(programs)
 
 
 def get_slice_input(num_elements):
     while True:
         try:
-            string = input('\nEnter a number or interval (e.g. 8 or 5-10). (q to quit): ')
-            slice_match = re.match(r'^(\d*)[:-](\d*)$', string)
-            index_match = re.match(r'^(\d+)$', string)
+            string = input('\nEnter a number or Python-style interval (e.g. 8 or -2: ). (q to quit): ')
+            slice_match = re.match(r'^(-?\d*):(-?\d*)$', string)
+            index_match = re.match(r'^(-?\d+)$', string)
             quit_match = re.match(r'^q$', string.lower())
             if slice_match:
                 slice_min = int(slice_match.group(1) or 0)
-                slice_max = int(slice_match.group(2) or num_elements - 1)
+                slice_max = int(slice_match.group(2) or num_elements)
             elif index_match:
                 slice_min = int(index_match.group(1))
-                slice_max = slice_min
+                if slice_min == -1:
+                    slice_max = None
+                else:
+                    slice_max = slice_min + 1
             elif quit_match:
                 print('OK, quitting program\n')
                 sys.exit(0)
             else:
                 raise SyntaxError('Syntax not allowed')
-
-            # Check the values of the ints
-            if slice_min > slice_max:
-                raise ValueError('Max is not larger than min')
-            if slice_max >= num_elements or slice_min > num_elements - 1:
-                raise ValueError('Value is too high')
-
         except Exception as e:
             # An exception was generated above
             print('Sorry, not a valid input: {}\n'.format(e))
@@ -124,7 +113,9 @@ def get_slice_input(num_elements):
             # No exception generated above, we're done
             break
 
-    return slice(slice_min, slice_max + 1)
+    s = slice(slice_min, slice_max)
+    print(s)
+    return s
 
 
 def ask_for_program_download(programs):
@@ -133,21 +124,35 @@ def ask_for_program_download(programs):
         print('{:2}: {}'.format(i, p))
     selection = get_slice_input(len(programs))
     LOG.debug('You selected %s', selection)
+    return programs[selection]
 
-    print('Getting program details for your selection of {} programs...'.format(len(programs[selection])))
-    programs_to_download = []
-    # TODO: It takes time to call .get_download_details() sequentially. Should be rewritten to use parallel workers.
-    for program in programs[selection]:
-        program.get_download_details()
-        if program.media_urls:
-            programs_to_download.append(program)
-            if program.series_id:
-                series = tv.series_from_series_id(program.series_id)
-                tv.download_series_metadata(series)
-        else:
-            LOG.info('Sorry, program not available: %s', program.title)
 
-    tv.download_programs(programs_to_download)
+# def get_integer_input(max_allowed):
+#     while True:
+#         try:
+#             string = input('\nEnter a number in the range 0-{}. (q to quit): '.format(max_allowed))
+#             print(string)
+#             index_match = re.match(r'^(\d+)$', string)
+#             quit_match = re.match(r'^q$', string.lower())
+#             if index_match:
+#                 index = int(index_match.group(1))
+#             elif quit_match:
+#                 print('OK, quitting program\n')
+#                 sys.exit(0)
+#             else:
+#                 raise SyntaxError('Syntax not allowed')
+#
+#             if index > max_allowed:
+#                 raise ValueError('Value is too high')
+#
+#         except Exception as e:
+#             # An exception was generated above
+#             print('Sorry, not a valid input: {}\n'.format(e))
+#             continue
+#         else:
+#             # No exception generated above, we're done
+#             break
+#     return index
 
 
 if __name__ == '__main__':

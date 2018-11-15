@@ -1,3 +1,27 @@
+import logging
+import multiprocessing
+import os.path
+import subprocess
+import time
+import datetime
+
+import tqdm
+
+try:
+    # Python 3
+    from urllib.request import urlretrieve
+except ImportError:
+    # Python 2
+    from urllib import urlretrieve
+
+from . import utils
+from . import config
+
+
+# Module wide logger
+LOG = logging.getLogger(__name__)
+
+
 def download_worker(args):
     program, program_idx, progress_list = args
     if not program.filename:
