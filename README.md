@@ -1,11 +1,13 @@
 # nrkdownload
 ![Supports python 2.7, 3.3, 3.4, 3.5, 3.6](https://img.shields.io/badge/python-2.7%2C%203.3%2C%203.4%2C%203.5%2C%203.6-brightgreen.svg "Supported Python versions")
 
+As of autumn 2018, NRK has started to require a secret key in the header of the API requests. As far as I know, this is currently the only download-tool that works with the new restrictions.
+
 This is yet another commandline tool to download programs and series from NRK (Norwegian public broadcaster). It is inspired by the already existing tools that you can find on GitHub. The reason I decided to make yet another tool, was that I found the source code of some of the other tools to be difficult to read and understand, and thus difficult to contribute to.
 
 The tool is written in Python, and is compatible with Python 2.7 and 3.x. It has been tested under both Linux, MacOS and Windows.
 
-## What does this tool add?
+## How is this tools different than others?
 When you download a program with this tool, it doesn't just download that file. If the program is part of a series, directories for that series and season is created. And the file is automatically named according to its episode and season number. Subtitles and additional images are also automatically downloaded. The subtitles are automatically embedded in the .m4v-file, so you could decide to delete the .srt-file. (I have found that in some tools (like VLC), the support for included subtitles is not perfect. That's why the separate .srt-file is also there.)
 
 The idea behind this is that the downloaded programs should integrate seamlessly into you favorite media server, e.g. [Plex](http://www.plex.tv). If you for example download all the episodes of the very popular series SKAM, you would get a directory-structure like this: 
@@ -34,37 +36,41 @@ SKAM
 ```
 
 # Usage
-There are two ways do download things:
-1. You can interactively search for content. You have to specify whether you are searching for a particular program, or if you are searching for a series. You will go through a selection process in order to identify what is to be downloaded.
-1. You can specify an URL that identifies the content that you want to dowload. The URL is typically copied from https://tv.nrk.no/. In this case, the download starts with no questions asked.
+Before NRK restricted the API, it was possible to search for content. With the current restrictions, you will need to specify an URL for the content you want to download. Start by browsing https://tv.nrk.no or https://radio.nrk.no until you find what you want. Copy the URL and give it as argument for this tool, either on the command-line or from a file.
+
 ```
 $ nrkdownload -h
-usage: nrkdownload [-h] [--version] [-d DIRECTORY]
-                   (-p PROGRAM | -s SERIES | -u URL)
+usage: nrkdownload [-h] [--version] [-d DIRECTORY] [-v] [-a | -l] [-f FILE]
+                   [URL [URL ...]]
 
 Download series or programs from NRK, complete with images and subtitles.
+
+positional arguments:
+  URL                   Specify download source(s). Browse https://tv.nrk.no/
+                        or https://radio.nrk.no/ and copy the URL. The URL can
+                        point to a whole series, or just one episode.
 
 optional arguments:
   -h, --help            show this help message and exit
   --version             show program's version number and exit
   -d DIRECTORY          The directory where the downloaded files will be
                         placed
-  -p PROGRAM, --program PROGRAM
-                        Search for a program that matches the string PROGRAM.
-                        Interactive download.
-  -s SERIES, --series SERIES
-                        Search for a series that matches the string SERIES.
-                        Interactive download
-  -u URL, --url URL     Download whatever is specified by URLs, no questions
-                        asked. URLs can be copied from https://tv.nrk.no/
+  -v, --verbose         Increase verbosity. Can be repeated up to two times.
+  -a, --all             If URL matches several episodes: Download all episodes
+                        without asking.
+  -l, --last            If URL matches several episodes: Download the latest
+                        without asking.
+  -f FILE, --file FILE  Specify a file containing URLs, one URL per line.
+                        Specifying urls from a file will automatically enable
+                        --all and download all episodes from series.
 
 The files are by default downloaded to ~/Downloads/nrkdownload. This can be
 changed by using the option -d as described above, or you can define the
 environment variable NRKDOWNLOAD_DIR
 ```
 
-## Searching for a series
-Let's say you are interested in downloading all the available episodes about the rescue boat "Elias". You would then use the flag `-s` to specify that you are searching for a series with the name Elias. If there is more than one matching series, you will be asked to specify which one of them you want. You respond to this by typing an integer and pressing Enter. If there is only one matching series, it skips directly to the next step:
+## Downloading a series
+Let's say you are interested in downloading all the available episodes about the rescue boat "Elias". You would then search for "Elias" on https://tv.nrk.no and end up at a page with the URL https://tv.nrk.no/serie/elias
 
 Then, all of the registered episodes will be listed (due to copyright-issues, some of them might not be available for download). You then will be asked to specify what episodes you want to download. You respond to this by typing an integer or a range. The range can be specified in different ways:
 - `5-10` or `5:10`, means all episodes from 5 to 10, including both 5 and 10.
