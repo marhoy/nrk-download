@@ -1,7 +1,7 @@
 # nrkdownload
 ![Supports python 2.7, 3.3, 3.4, 3.5, 3.6](https://img.shields.io/badge/python-2.7%2C%203.3%2C%203.4%2C%203.5%2C%203.6-brightgreen.svg "Supported Python versions")
 
-As of autumn 2018, NRK has started to require a secret key in the header of the API requests. As far as I know, this is currently the only download-tool that works with the new restrictions.
+As of autumn 2018, NRK has started to require a secret key in the header of the API requests. As far as I know, this is currently the only download-tool that works even after these restrictions.
 
 This is yet another commandline tool to download programs and series from NRK (Norwegian public broadcaster). It supports both TV, Radio and PodCast content.
 
