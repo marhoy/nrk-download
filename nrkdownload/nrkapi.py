@@ -1,7 +1,8 @@
-import re
 import logging
+import re
 import sys
 
+import pkg_resources
 import requests
 import requests_cache
 
@@ -16,8 +17,9 @@ except ImportError:
 # Module wide logger
 LOG = logging.getLogger(__name__)
 
-# Use local, persistent cache for the requests
-requests_cache.install_cache(cache_name='nrk_cache', backend='sqlite', expire_after=600)
+# Use a local, persistent cache for the API requests
+cache_file = pkg_resources.resource_filename('nrkdownload', 'data/api_cache')
+requests_cache.install_cache(cache_name=cache_file, backend='sqlite', expire_after=900)
 
 
 def _api_url(path):

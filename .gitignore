@@ -24,6 +24,7 @@ var/
 .installed.cfg
 *.egg
 version.py
+data/*.sqlite
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

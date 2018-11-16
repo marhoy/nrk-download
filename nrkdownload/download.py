@@ -88,7 +88,7 @@ def download_worker(args):
                 while process.poll() is None:
                     downloaded_seconds[media_url_idx] = utils.ffmpeg_seconds_downloaded(process)
                     progress_list[program_idx] = round(sum(downloaded_seconds))
-                    time.sleep(0.5)
+                    time.sleep(1)
                 process.wait()
                 output_filenames.append(output_filename)
             except Exception as e:
@@ -109,6 +109,8 @@ def download_worker(args):
             os.remove(program_filename + '-parts.txt')
             for file in output_filenames:
                 os.remove(file)
+
+    LOG.debug("Finished downloading %s", program)
 
 
 def download_programs(programs):
@@ -133,8 +135,9 @@ def download_programs(programs):
     result = pool.map_async(download_worker, args)
 
     while not result.ready():
+        time.sleep(1)
         LOG.debug('Progress: %s', shared_progress)
-        time.sleep(0.1)
+        LOG.debug("Sum downloaded: %d, pbar.n: %d", sum(shared_progress), progress_bar.n)
         progress_bar.update(sum(shared_progress) - progress_bar.n)
     progress_bar.update(progress_bar.total - progress_bar.n)
     progress_bar.close()

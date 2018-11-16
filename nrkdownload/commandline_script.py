@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import argparse
 import logging
 import os.path
@@ -8,10 +6,10 @@ import re
 import sys
 
 # Our own modules
-from . import config
-from . import parse_nrk_url
-from . import version
-from . import download
+from nrkdownload import config
+from nrkdownload import parse_nrk_url
+from nrkdownload import version
+from nrkdownload import download
 
 LOG = logging.getLogger(__name__)
 
@@ -74,20 +72,32 @@ def main():
 def download_url(url, download_all=False, download_last=False):
     LOG.debug("Looking at %s", url)
     programs = parse_nrk_url.parse_url(url)
+    programs = remove_unavailable_programs(programs)
+    if len(programs) == 0:
+        print("No programs available for download")
+        return
     if len(programs) > 1:
         if (download_all is False) and (download_last is False) :
             programs = ask_for_program_download(programs)
         elif download_last is True:
             programs = programs[-1:]
+    download.download_programs(programs)
+
+
+def remove_unavailable_programs(programs):
+    available_programs = []
     for program in programs:
-        print("Will download: ", program)
-        download.download_programs(programs)
+        if not program.media_urls:
+            print("Not available for download: {}".format(program))
+        else:
+            available_programs.append(program)
+    return available_programs
 
 
 def get_slice_input(num_elements):
     while True:
         try:
-            string = input('\nEnter a number or Python-style interval (e.g. 8 or -2: ). (q to quit): ')
+            string = input('\nEnter a number or Python-style interval (e.g. 8 or -2: or : ). (q to quit): ')
             slice_match = re.match(r'^(-?\d*):(-?\d*)$', string)
             index_match = re.match(r'^(-?\d+)$', string)
             quit_match = re.match(r'^q$', string.lower())
