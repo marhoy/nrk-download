@@ -263,3 +263,30 @@ def search_from_cmdline(args):
         LOG.error('Unknown state, not sure what to do')
 
 
+# def get_integer_input(max_allowed):
+#     while True:
+#         try:
+#             string = input('\nEnter a number in the range 0-{}. (q to quit): '.format(max_allowed))
+#             print(string)
+#             index_match = re.match(r'^(\d+)$', string)
+#             quit_match = re.match(r'^q$', string.lower())
+#             if index_match:
+#                 index = int(index_match.group(1))
+#             elif quit_match:
+#                 print('OK, quitting program\n')
+#                 sys.exit(0)
+#             else:
+#                 raise SyntaxError('Syntax not allowed')
+#
+#             if index > max_allowed:
+#                 raise ValueError('Value is too high')
+#
+#         except Exception as e:
+#             # An exception was generated above
+#             print('Sorry, not a valid input: {}\n'.format(e))
+#             continue
+#         else:
+#             # No exception generated above, we're done
+#             break
+#     return index
+

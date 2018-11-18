@@ -5,6 +5,9 @@ import logging
 
 from . import tv
 
+__all__ = [tv]
+
+
 # Before we continue, make sure that ffmpeg is available
 try:
     subprocess.call(['ffmpeg', '-version'], stdout=open(os.devnull, 'w'))

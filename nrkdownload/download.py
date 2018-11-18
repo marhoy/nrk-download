@@ -92,7 +92,8 @@ def download_worker(args):
                 process.wait()
                 output_filenames.append(output_filename)
             except Exception as e:
-                LOG.warning('Unable to download program %s:%s : %s', program.title, program.episodeTitle, e)
+                LOG.warning('Unable to download program %s:%s : %s',
+                            program.title, program.episodeTitle, e)
 
         # If the program was divided in parts, we need to concatenate them
         if len(output_filenames) > 1:
@@ -102,7 +103,8 @@ def download_worker(args):
                     file.write("file '" + output_filename + "'\n")
             cmd = ['ffmpeg', '-f', 'concat', '-safe', '0', '-i', program_filename + '-parts.txt']
             cmd += ['-c', 'copy', video_filename]
-            process = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdin=open(os.devnull, 'r'), universal_newlines=True)
+            process = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdin=open(os.devnull, 'r'),
+                                       universal_newlines=True)
             process.wait()
 
             # Remove the temporary file list and the -part files
@@ -120,7 +122,8 @@ def download_programs(programs):
             program.get_download_details()
         total_duration += program.duration
     total_duration = total_duration - datetime.timedelta(microseconds=total_duration.microseconds)
-    print('Ready to download {} programs, with total duration {}'.format(len(programs), total_duration))
+    print('Ready to download {} programs, with total duration {}'.format(
+        len(programs), total_duration))
 
     # Under Python 2.7, we can't use with .. as, .. as:
     pool = multiprocessing.Pool(processes=multiprocessing.cpu_count())
@@ -159,5 +162,3 @@ def download_series_metadata(series):
             urlretrieve(series.image_url, os.path.join(download_dir, image_filename))
         except Exception as e:
             LOG.error('Could not download metadata for series %s: %s', series.title, e)
-
-

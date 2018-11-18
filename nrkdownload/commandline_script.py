@@ -31,17 +31,20 @@ def main():
 
     mutex = parser.add_mutually_exclusive_group()
     mutex.add_argument('-a', '--all', action='store_true',
-                       help="If URL matches several episodes: Download all episodes without asking.")
+                       help="If URL matches several episodes: Download all episodes without "
+                            "asking.")
     mutex.add_argument('-l', '--last', action='store_true',
                        help="If URL matches several episodes: Download the latest without asking.")
 
     parser.add_argument('URL', nargs='*',
-                        help="Specify download source(s). Browse https://tv.nrk.no/ or https://radio.nrk.no/ and copy"
-                             " the URL. The URL can point to a whole series, or just one episode.")
+                        help="Specify download source(s). Browse https://tv.nrk.no/ or "
+                             "https://radio.nrk.no/ and copy the URL. The URL can point to a "
+                             "whole series, or just one episode.")
 
     parser.add_argument('-f', '--file',
-                        help="Specify a file containing URLs, one URL per line. Specifying urls from a file will"
-                              " automatically enable --all and download all episodes from series.")
+                        help="Specify a file containing URLs, one URL per line. Specifying urls "
+                             "from a file will automatically enable --all and download all "
+                             "episodes from series.")
 
     arguments = parser.parse_args()
 
@@ -77,7 +80,7 @@ def download_url(url, download_all=False, download_last=False):
         print("No programs available for download")
         return
     if len(programs) > 1:
-        if (download_all is False) and (download_last is False) :
+        if (download_all is False) and (download_last is False):
             programs = ask_for_program_download(programs)
         elif download_last is True:
             programs = programs[-1:]
@@ -97,7 +100,8 @@ def remove_unavailable_programs(programs):
 def get_slice_input(num_elements):
     while True:
         try:
-            string = input('\nEnter a number or Python-style interval (e.g. 8 or -2: or : ). (q to quit): ')
+            string = input("\nEnter a number or Python-style interval (e.g. 8 or -2: or : )."
+                           " (q to quit): ")
             slice_match = re.match(r'^(-?\d*):(-?\d*)$', string)
             index_match = re.match(r'^(-?\d+)$', string)
             quit_match = re.match(r'^q$', string.lower())
@@ -135,34 +139,6 @@ def ask_for_program_download(programs):
     selection = get_slice_input(len(programs))
     LOG.debug('You selected %s', selection)
     return programs[selection]
-
-
-# def get_integer_input(max_allowed):
-#     while True:
-#         try:
-#             string = input('\nEnter a number in the range 0-{}. (q to quit): '.format(max_allowed))
-#             print(string)
-#             index_match = re.match(r'^(\d+)$', string)
-#             quit_match = re.match(r'^q$', string.lower())
-#             if index_match:
-#                 index = int(index_match.group(1))
-#             elif quit_match:
-#                 print('OK, quitting program\n')
-#                 sys.exit(0)
-#             else:
-#                 raise SyntaxError('Syntax not allowed')
-#
-#             if index > max_allowed:
-#                 raise ValueError('Value is too high')
-#
-#         except Exception as e:
-#             # An exception was generated above
-#             print('Sorry, not a valid input: {}\n'.format(e))
-#             continue
-#         else:
-#             # No exception generated above, we're done
-#             break
-#     return index
 
 
 if __name__ == '__main__':

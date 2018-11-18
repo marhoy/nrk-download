@@ -96,7 +96,7 @@ def parse_urls(args):
         for line in file:
             line = line.strip()
             if is_valid_url(line):
-               nrkdownload.tv.download_from_url(line)
+                nrkdownload.tv.download_from_url(line)
             else:
                 LOG.warning("Skipping invalid URL: %s", line)
 
