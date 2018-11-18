@@ -17,12 +17,15 @@ except ImportError:
 # Module wide logger
 LOG = logging.getLogger(__name__)
 
-# Use a local, persistent cache for the API requests
-cache_file = pkg_resources.resource_filename('nrkdownload', 'data/api_cache')
-requests_cache.install_cache(cache_name=cache_file, backend='sqlite', expire_after=900)
-
 
 def _api_url(path):
+    # We need to put this inside a function to delay execution until after import-time
+    from . import config
+    if config.ENABLE_CACHE:
+        # Use a local, persistent cache for the API requests
+        cache_file = pkg_resources.resource_filename('nrkdownload', 'data/api_cache')
+        requests_cache.install_cache(cache_name=cache_file, backend='sqlite', expire_after=900)
+
     # This is the Granitt API: Nrk.Programspiller.Backend.WebAPI
     # http://v8.psapi.nrk.no  Now requires a key
     granitt_url = 'http://nrkpswebapi2ne.cloudapp.net'

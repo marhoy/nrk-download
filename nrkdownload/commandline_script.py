@@ -28,6 +28,8 @@ def main():
                         help='The directory where the downloaded files will be placed')
     parser.add_argument('-v', '--verbose', action='count',
                         help="Increase verbosity. Can be repeated up to two times.")
+    parser.add_argument('-c', '--cache', action='store_true',
+                        help="Enable persistent caching of the API requests.")
 
     mutex = parser.add_mutually_exclusive_group()
     mutex.add_argument('-a', '--all', action='store_true',
@@ -57,6 +59,8 @@ def main():
 
     if arguments.d:
         config.DOWNLOAD_DIR = os.path.expanduser(arguments.d)
+
+    config.ENABLE_CACHE = arguments.cache
 
     for url in arguments.URL:
         download_url(url, download_all=arguments.all, download_last=arguments.last)
