@@ -22,7 +22,7 @@ setup(
     # Version number is automatically extracted from Git
     # https://pypi.python.org/pypi/setuptools_scm
     # https://packaging.python.org/en/latest/single_source_version.html
-    use_scm_version={'write_to': 'nrkdownload/version.py'},
+    use_scm_version={'write_to': 'src/nrkdownload/version.py'},
     setup_requires=['setuptools_scm', 'pypandoc'],
 
     description='Download series or programs from NRK, complete with images and subtitles',
@@ -65,7 +65,7 @@ setup(
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    packages=['nrkdownload'],
+    # packages=['src/nrkdownload'],
 
     # exclude_package_data={'': ['API-testing.ipynb']},
 
