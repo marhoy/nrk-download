@@ -19,7 +19,7 @@ from nrkdownload import download
 LOG = logging.getLogger(__name__)
 
 
-def main():
+def make_parser():
     parser = argparse.ArgumentParser(
         description='Download series or programs from NRK, complete with images and subtitles.',
         epilog='The files are by default downloaded to ~/Downloads/nrkdownload.'
@@ -52,7 +52,12 @@ def main():
                         help="Specify a file containing URLs, one URL per line. Specifying urls "
                              "from a file will automatically enable --all and download all "
                              "episodes from series.")
+    return parser
 
+
+def main():
+
+    parser = make_parser()
     arguments = parser.parse_args()
 
     # Possibly change logging level of the top-level logger
@@ -137,7 +142,6 @@ def get_slice_input(num_elements):
             break
 
     s = slice(slice_min, slice_max)
-    print(s)
     return s
 
 

@@ -44,9 +44,9 @@ def parse_duration(string):
         return datetime.timedelta()
 
     hours = minutes = seconds = 0
-    hours_search = re.search('(\d+)H', string)
-    minutes_search = re.search('(\d+)M', string)
-    seconds_search = re.search('([\d.]+)S', string)
+    hours_search = re.search(r'(\d+)H', string)
+    minutes_search = re.search(r'(\d+)M', string)
+    seconds_search = re.search(r'([\d.]+)S', string)
     if hours_search:
         hours = int(hours_search.group(1))
     if minutes_search:
@@ -68,7 +68,7 @@ def ffmpeg_seconds_downloaded(process):
 
     line = process.stderr.readline()
     if line:
-        time_match = re.search('.+\s+time=([\d:.]+)', line)
+        time_match = re.search(r'.+\s+time=([\d:.]+)', line)
         if time_match:
             downloaded_time_list = time_match.group(1).split(':')
             downloaded_time = datetime.timedelta(hours=int(downloaded_time_list[0]),

@@ -116,7 +116,7 @@ class Program:
             if not self.title.lower().startswith(self._series.title.lower()):
                 filename += ' - {}'.format(self.title)
 
-            regex_match = re.match('^(\d+):(\d+)$', self.episode_number_or_date)
+            regex_match = re.match(r'^(\d+):(\d+)$', self.episode_number_or_date)
             if regex_match:
                 filename += ' - {}of{}'.format(regex_match.group(1), regex_match.group(2))
             else:
