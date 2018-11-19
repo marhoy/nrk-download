@@ -5,7 +5,7 @@ https://packaging.python.org/en/latest/distributing.html
 https://github.com/pypa/sampleproject
 """
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # Possibly convert the README.md to .rst-format
 try:
@@ -66,6 +66,8 @@ setup(
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
     # packages=['src/nrkdownload'],
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
 
     # exclude_package_data={'': ['API-testing.ipynb']},
 
