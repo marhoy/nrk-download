@@ -5,7 +5,7 @@ https://packaging.python.org/en/latest/distributing.html
 https://github.com/pypa/sampleproject
 """
 
-from setuptools import setup
+from setuptools import setup, find_packages
 
 # Possibly convert the README.md to .rst-format
 try:
@@ -22,7 +22,7 @@ setup(
     # Version number is automatically extracted from Git
     # https://pypi.python.org/pypi/setuptools_scm
     # https://packaging.python.org/en/latest/single_source_version.html
-    use_scm_version={'write_to': 'nrkdownload/version.py'},
+    use_scm_version={'write_to': 'src/nrkdownload/version.py'},
     setup_requires=['setuptools_scm', 'pypandoc'],
 
     description='Download series or programs from NRK, complete with images and subtitles',
@@ -65,7 +65,9 @@ setup(
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
-    packages=['nrkdownload'],
+    # packages=['src/nrkdownload'],
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
 
     # exclude_package_data={'': ['API-testing.ipynb']},
 
@@ -73,16 +75,16 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['requests', 'tqdm', 'future'],
+    install_requires=['requests', 'requests_cache', 'tqdm', 'future', 'python-dateutil'],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
     # for example:
     # $ pip install -e .[dev,test]
-    extras_require={
-        'dev': ['pypandoc'],
-        'test': ['coverage'],
-    },
+    # extras_require={
+    #    'dev': ['pypandoc'],
+    #    'test': ['coverage'],
+    #},
 
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow
