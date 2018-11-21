@@ -20,8 +20,8 @@ sys.path.insert(0, os.path.abspath('../src/'))
 # -- Project information -----------------------------------------------------
 
 project = 'nrkdownload'
-copyright = '2018, Martin Høy'
-author = 'Martin Høy'
+copyright = '2018, Martin Hoy'
+author = 'Martin Hoy'
 
 # The short X.Y version
 version = ''
