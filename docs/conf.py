@@ -20,8 +20,8 @@ sys.path.insert(0, os.path.abspath('../src/'))
 # -- Project information -----------------------------------------------------
 
 project = 'nrkdownload'
-copyright = '2018, Martin Hoy'
-author = 'Martin Hoy'
+copyright = u'2018, Martin Høy'
+author = u'Martin Høy'
 
 # The short X.Y version
 version = ''
@@ -136,7 +136,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'nrkdownload.tex', 'nrkdownload Documentation',
-     'Martin Høy', 'manual'),
+     u'Martin Høy', 'manual'),
 ]
 
 
