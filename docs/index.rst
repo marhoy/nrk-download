@@ -1,7 +1,3 @@
-.. nrkdownload documentation master file, created by
-   sphinx-quickstart on Mon Nov 19 18:30:42 2018.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
 
 Welcome to nrkdownload's documentation!
 =======================================
@@ -13,6 +9,7 @@ Welcome to nrkdownload's documentation!
    features
    installing
    usage
+   examples
 
 
 Indices and tables
