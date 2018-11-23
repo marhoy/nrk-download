@@ -77,6 +77,7 @@ target/
 .idea/misc.xml
 .idea/modules.xml
 .idea/nrk-download.iml
+.idea/
 
 # pyenv
 .python-version
