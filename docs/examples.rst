@@ -15,16 +15,17 @@ download. You then will be asked to specify what episodes you want to
 download. You respond to this by typing an integer or a Python-style range.
 Some examples:
 
-4
+``4``
     means the fourth episode.
-:10
+``:10``
     means the 10 first episodes from 0 to 9.
-5:10
+``5:10``
     means the five episodes from 5 to 9.
-10:
+``10:``
     means all episodes from 10 to the last, including both 10 and the last.
-:
+``:``
     means all available episodes.
+
 
 If you want to download all available episodes with no questions asked, use
 the ``--all`` option. Or if you want to download only the latest episode, use
