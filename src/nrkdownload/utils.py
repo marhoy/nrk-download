@@ -7,16 +7,14 @@ import logging
 try:
     # Python 3
     from urllib.parse import urlparse
-except ImportError:
+except ImportError:                                 # pragma: no cover
     # Python 2
     from urlparse import urlparse
 
 import re
-import sys
 import datetime
 import dateutil.parser
 
-import nrkdownload.tv  # We have to do it this way due to circular imports and Python2
 
 # Module wide logger
 LOG = logging.getLogger(__name__)
@@ -79,34 +77,6 @@ def ffmpeg_seconds_downloaded(process):
         #    download_rate = rate_match.group(1)
 
     return downloaded_time.total_seconds()
-
-
-def parse_urls(args):
-
-    if is_valid_url(args.url):
-        nrkdownload.tv.download_from_url(args.url)
-    else:
-        try:
-            file = open(args.url, 'r')
-        except FileNotFoundError:
-            LOG.error("The string %s is neither a valid URL nor a valid filename", args.url)
-            sys.exit(1)
-
-        for line in file:
-            line = line.strip()
-            if is_valid_url(line):
-                nrkdownload.tv.download_from_url(line)
-            else:
-                LOG.warning("Skipping invalid URL: %s", line)
-
-
-def is_valid_url(url):
-    parsed_url = urlparse(url)
-    if parsed_url.netloc in ["tv.nrk.no", "radio.nrk.no"] and parsed_url.scheme == 'https' \
-       and parsed_url.path.startswith(('/serie/', '/program/')):
-        return True
-    else:
-        return False
 
 
 class ClassProperty(property):

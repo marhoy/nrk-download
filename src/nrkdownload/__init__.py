@@ -13,7 +13,7 @@ __version__ = version.version
 # Before we continue, make sure that ffmpeg is available
 try:
     subprocess.call(['ffmpeg', '-version'], stdout=open(os.devnull, 'w'))
-except OSError as exception:
+except OSError as exception:  # pragma: no cover
     print('\nFFmpeg is not installed (or not in PATH):\n  ', exception, '\n')
     print('Please install FFmpeg from https://ffmpeg.org/')
     print('See README on https://github.com/marhoy/nrk-download if you need hints.\n')

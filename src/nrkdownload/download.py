@@ -12,7 +12,7 @@ from . import tv
 try:
     # Python 3
     from urllib.request import urlretrieve
-except ImportError:
+except ImportError:                 # pragma: no cover
     # Python 2
     from urllib import urlretrieve
 

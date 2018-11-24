@@ -10,7 +10,7 @@ import sys
 try:
     # Python 3
     from urllib.parse import quote, unquote
-except ImportError:
+except ImportError:                             # pragma: no cover
     # Python 2
     from urllib import quote, unquote           # noqa: F401
 
