@@ -23,9 +23,24 @@ setup(
     # https://pypi.python.org/pypi/setuptools_scm
     # https://packaging.python.org/en/latest/single_source_version.html
     use_scm_version={'write_to': 'src/nrkdownload/version.py'},
-    setup_requires=['setuptools_scm', 'pypandoc'],
 
-    description='Download series or programs from NRK, complete with images and subtitles',
+    setup_requires=['setuptools_scm', 'pypandoc'],
+    # tests_require=['pytest', 'pytest-cov'],
+
+    # For an analysis of "install_requires" vs pip's requirements files see:
+    # https://packaging.python.org/en/latest/requirements.html
+    install_requires=['requests', 'requests_cache', 'tqdm', 'future', 'python-dateutil'],
+
+    # List additional groups of dependencies here (e.g. development
+    # dependencies). You can install these using the following syntax,
+    # for example:
+    # $ pip install -e .[dev,test]
+    extras_require={
+       'testing': ['pytest', 'pytest-cov', 'pytest-console-scripts'],
+    },
+
+    description='Download series or programs from NRK, '
+                'complete with images and subtitles',
     long_description=README,
 
     # The project's main homepage.
@@ -58,6 +73,7 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
 
     # What does your project relate to?
@@ -70,21 +86,6 @@ setup(
     package_dir={"": "src"},
 
     # exclude_package_data={'': ['API-testing.ipynb']},
-
-    # List run-time dependencies here.  These will be installed by pip when
-    # your project is installed. For an analysis of "install_requires" vs pip's
-    # requirements files see:
-    # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['requests', 'requests_cache', 'tqdm', 'future', 'python-dateutil'],
-
-    # List additional groups of dependencies here (e.g. development
-    # dependencies). You can install these using the following syntax,
-    # for example:
-    # $ pip install -e .[dev,test]
-    # extras_require={
-    #    'dev': ['pypandoc'],
-    #    'test': ['coverage'],
-    #},
 
     # To provide executable scripts, use entry points in preference to the
     # "scripts" keyword. Entry points provide cross-platform support and allow

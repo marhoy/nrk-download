@@ -4,9 +4,11 @@ import sys
 import logging
 
 from . import tv
+from . import version
 
 __all__ = [tv]
 
+__version__ = version.version
 
 # Before we continue, make sure that ffmpeg is available
 try:

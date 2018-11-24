@@ -8,8 +8,8 @@ try:
     from urllib.parse import unquote, urlparse
 except ImportError:
     # Python 2
-    from urllib import unquote, urlretrieve
-    from urlparse import urlparse
+    from urllib import unquote, urlretrieve                 # noqa: F401
+    from urlparse import urlparse                           # noqa: F401
 
 from . import tv
 from . import radio
@@ -108,7 +108,10 @@ def parse_url(url):
         #   https://tv.nrk.no/serie/oppfinneren
         series_id = series_match.group(1)
         series = tv.series_from_series_id(series_id)
-        episodes = [episode for season in series.seasons for episode in season.episodes]
+        episodes = []
+        for season in series.seasons:
+            for episode in season.episodes:
+                episodes.append(episode)
         LOG.info("URL matches series %s", series_id)
         return episodes
 

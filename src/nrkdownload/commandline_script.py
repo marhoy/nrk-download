@@ -1,7 +1,7 @@
 # Python 2 compatibility
-from __future__ import print_function
 from __future__ import unicode_literals
-from builtins import input
+from __future__ import print_function
+from future.builtins import input
 
 import argparse
 import logging
@@ -21,7 +21,8 @@ LOG = logging.getLogger(__name__)
 
 def make_parser():
     parser = argparse.ArgumentParser(
-        description='Download series or programs from NRK, complete with images and subtitles.',
+        description='Download series or programs from NRK, complete with images and'
+                    ' subtitles.',
         epilog='The files are by default downloaded to ~/Downloads/nrkdownload.'
                ' This can be changed by using the option -d as described above,'
                ' or you can define the environment variable NRKDOWNLOAD_DIR')
@@ -38,20 +39,21 @@ def make_parser():
 
     mutex = parser.add_mutually_exclusive_group()
     mutex.add_argument('-a', '--all', action='store_true',
-                       help="If URL matches several episodes: Download all episodes without "
-                            "asking.")
+                       help="If URL matches several episodes: Download all episodes"
+                            " without asking.")
     mutex.add_argument('-l', '--last', action='store_true',
-                       help="If URL matches several episodes: Download the latest without asking.")
+                       help="If URL matches several episodes: Download the latest without"
+                            " asking.")
 
     parser.add_argument('URL', nargs='*',
                         help="Specify download source(s). Browse https://tv.nrk.no/ or "
-                             "https://radio.nrk.no/ and copy the URL. The URL can point to a "
-                             "whole series, or just one episode.")
+                             "https://radio.nrk.no/ and copy the URL. The URL can point"
+                             " to a whole series, or just one episode.")
 
     parser.add_argument('-f', '--file',
-                        help="Specify a file containing URLs, one URL per line. Specifying urls "
-                             "from a file will automatically enable --all and download all "
-                             "episodes from series.")
+                        help="Specify a file containing URLs, one URL per line. "
+                             "Specifying urls from a file will automatically enable"
+                             " --all and download all episodes from series.")
     return parser
 
 
@@ -81,7 +83,8 @@ def main():
             with open(arguments.file) as file:
                 for line in file:
                     url = line.strip()
-                    download_url(url, download_all=arguments.all, download_last=arguments.last)
+                    download_url(url, download_all=arguments.all,
+                                 download_last=arguments.last)
         else:
             print("{} is not a valid filename".format(arguments.file))
 
@@ -114,8 +117,9 @@ def remove_unavailable_programs(programs):
 def get_slice_input(num_elements):
     while True:
         try:
-            string = input("\nEnter a number or Python-style interval (e.g. 8 or -2: or : )."
-                           " (q to quit): ")
+            string = input(
+                "\nEnter a number or Python-style interval (e.g. 8 or -2: or : )."
+                " (q to quit): ")
             slice_match = re.match(r'^(-?\d*):(-?\d*)$', string)
             index_match = re.match(r'^(-?\d+)$', string)
             quit_match = re.match(r'^q$', string.lower())

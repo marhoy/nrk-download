@@ -12,7 +12,7 @@ try:
     from urllib.parse import quote, unquote
 except ImportError:
     # Python 2
-    from urllib import quote, unquote
+    from urllib import quote, unquote           # noqa: F401
 
 
 # Module wide logger
@@ -92,8 +92,10 @@ def get_series(series_id):
 
 
 def get_episode_ids_of_series_season(series_id, season_id):
-    LOG.info("Getting json-data with episode ids of series %s, season %s", series_id, season_id)
-    r = requests.get(_api_url("/series/{}/seasons/{}/episodes".format(series_id, season_id)))
+    LOG.info("Getting json-data with episode ids of series %s, season %s",
+             series_id, season_id)
+    r = requests.get(_api_url("/series/{}/seasons/{}/episodes".format(
+        series_id, season_id)))
     r.raise_for_status()
     json = r.json()
     episode_ids = [episode['id'] for episode in reversed(json)]

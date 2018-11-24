@@ -74,11 +74,9 @@ class PodcastEpisode:
         return string
 
     def __str__(self):
-        string = "{} - Episode {} ({}): {}".format(self.podcast.title,
-                                                   self.episode_number + 1,
-                                                   self.published.date(),
-                                                   self.title
-                                                   )
+        string = "{} - Episode {} ({})".format(self.podcast.title,
+                                               self.episode_number + 1,
+                                               self.published.date())
         return string
 
 

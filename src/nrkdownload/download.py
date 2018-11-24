@@ -7,6 +7,8 @@ import datetime
 
 import tqdm
 
+from . import tv
+
 try:
     # Python 3
     from urllib.request import urlretrieve
@@ -60,7 +62,8 @@ def download_worker(args):
         try:
             subprocess.call(cmd, stdin=open(os.devnull, 'r'))
         except Exception as e:
-            LOG.warning('Could not download subtitles for program %s: %s', program.title, e)
+            LOG.warning('Could not download subtitles for program %s: %s',
+                        program.title, e)
 
     # Download video
     if not os.path.exists(video_filename):
@@ -83,7 +86,8 @@ def download_worker(args):
             cmd += ['-c:v', 'copy', '-c:a', 'copy', '-bsf:a', 'aac_adtstoasc', output_filename]
             try:
                 LOG.debug("Starting command: %s", ' '.join(cmd))
-                process = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdin=open(os.devnull, 'r'),
+                process = subprocess.Popen(cmd, stderr=subprocess.PIPE,
+                                           stdin=open(os.devnull, 'r'),
                                            universal_newlines=True)
                 while process.poll() is None:
                     downloaded_seconds[media_url_idx] = utils.ffmpeg_seconds_downloaded(process)
@@ -116,10 +120,14 @@ def download_worker(args):
 
 
 def download_programs(programs):
+
+    for program in programs:
+        if program.series_id:
+            series = tv.series_from_series_id(program.series_id)
+            download_series_metadata(series)
+
     total_duration = datetime.timedelta()
     for program in programs:
-        if program.duration is None:
-            program.get_download_details()
         total_duration += program.duration
     total_duration = total_duration - datetime.timedelta(microseconds=total_duration.microseconds)
     print('Ready to download {} programs, with total duration {}'.format(
@@ -130,7 +138,8 @@ def download_programs(programs):
     manager = multiprocessing.Manager()
 
     shared_progress = manager.list([0]*len(programs))
-    progress_bar = tqdm.tqdm(desc='Downloading', total=round(total_duration.total_seconds()),
+    progress_bar = tqdm.tqdm(desc='Downloading',
+                             total=round(total_duration.total_seconds()),
                              unit='s', unit_scale=True)
 
     LOG.debug('Starting pool of workers')

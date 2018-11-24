@@ -1,7 +1,6 @@
 # These are needed if we are running under Python 2.7
 from __future__ import unicode_literals
 from __future__ import print_function
-from future.builtins import input
 
 import logging
 

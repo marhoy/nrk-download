@@ -13,8 +13,8 @@ try:
     from urllib.parse import unquote, urlparse
 except ImportError:
     # Python 2
-    from urllib import unquote, urlretrieve
-    from urlparse import urlparse
+    from urllib import unquote, urlretrieve             # noqa: F401
+    from urlparse import urlparse                       # noqa: F401
 
 # Our own modules
 from . import utils
@@ -145,7 +145,8 @@ class Program:
 
 class Season:
     def __init__(self, series_id, idx, season_id, name):
-        LOG.debug('Creating new season of %s: %s: %s: %s', series_id, idx, season_id, name)
+        LOG.debug('Creating new season of %s: %s: %s: %s',
+                  series_id, idx, season_id, name)
         self.series_id = series_id
         self.idx = idx
         self.season_id = season_id
