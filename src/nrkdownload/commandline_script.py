@@ -79,7 +79,6 @@ def main():
 
     if arguments.file:
         if os.path.isfile(arguments.file):
-            config.DOWNLOAD_ALL = True
             with open(arguments.file) as file:
                 for line in file:
                     url = line.strip()

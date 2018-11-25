@@ -13,6 +13,12 @@ def test_parse_duration(string='PT3H12M41.6S'):
     duration = nrkdownload.utils.parse_duration(string)
     assert duration == datetime.timedelta(hours=3, minutes=12, seconds=41.6)
 
+    duration = nrkdownload.utils.parse_duration('')
+    assert duration == datetime.timedelta()
+
+#    duration = nrkdownload.utils.parse_datetime('not_a_duration')
+#    assert duration == datetime.timedelta()
+
 
 def test_classmethod():
     c = nrkdownload.utils.ClassProperty()

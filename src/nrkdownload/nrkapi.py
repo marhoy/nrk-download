@@ -36,7 +36,7 @@ def _api_url(path):
         base_url = snapshot_url
     elif path.startswith('/podcast'):
         base_url = snapshot_url
-    else:
+    else:                                       # pragma: no cover
         LOG.error("No baseurl defined for %s", path)
         sys.exit(1)
     return base_url + path

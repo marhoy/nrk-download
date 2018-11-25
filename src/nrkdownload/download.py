@@ -166,8 +166,8 @@ def download_series_metadata(series):
             try:
                 # Can't use exist_ok = True under Python 2.7
                 os.makedirs(download_dir)
-            except OSError:
+            except OSError:         # pragma: no cover
                 pass
             urlretrieve(series.image_url, os.path.join(download_dir, image_filename))
-        except Exception as e:
+        except Exception as e:      # pragma: no cover
             LOG.error('Could not download metadata for series %s: %s', series.title, e)

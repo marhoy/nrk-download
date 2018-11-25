@@ -50,13 +50,7 @@ def parse_duration(string):
         minutes = int(minutes_search.group(1))
     if seconds_search:
         seconds = float(seconds_search.group(1))
-
-    try:
-        duration = datetime.timedelta(hours=hours, minutes=minutes, seconds=seconds)
-    except Exception as e:
-        LOG.warning('Unable to calculate duration: %s: %s', string, e)
-        return datetime.timedelta()
-
+    duration = datetime.timedelta(hours=hours, minutes=minutes, seconds=seconds)
     return duration
 
 

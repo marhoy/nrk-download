@@ -22,7 +22,7 @@ class Podcast:
         self.title = title
         self.subtitle = subtitle
         self.image_url = image_url
-        self._episodes = None
+        self.episodes = None
         self.dir_name = utils.valid_filename(self.title)
 
         # Add our instance to dict with known podcasts
@@ -39,7 +39,7 @@ class Podcast:
     @property
     def episodes(self):
         if not self._episodes:
-            self._episodes = podcast_episodes(self.podcast_id)
+            self.episodes = podcast_episodes(self.podcast_id)
         return self._episodes
 
     @episodes.setter

@@ -11,7 +11,7 @@ try:
     # Python 3
     from urllib.request import urlretrieve
     from urllib.parse import unquote, urlparse
-except ImportError:
+except ImportError:                                     # pragma: no cover
     # Python 2
     from urllib import unquote, urlretrieve             # noqa: F401
     from urlparse import urlparse                       # noqa: F401
