@@ -47,6 +47,24 @@ Some examples:
     means all available episodes.
 
 
+When you have made a selection, the download starts::
+
+    Ready to download 1 programs, with total duration 0:11:02
+    Downloading:  26%|███████▊                      | 173/662 [00:10<00:11, 43.9s/s]
+
+The progress bar shows the number of seconds of video to be downloaded,
+in this case 0:11:02 = 11*60 + 2 = 662 seconds. The next two times are
+the estimated remaining and total download time. The last number shows how
+many seconds of video are downloaded per second. So in this snapshot, the
+video was downloaded at 44x the playback speed.
+
+If you have already downloaded some of the episodes, those will be
+automatically skipped (not overwritten).
+
+
+Downloading without interaction
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 If you want to download all available episodes with no questions asked, use
 the ``--all`` option on the command line.
 Or if you want to download only the latest episode, use

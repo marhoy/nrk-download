@@ -6,15 +6,16 @@ Welcome to nrkdownload's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   features
-   installing
-   usage
-   examples
+   10_features
+   20_installing_nrkdownload
+   30_installing_ffmpeg
+   40_usage
+   50_examples
+   90_contributing
 
 
 Indices and tables
 ==================
 
 * :ref:`genindex`
-* :ref:`modindex`
 * :ref:`search`
