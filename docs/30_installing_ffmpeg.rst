@@ -1,6 +1,6 @@
 
 
-Installing ffmpeg
+Installing FFmpeg
 =================
 
 The videos and subtitles are downloaded using
@@ -8,6 +8,13 @@ The videos and subtitles are downloaded using
 It is available for
 all major operating systems. You need to install ffmpeg and make it
 available in your $PATH before you can use nrkdownload.
+
+For Windows
+-----------
+
+Should be rather straight forward. Download the latest static build and
+run the installer.
+
 
 For Linux
 ---------

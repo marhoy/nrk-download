@@ -29,7 +29,7 @@ URL you want to give as argument to ``nrkdownload``::
     Enter a number or Python-style interval (e.g. 8 or -2: or : ). (q to quit):
 
 
-Ell of the registered episodes will be listed, numbered from 0.
+All of the registered episodes will be listed, numbered from 0.
 Due to copyright-issues, some of the episodes might not be available for
 download. You are then asked to specify what episodes you want to
 download. You respond to this by typing an integer or a Python-style range.
@@ -110,5 +110,11 @@ refers to a specific episode::
      4: Sjakksnakk - Episode 5 - #5 Hans Olav Lahlum mener Carlsen søker sj...
      5: Sjakksnakk - Episode 6 - #6 Torstein Bae og Atle Grønn tror VM blir...
 
-    Enter a number or Python-style interval (e.g. 8 or -2: or : ). (q to quit):
+    Enter a number or Python-style interval (e.g. 8 or -2: or : ). (q to quit): :
+    Podcast 1 of 6: 91.2Mb [00:00, 175Mb/s]
+    Podcast 2 of 6: 60.9Mb [00:00, 181Mb/s]
+    Podcast 3 of 6: 58.8Mb [00:00, 181Mb/s]
+    Podcast 4 of 6: 74.6Mb [00:00, 177Mb/s]
+    Podcast 5 of 6: 67.4Mb [00:00, 170Mb/s]
+    Podcast 6 of 6: 83.5Mb [00:00, 133Mb/s]
 
