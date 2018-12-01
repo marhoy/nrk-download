@@ -13,9 +13,3 @@ Welcome to nrkdownload's documentation!
    50_examples
    90_contributing
 
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`

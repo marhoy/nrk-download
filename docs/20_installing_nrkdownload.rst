@@ -5,7 +5,8 @@ Installing nrkdownload
 Installing or upgrading to the latest release of nrkdownload
 ------------------------------------------------------------
 
-To install or upgrade to the latest release from pypi.org, use the following
+To install or upgrade to the latest release from
+`PyPI <https://pypi.org/project/nrkdownload/>`_ , use the following
 command::
 
     $ pip install -U --user nrkdownload
@@ -29,7 +30,7 @@ will be a pointer to your local repository. Whatever changes you make
 in your local repository will have immediate effect on the "installation".
 
 You are welcome to help developing ``nrkdownload``, please see the section
-on :ref:`contributing`
+on :ref:`contributing`.
 
 
 Uninstalling nrkdownload
@@ -51,14 +52,14 @@ OS considerations
 -----------------
 
 This tool is compatible with both Python 2 and 3. But unless you have
-other reasons to use Python 2, Python 3.x is recommended.
+other reasons to use Python 2, the latest Python 3.x is recommended.
 
 If your system-wide Python installation is under control of a package
 manager like rpm or deb, you should avoid pip-installing python
-packages as root. This can be achieved in several ways:
+packages as root. This can be solved in several ways:
 
 #. Install Python packages under your own home-directory by passing the
-   --user option to the pip installer.
+   ``--user`` option to the pip installer.
 #. Install your own user-specific Python distribution, where you can
    later install packages. Anaconda (or Miniconda) is a good choice.
    It also has good support for environment (see next).
