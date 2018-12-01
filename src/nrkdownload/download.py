@@ -1,10 +1,11 @@
+import datetime
 import logging
 import multiprocessing
 import os.path
 import subprocess
 import time
-import datetime
 
+import requests
 import tqdm
 
 from . import tv
@@ -162,12 +163,44 @@ def download_series_metadata(series):
     image_filename = 'poster.jpg'
     if not os.path.exists(os.path.join(download_dir, image_filename)):
         LOG.info('Downloading image for series %s', series.title)
+        create_directory(download_dir)
+        urlretrieve(series.image_url, os.path.join(download_dir, image_filename))
+
+
+def download_podcasts(episodes):
+
+    chunk_size = 1024
+
+    download_dir = os.path.dirname(episodes[0].filename)
+    create_directory(download_dir)
+    download_series_metadata(episodes[0].podcast)
+
+    for i, episode in enumerate(episodes):
+        audio_filename = episode.filename + ".mp3"
+
+        LOG.debug("Starting download of podcast episode %d", i + 1)
+        r = requests.get(episode.media_urls[0], stream=True)
+        progress_bar = tqdm.tqdm(total=int(r.headers['Content-Length']),
+                                 desc='Podcast {} of {}'.format(i + 1, len(episodes)),
+                                 unit='b', unit_scale=True)
+
+        with open(audio_filename, "wb") as file:
+            for data in r.iter_content(chunk_size=chunk_size):
+                file.write(data)
+                progress_bar.update(chunk_size)
+            progress_bar.close()
+
+
+def create_directory(directory):
+    # Create directory if needed
+    if not os.path.exists(directory):
         try:
             try:
-                # Can't use exist_ok = True under Python 2.7
-                os.makedirs(download_dir)
-            except OSError:         # pragma: no cover
+                # Can't use exist_ok=True under Python 2.7
+                # And some other thread might have created the directory just before us
+                os.makedirs(directory)
+            except OSError:
                 pass
-            urlretrieve(series.image_url, os.path.join(download_dir, image_filename))
-        except Exception as e:      # pragma: no cover
-            LOG.error('Could not download metadata for series %s: %s', series.title, e)
+        except Exception as e:
+            LOG.error('Could not create directory %s: %s', directory, e)
+            return

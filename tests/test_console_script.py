@@ -1,5 +1,7 @@
 import io
 
+import pytest
+
 
 def test_verbose(script_runner):
     ret = script_runner.run('nrkdownload', '-v')
@@ -11,6 +13,7 @@ def test_very_verbose(script_runner):
     assert ret.success
 
 
+@pytest.mark.slow
 def test_download_url(script_runner, tmp_path):
     nrk_url = 'https://tv.nrk.no/serie/humorkalender/sesong/2'
     expected_files = [
@@ -26,6 +29,7 @@ def test_download_url(script_runner, tmp_path):
         assert tmp_path.joinpath(file).exists()
 
 
+@pytest.mark.slow
 def test_download_file(script_runner, tmp_path):
     ret = script_runner.run('nrkdownload', '-f', 'tests/test_urls.txt',
                             '--last', '-d', tmp_path.as_posix())

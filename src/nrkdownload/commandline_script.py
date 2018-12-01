@@ -15,6 +15,8 @@ from nrkdownload import config
 from nrkdownload import parse_nrk_url
 from nrkdownload import version
 from nrkdownload import download
+from nrkdownload import tv
+from nrkdownload import radio
 
 LOG = logging.getLogger(__name__)
 
@@ -100,7 +102,10 @@ def download_url(url, download_all=False, download_last=False):
             programs = ask_for_program_download(programs)
         elif download_last is True:
             programs = programs[-1:]
-    download.download_programs(programs)
+    if type(programs[0]) == tv.Program:
+        download.download_programs(programs)
+    elif type(programs[0]) == radio.PodcastEpisode:
+        download.download_podcasts(programs)
 
 
 def remove_unavailable_programs(programs):

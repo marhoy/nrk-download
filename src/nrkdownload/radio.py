@@ -48,13 +48,14 @@ class Podcast:
 
 
 class PodcastEpisode:
-    def __init__(self, podcast_id, episode_id, title, subtitle, duration, download_url, published):
+    def __init__(self, podcast_id, episode_id, title, subtitle,
+                 duration, media_urls, published):
         self.podcast_id = podcast_id
         self.episode_id = episode_id
         self.title = title
         self.subtitle = subtitle
         self.duration = duration
-        self.download_url = download_url
+        self.media_urls = media_urls
         self.published = published
 
     @property
@@ -69,14 +70,17 @@ class PodcastEpisode:
     @property
     def filename(self):
         basedir = os.path.join(config.DOWNLOAD_DIR, self.podcast.dir_name)
-        file = utils.valid_filename(self.__str__())
-        string = os.path.join(basedir, file)
-        return string
+        string = "{} - Episode {} - {} ({})".format(self.podcast.title,
+                                                    self.episode_number + 1,
+                                                    self.title,
+                                                    self.published.date())
+        file = utils.valid_filename(string)
+        return os.path.join(basedir, file)
 
     def __str__(self):
-        string = "{} - Episode {} ({})".format(self.podcast.title,
-                                               self.episode_number + 1,
-                                               self.published.date())
+        string = os.path.basename(self.filename)
+        if len(string) > config.MAX_OUTPUT_STRING_LENGTH:
+            string = string[:config.MAX_OUTPUT_STRING_LENGTH - 3] + '...'
         return string
 
 
@@ -85,7 +89,7 @@ def podcast_from_podcast_id(podcast_id):
         LOG.debug("Returning known podcast %s", podcast_id)
         return Podcast.known_podcasts[podcast_id]
     json = nrkapi.get_podcast_series(podcast_id)
-    title = json['titles']['title']
+    title = json['titles']['title'].strip()
     subtitle = json['titles']['subtitle']
     image_url = json['imageUrl']
     podcast = Podcast(podcast_id=podcast_id, title=title, subtitle=subtitle,
@@ -108,14 +112,14 @@ def podcast_episode_from_json(json):
         url = json['_links']['self']['href']
     episode_id = url.split('/')[-1]
     podcast_id = url.split('/')[-3]
-    title = json['titles']['title']
+    title = json['titles']['title'].strip()
     subtitle = json['titles']['subtitle']
     duration = utils.parse_duration(json['duration'])
-    download_url = json['downloadables'][0]['audio']['url']
+    media_urls = [url['audio']['url'] for url in json['downloadables']]
     published = utils.parse_datetime(json['publishedAt'])
     episode = PodcastEpisode(podcast_id=podcast_id, episode_id=episode_id, title=title,
                              subtitle=subtitle, duration=duration,
-                             download_url=download_url, published=published)
+                             media_urls=media_urls, published=published)
     return episode
 
 
