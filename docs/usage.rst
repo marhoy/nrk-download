@@ -6,9 +6,8 @@ the current restrictions, you will need to specify an URL for the content you
 want to download: Start by browsing https://tv.nrk.no (possibly
 https://tv.nrksuper.no/) or https://radio.nrk.no
 until you find what you want. Copy the URLs and give it as arguments for this
-tool, either on the command-line or one per line in a file. Files that are
-already downloaded will be skipped.
-
+tool. You can list several URLs on the command line (separated by space),
+or line by line in a file. Content that are already downloaded will be skipped.
 
 
 Options

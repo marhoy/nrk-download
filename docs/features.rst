@@ -1,13 +1,13 @@
 Features
 ========
 
-This is a commandline tool to download programs and series from NRK
-(Norwegian public broadcaster). It supports downloading TV, radio and podcast
-content. The tool is written in Python, and is compatible with Python 2.7
+This is a commandline tool to download content from NRK
+(Norwegian public broadcaster). It supports downloading TV, radio and podcasts.
+The tool is written in Python, and is compatible with Python 2.7
 and 3.x. It has been tested under Linux, Mac OS X and Windows.
 
 As of autumn 2018, NRK has started to require a secret key in the header of
-the API requests. This download-tool works even after the restrictions.
+the API requests. This download-tool works even after those restrictions.
 Users outside of Norway should note that some of the content is
 geo-restricted.
 
