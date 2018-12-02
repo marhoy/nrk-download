@@ -102,10 +102,12 @@ def download_url(url, download_all=False, download_last=False):
             programs = ask_for_program_download(programs)
         elif download_last is True:
             programs = programs[-1:]
-    if type(programs[0]) == tv.Program:
+    if isinstance(programs[0], tv.Program):
         download.download_programs(programs)
-    elif type(programs[0]) == radio.PodcastEpisode:
+    elif isinstance(programs[0], radio.PodcastEpisode):
         download.download_podcasts(programs)
+    else:
+        print("Program is of unknown type", type(programs[0]))
 
 
 def remove_unavailable_programs(programs):

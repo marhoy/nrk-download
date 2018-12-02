@@ -74,17 +74,20 @@ def download_worker(args):
         downloaded_seconds = []
         for media_url_idx, media_url in enumerate(program.media_urls):
             if len(program.media_urls) > 1:
-                output_filename = program_filename + '-part{}'.format(media_url_idx) + '.m4v'
+                output_filename = program_filename + \
+                                  '-part{}'.format(media_url_idx) + '.m4v'
             else:
                 output_filename = video_filename
             downloaded_seconds.append(0)
 
             cmd = ['ffmpeg', '-loglevel', '8', '-stats', '-i', media_url]
             if os.path.exists(subtitle_file):
-                cmd += ['-i', subtitle_file, '-c:s', 'mov_text', '-metadata:s:s:0', 'language=nor']
+                cmd += ['-i', subtitle_file, '-c:s', 'mov_text', '-metadata:s:s:0',
+                        'language=nor']
             # cmd += ['-metadata', 'description="{}"'.format(obj.description)]
             # cmd += ['-metadata', 'track="24"']
-            cmd += ['-c:v', 'copy', '-c:a', 'copy', '-bsf:a', 'aac_adtstoasc', output_filename]
+            cmd += ['-c:v', 'copy', '-c:a', 'copy', '-bsf:a', 'aac_adtstoasc',
+                    output_filename]
             try:
                 LOG.debug("Starting command: %s", ' '.join(cmd))
                 process = subprocess.Popen(cmd, stderr=subprocess.PIPE,
@@ -102,13 +105,16 @@ def download_worker(args):
 
         # If the program was divided in parts, we need to concatenate them
         if len(output_filenames) > 1:
-            LOG.info("Concatenating the %d parts of %s", len(output_filenames), program.title)
+            LOG.info("Concatenating the %d parts of %s",
+                     len(output_filenames), program.title)
             with open(program_filename + '-parts.txt', "w") as file:
                 for output_filename in output_filenames:
                     file.write("file '" + output_filename + "'\n")
-            cmd = ['ffmpeg', '-f', 'concat', '-safe', '0', '-i', program_filename + '-parts.txt']
+            cmd = ['ffmpeg', '-f', 'concat', '-safe', '0', '-i',
+                   program_filename + '-parts.txt']
             cmd += ['-c', 'copy', video_filename]
-            process = subprocess.Popen(cmd, stderr=subprocess.PIPE, stdin=open(os.devnull, 'r'),
+            process = subprocess.Popen(cmd, stderr=subprocess.PIPE,
+                                       stdin=open(os.devnull, 'r'),
                                        universal_newlines=True)
             process.wait()
 
@@ -168,6 +174,7 @@ def download_series_metadata(series):
 
 
 def download_podcasts(episodes):
+    LOG.debug("Getting ready to download %d podcasts", len(episodes))
 
     chunk_size = 1024
 

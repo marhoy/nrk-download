@@ -1,5 +1,8 @@
-import nrkdownload.parse_nrk_url
+# -*- coding: utf-8 -*-
+from __future__ import unicode_literals
+
 import nrkdownload.config
+import nrkdownload.parse_nrk_url
 
 
 def test_parse_url():
@@ -42,14 +45,14 @@ def test_parse_url():
         '/Arif og Unge Ferrari med Stavanger Symfoniorkester'
 
     podcasts = nrkdownload.parse_nrk_url.parse_url(
-        'https://radio.nrk.no/podkast/saann_er_du/nrkno-poddkast-25555-141668-15092018140000')
+        'https://radio.nrk.no/podkast/mandag_hele_aaret/nrkno-poddkast-26613-142718-01112018083000')  # noqa: E501
     assert len(podcasts) == 1
 
     podcasts = nrkdownload.parse_nrk_url.parse_url(
-        'https://radio.nrk.no/podkast/saann_er_du/')
-    assert len(podcasts) == 36
-    assert podcasts[0].title == 'Sånn er du, Karl Ove Knausgård'
-    assert podcasts[0].podcast.title == 'Sånn er du'
-    assert podcasts[0].episode_number == 0
-    assert podcasts[0].filename == nrkdownload.config.DOWNLOAD_DIR + \
-        '/Sånn er du/Sånn er du - Episode 1 (2017-01-08)'
+        'https://radio.nrk.no/podkast/mandag_hele_aaret/')
+    assert len(podcasts) == 6
+    assert podcasts[1].title == 'Episode 1:5 "Jeg vil kjøre formel 1"'
+    assert podcasts[1].podcast.title == 'Mandag hele året'
+    assert podcasts[1].episode_number == 1
+    assert podcasts[1].filename == nrkdownload.config.DOWNLOAD_DIR + \
+        '/Mandag hele året/Mandag hele året - Episode 2 - Episode 15 Jeg vil kjøre formel 1 (2018-10-09)'  # noqa: E501

@@ -2,7 +2,7 @@ import logging
 import re
 
 # The urllib has changed from Python 2 to 3, and thus requires some extra handling
-try:
+try:                                                        # pragma: no cover
     # Python 3
     from urllib.request import urlretrieve
     from urllib.parse import unquote, urlparse

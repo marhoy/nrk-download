@@ -1,4 +1,4 @@
-import io
+# -*- coding: utf-8 -*-
 
 import pytest
 
@@ -14,7 +14,7 @@ def test_very_verbose(script_runner):
 
 
 @pytest.mark.slow
-def test_download_url(script_runner, tmp_path):
+def test_download_url_tv(script_runner, tmp_path):
     nrk_url = 'https://tv.nrk.no/serie/humorkalender/sesong/2'
     expected_files = [
         'Humorkalender/poster.jpg',
@@ -30,13 +30,27 @@ def test_download_url(script_runner, tmp_path):
 
 
 @pytest.mark.slow
+def test_download_url_podcast(script_runner, tmp_path):
+    nrk_url = 'https://radio.nrk.no/podkast/mandag_hele_aaret/nrkno-poddkast-26613-142282-09102018220300'  # noqa: E501
+    expected_files = [
+        'Mandag hele året/poster.jpg',
+        'Mandag hele året/Mandag hele året - Episode 2 - Episode 15 Jeg vil kjøre formel 1 (2018-10-09).mp3'  # noqa: E501
+    ]
+
+    ret = script_runner.run('nrkdownload', nrk_url, '-d', tmp_path.as_posix())
+    assert ret.success
+    for file in expected_files:
+        assert tmp_path.joinpath(file).exists()
+
+
+@pytest.mark.slow
 def test_download_file(script_runner, tmp_path):
     ret = script_runner.run('nrkdownload', '-f', 'tests/test_urls.txt',
                             '--last', '-d', tmp_path.as_posix())
     assert ret.success
-    ret = script_runner.run('nrkdownload', '-f', 'test_urls.txt',
-                            '--last', '-d', tmp_path.as_posix())
-    assert ret.success
+#    ret = script_runner.run('nrkdownload', '-f', 'test_urls.txt',
+#                            '--last', '-d', tmp_path.as_posix())
+#    assert ret.success
 
 
 def test_download_not_available(script_runner):
@@ -45,7 +59,7 @@ def test_download_not_available(script_runner):
     assert ret.success
 
 
-interactive_input = io.StringIO('-1\n')
+# interactive_input = io.StringIO('-1\n')
 
 
 # def test_download_url_interactive(script_runner, tmp_path, stdin=interactive_input):

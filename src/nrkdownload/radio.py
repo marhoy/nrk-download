@@ -22,7 +22,7 @@ class Podcast:
         self.title = title
         self.subtitle = subtitle
         self.image_url = image_url
-        self.episodes = None
+        self._episodes = None
         self.dir_name = utils.valid_filename(self.title)
 
         # Add our instance to dict with known podcasts
@@ -39,12 +39,13 @@ class Podcast:
     @property
     def episodes(self):
         if not self._episodes:
-            self.episodes = podcast_episodes(self.podcast_id)
+            self._episodes = podcast_episodes(self.podcast_id)
         return self._episodes
 
-    @episodes.setter
-    def episodes(self, episodes):
-        self._episodes = episodes
+#    @episodes.setter
+#    def episodes(self, episodes):
+#        LOG.debug("In episode setter")
+#        self._episodes = episodes
 
 
 class PodcastEpisode:
@@ -115,7 +116,7 @@ def podcast_episode_from_json(json):
     title = json['titles']['title'].strip()
     subtitle = json['titles']['subtitle']
     duration = utils.parse_duration(json['duration'])
-    media_urls = [url['audio']['url'] for url in json['downloadables']]
+    media_urls = [download_url['audio']['url'] for download_url in json['downloadables']]
     published = utils.parse_datetime(json['publishedAt'])
     episode = PodcastEpisode(podcast_id=podcast_id, episode_id=episode_id, title=title,
                              subtitle=subtitle, duration=duration,
