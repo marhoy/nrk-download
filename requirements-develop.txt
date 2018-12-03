@@ -5,3 +5,4 @@ flake8
 tox
 sphinx
 sphinx_rtd_theme
+twine
