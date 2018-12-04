@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import pytest
+import sys
+
+if sys.platform.startswith("win"):
+    pytest.skip("skipping tests that fails on windows", allow_module_level=True)
 
 
 def test_verbose(script_runner):

@@ -11,12 +11,10 @@ import re
 import sys
 
 # Our own modules
-from nrkdownload import config
-from nrkdownload import parse_nrk_url
-from nrkdownload import version
-from nrkdownload import download
-from nrkdownload import tv
-from nrkdownload import radio
+import nrkdownload
+import nrkdownload.config
+import nrkdownload.parse_nrk_url
+import nrkdownload.download
 
 LOG = logging.getLogger(__name__)
 
@@ -31,13 +29,11 @@ def make_parser():
 
     parser.add_argument('--version', action='version',
                         version='%(prog)s version {}, running under {} with Python {}'.format(
-                            version.version, platform.system(), platform.python_version()))
+                            nrkdownload.__version__, platform.system(), platform.python_version()))
     parser.add_argument('-d', metavar='DIRECTORY', action='store',
                         help='The directory where the downloaded files will be placed')
     parser.add_argument('-v', '--verbose', action='count',
                         help="Increase verbosity. Can be repeated up to two times.")
-    parser.add_argument('-c', '--cache', action='store_true',
-                        help="Enable persistent caching of the API requests.")
 
     mutex = parser.add_mutually_exclusive_group()
     mutex.add_argument('-a', '--all', action='store_true',
@@ -72,27 +68,32 @@ def main():
             logging.getLogger().setLevel(logging.DEBUG)
 
     if arguments.d:
-        config.DOWNLOAD_DIR = os.path.expanduser(arguments.d)
-
-    config.ENABLE_CACHE = arguments.cache
+        download_dir = os.path.expanduser(arguments.d)
+    else:
+        download_dir = nrkdownload.config.DOWNLOAD_DIR
 
     for url in arguments.URL:
-        download_url(url, download_all=arguments.all, download_last=arguments.last)
+        download_url(url,
+                     download_all=arguments.all,
+                     download_last=arguments.last,
+                     download_dir=download_dir)
 
     if arguments.file:
         if os.path.isfile(arguments.file):
             with open(arguments.file) as file:
                 for line in file:
                     url = line.strip()
-                    download_url(url, download_all=arguments.all,
-                                 download_last=arguments.last)
+                    download_url(url,
+                                 download_all=arguments.all,
+                                 download_last=arguments.last,
+                                 download_dir=download_dir)
         else:
             print("{} is not a valid filename".format(arguments.file))
 
 
-def download_url(url, download_all=False, download_last=False):
+def download_url(url, download_all=False, download_last=False, download_dir=None):
     LOG.debug("Looking at %s", url)
-    programs = parse_nrk_url.parse_url(url)
+    programs = nrkdownload.parse_nrk_url.parse_url(url)
     programs = remove_unavailable_programs(programs)
     if len(programs) == 0:
         print("No programs available for download")
@@ -102,12 +103,7 @@ def download_url(url, download_all=False, download_last=False):
             programs = ask_for_program_download(programs)
         elif download_last is True:
             programs = programs[-1:]
-    if isinstance(programs[0], tv.Program):
-        download.download_programs(programs)
-    elif isinstance(programs[0], radio.PodcastEpisode):
-        download.download_podcasts(programs)
-    else:
-        print("Program is of unknown type", type(programs[0]))
+    nrkdownload.download.download_all(programs, download_dir=download_dir)
 
 
 def remove_unavailable_programs(programs):

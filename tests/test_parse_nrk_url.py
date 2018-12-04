@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 import nrkdownload.config
 import nrkdownload.parse_nrk_url
 
+import os.path
+
 
 def test_parse_url():
     programs = nrkdownload.parse_nrk_url.parse_url(
@@ -16,10 +18,12 @@ def test_parse_url():
     assert programs[0].title == 'Oppfinneren'
     assert programs[0].season_number == 1
     assert programs[0].episode_number == 1
-    assert programs[0].filename == nrkdownload.config.DOWNLOAD_DIR + \
-        '/Oppfinneren/Season 02/Oppfinneren - S02E02 - 2of8'
-    assert programs[0].filename == nrkdownload.config.DOWNLOAD_DIR + \
-        '/Oppfinneren/Season 02/Oppfinneren - S02E02 - 2of8'
+    assert os.path.normpath(programs[0].filename) == \
+           os.path.normpath(os.path.join(nrkdownload.config.DOWNLOAD_DIR,
+                                         'Oppfinneren/Season 02/Oppfinneren - S02E02 - 2of8'))
+    assert os.path.normpath(programs[0].filename) == \
+           os.path.normpath(os.path.join(nrkdownload.config.DOWNLOAD_DIR,
+                                         'Oppfinneren/Season 02/Oppfinneren - S02E02 - 2of8'))
     assert programs[0].__str__() == 'Oppfinneren - Sesong 2 - Oppfinneren: 2:8'
     assert programs[0]._series.seasons[0].__str__() == '1: 1 (8 episoder)'
     assert programs[0]._series.__str__() == 'Oppfinneren : 3 Sesonger'
@@ -41,8 +45,9 @@ def test_parse_url():
     assert programs[0].series_id is None
     assert programs[0].season_number is None
     assert programs[0].episode_number is None
-    assert programs[0].filename == nrkdownload.config.DOWNLOAD_DIR + \
-        '/Arif og Unge Ferrari med Stavanger Symfoniorkester'
+    assert os.path.normpath(programs[0].filename) == \
+           os.path.normpath(os.path.join(nrkdownload.config.DOWNLOAD_DIR,
+                                         'Arif og Unge Ferrari med Stavanger Symfoniorkester'))
 
     podcasts = nrkdownload.parse_nrk_url.parse_url(
         'https://radio.nrk.no/podkast/mandag_hele_aaret/nrkno-poddkast-26613-142718-01112018083000')  # noqa: E501
@@ -54,5 +59,6 @@ def test_parse_url():
     assert podcasts[1].title == 'Episode 1:5 "Jeg vil kjøre formel 1"'
     assert podcasts[1].podcast.title == 'Mandag hele året'
     assert podcasts[1].episode_number == 1
-    assert podcasts[1].filename == nrkdownload.config.DOWNLOAD_DIR + \
-        '/Mandag hele året/Mandag hele året - Episode 2 - Episode 15 Jeg vil kjøre formel 1 (2018-10-09)'  # noqa: E501
+    assert os.path.normpath(podcasts[1].filename) == \
+           os.path.normpath(os.path.join(nrkdownload.config.DOWNLOAD_DIR,
+                                         'Mandag hele året/Mandag hele året - Episode 2 - Episode 15 Jeg vil kjøre formel 1 (2018-10-09)'))  # noqa: E501

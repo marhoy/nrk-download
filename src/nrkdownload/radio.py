@@ -70,7 +70,7 @@ class PodcastEpisode:
 
     @property
     def filename(self):
-        basedir = os.path.join(config.DOWNLOAD_DIR, self.podcast.dir_name)
+        basedir = self.podcast.dir_name
         string = "{} - Episode {} - {} ({})".format(self.podcast.title,
                                                     self.episode_number + 1,
                                                     self.title,

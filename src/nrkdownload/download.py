@@ -8,7 +8,8 @@ import time
 import requests
 import tqdm
 
-from . import tv
+import nrkdownload.tv
+import nrkdownload.radio
 
 try:
     # Python 3
@@ -31,6 +32,7 @@ def download_worker(args):
         program.make_filename()
     program_filename = program.filename
     download_dir = os.path.dirname(program_filename)
+    print("Downloading to ", download_dir)
     image_filename = program_filename + '.jpg'
     subtitle_file = program_filename + '.no.srt'
     video_filename = program_filename + '.m4v'
@@ -126,11 +128,20 @@ def download_worker(args):
     LOG.debug("Finished downloading %s", program)
 
 
-def download_programs(programs):
+def download_all(programs, download_dir=None):
+    if isinstance(programs[0], nrkdownload.tv.Program):
+        download_programs(programs, download_dir)
+    elif isinstance(programs[0], nrkdownload.radio.PodcastEpisode):
+        download_podcasts(programs, download_dir)
+    else:
+        print("Program is of unknown type", type(programs[0]))
+
+
+def download_programs(programs, download_dir=None):
 
     for program in programs:
         if program.series_id:
-            series = tv.series_from_series_id(program.series_id)
+            series = nrkdownload.tv.series_from_series_id(program.series_id)
             download_series_metadata(series)
 
     total_duration = datetime.timedelta()
@@ -164,8 +175,8 @@ def download_programs(programs):
     LOG.debug('All workers finished. Result: %s', result.get())
 
 
-def download_series_metadata(series):
-    download_dir = os.path.join(config.DOWNLOAD_DIR, series.dir_name)
+def download_series_metadata(series, download_dir=None):
+    download_dir = os.path.join(download_dir, series.dir_name)
     image_filename = 'poster.jpg'
     if not os.path.exists(os.path.join(download_dir, image_filename)):
         LOG.info('Downloading image for series %s', series.title)
@@ -173,17 +184,18 @@ def download_series_metadata(series):
         urlretrieve(series.image_url, os.path.join(download_dir, image_filename))
 
 
-def download_podcasts(episodes):
+def download_podcasts(episodes, download_dir=None):
     LOG.debug("Getting ready to download %d podcasts", len(episodes))
 
     chunk_size = 1024
 
-    download_dir = os.path.dirname(episodes[0].filename)
+    download_series_metadata(episodes[0].podcast, download_dir)
+
+    download_dir = os.path.join(download_dir, os.path.dirname(episodes[0].filename))
     create_directory(download_dir)
-    download_series_metadata(episodes[0].podcast)
 
     for i, episode in enumerate(episodes):
-        audio_filename = episode.filename + ".mp3"
+        audio_filename = os.path.join(download_dir, episode.filename + ".mp3")
 
         LOG.debug("Starting download of podcast episode %d", i + 1)
         r = requests.get(episode.media_urls[0], stream=True)
