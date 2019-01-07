@@ -142,7 +142,7 @@ def download_programs(programs, download_dir=None):
     for program in programs:
         if program.series_id:
             series = nrkdownload.tv.series_from_series_id(program.series_id)
-            download_series_metadata(series)
+            download_series_metadata(series, download_dir)
 
     total_duration = datetime.timedelta()
     for program in programs:
@@ -189,10 +189,10 @@ def download_podcasts(episodes, download_dir=None):
 
     chunk_size = 1024
 
+    create_directory(download_dir)
     download_series_metadata(episodes[0].podcast, download_dir)
 
-    download_dir = os.path.join(download_dir, os.path.dirname(episodes[0].filename))
-    create_directory(download_dir)
+    #download_dir = os.path.join(download_dir, os.path.dirname(episodes[0].filename))
 
     for i, episode in enumerate(episodes):
         audio_filename = os.path.join(download_dir, episode.filename + ".mp3")

@@ -70,7 +70,7 @@ def main():
     if arguments.d:
         download_dir = os.path.expanduser(arguments.d)
     else:
-        download_dir = nrkdownload.config.DOWNLOAD_DIR
+        download_dir = nrkdownload.config.DEFAULT_DOWNLOAD_DIR
 
     for url in arguments.URL:
         download_url(url,

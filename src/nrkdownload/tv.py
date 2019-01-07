@@ -106,7 +106,7 @@ class Program:
             # This program is part of a series
             LOG.debug("Making filename for program %s", self.title)
 
-            basedir = os.path.join(config.DOWNLOAD_DIR, self._series.dir_name,
+            basedir = os.path.join(self._series.dir_name,
                                    self._series.seasons[self.season_number].dir_name)
 
             filename = self._series.title
@@ -123,7 +123,7 @@ class Program:
                 filename += ' - {}'.format(self.episode_number_or_date)
         else:
             # This program is not part of a series
-            basedir = config.DOWNLOAD_DIR
+            basedir = ""
             filename = self.title
 
         self._filename = os.path.join(basedir, utils.valid_filename(filename))
