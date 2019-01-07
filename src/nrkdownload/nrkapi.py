@@ -25,9 +25,15 @@ requests_cache.install_cache(cache_name=cache_file, backend='sqlite', expire_aft
 
 
 def _api_url(path):
+    # API Documentation:
+    # https://psapi.nrk.no/
+    # https://stsnapshottestwe.blob.core.windows.net/apidocumentation/documentation.html
+
     # This is the Granitt API: Nrk.Programspiller.Backend.WebAPI
     # http://v8.psapi.nrk.no  Now requires a key
-    granitt_url = 'http://nrkpswebapi2ne.cloudapp.net'
+    # granitt_url = 'http://nrkpswebapi2ne.cloudapp.net'
+    granitt_url = 'http://psapi-granitt-prod-we.cloudapp.net'
+
     # This is the Snapshot API: Nrk.PsApi
     snapshot_url = 'http://psapi3-webapp-prod-we.azurewebsites.net'
     if path.startswith('/mediaelement'):
