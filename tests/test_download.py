@@ -1,3 +1,5 @@
+# coding=UTF-8
+
 import nrkdownload.download
 import nrkdownload.parse_nrk_url
 import nrkdownload.config
