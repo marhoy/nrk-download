@@ -30,6 +30,7 @@ https://tv.nrk.no/serie/oppfinneren/sesong/2/episode/2/avspiller
 https://tv.nrk.no/serie/oppfinneren/MKTV52000418
 https://tv.nrk.no/serie/forbrukerinspektoerene/MDHP11004318
 https://tv.nrk.no/serie/forbrukerinspektoerene/MDHP11004318/24-10-2018
+https://tv.nrk.no/serie/stroemmeland/2019/MUHH41000619
 
 For a repeating TV-program
 https://tv.nrk.no/serie/ut-i-naturen/DVNA50000512
@@ -66,7 +67,7 @@ def parse_url(url):
     series_match = re.match(r"/serie/([\w-]+)", parsed_url.path)
     season_match = re.match(r"/serie/[\w-]+/sesong/(\d+)", parsed_url.path)
     episode_match = re.match(r"/serie/[\w-]+/sesong/\d+/episode/(\d+)", parsed_url.path)
-    episode_id_match = re.match(r"/serie/[\w-]+/(\w+)", parsed_url.path)
+    episode_id_match = re.match(r"/serie/.+([a-zA-Z]{4}[0-9]{8}).*", parsed_url.path)
     program_match = re.match(r"/program/(\w+)", parsed_url.path)
 
     podcast_match = re.match(r"/podkast/([\w_-]+)", parsed_url.path)
