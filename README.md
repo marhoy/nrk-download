@@ -8,6 +8,8 @@ The documentation for nrkdownload is availabe here:
 https://nrkdownload.readthedocs.org
 
 # Making a new release
+- Make sure all tests are ok: `tox`
+- Push changed to GitHub
 - Use the "new release" functionallity of GitHub. Make a new tag.
 - `python setup.py sdist bdist_wheel`
-- `twine upload --repository-url  https://upload.pypi.org/legacy/ dist/*`
+- `twine upload dist/*`
