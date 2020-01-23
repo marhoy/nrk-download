@@ -14,14 +14,17 @@ def test_parse_url():
         'https://tv.nrk.no/serie/oppfinneren/sesong/2/episode/2/avspiller')
     assert len(programs) == 1
     assert programs[0].title == 'Oppfinneren'
-    assert programs[0].season_number == 1
+    assert programs[0].season_name == '2'
     assert programs[0].episode_number == 1
     assert programs[0].filename == nrkdownload.config.DOWNLOAD_DIR + \
         '/Oppfinneren/Season 02/Oppfinneren - S02E02 - 2of8'
     assert programs[0].filename == nrkdownload.config.DOWNLOAD_DIR + \
         '/Oppfinneren/Season 02/Oppfinneren - S02E02 - 2of8'
     assert programs[0].__str__() == 'Oppfinneren - Sesong 2 - Oppfinneren: 2:8'
-    assert programs[0]._series.seasons[0].__str__() == '1: 1 (8 episoder)'
+
+    first_season = list(programs[0]._series.seasons.values())[0]
+    assert first_season.__str__() == '1 (8 episoder)'
+
     assert programs[0]._series.__str__() == 'Oppfinneren : 3 Sesonger'
     nrkdownload.config.MAX_OUTPUT_STRING_LENGTH = 10
     assert programs[0].__str__() == 'Oppfinn...'
@@ -39,7 +42,7 @@ def test_parse_url():
     assert len(programs) == 1
     assert programs[0].title == 'Arif og Unge Ferrari med Stavanger Symfoniorkester'
     assert programs[0].series_id is None
-    assert programs[0].season_number is None
+    assert programs[0].season_name is None
     assert programs[0].episode_number is None
     assert programs[0].filename == nrkdownload.config.DOWNLOAD_DIR + \
         '/Arif og Unge Ferrari med Stavanger Symfoniorkester'

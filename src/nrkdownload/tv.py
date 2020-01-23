@@ -4,6 +4,8 @@ from __future__ import unicode_literals
 import logging
 import os.path
 import re
+from collections import OrderedDict
+
 
 # The urllib has changed from Python 2 to 3, and thus requires some extra handling
 
@@ -57,25 +59,37 @@ class Program:
         self.subtitle_urls = subtitle_urls
         self.duration = duration
         self._series = series_from_series_id(self.series_id)
-        self._season_number = None
+        self._season_name = None
+        self._season_id = None
         self._episode_number = None
         self._filename = None
 
     @property
-    def season_number(self):
-        """
-        Loop over the seasons of the series and find the one which contains our program_id
-
-        :return: Season number: int
-        """
+    def season_name(self):
         if not self.series_id:
             LOG.debug("%s is not part of a series", self.title)
             return None
-        if not self._season_number:
-            for i, season in enumerate(self._series.seasons):
-                if self.program_id in season.episode_ids:
-                    self._season_number = i
-        return self._season_number
+        return self._series.seasons[self.season_id].name
+
+    @property
+    def season_id(self):
+        """
+        Loop over the seasons of the series and find the one which contains our program_id
+
+        Returns:
+            Season ID (str)
+        """
+        if not self.series_id:
+            LOG.debug("%s is not part of a series", self.title)
+            return ""
+        if self._season_id:
+            return self._season_id
+        for season_id, season in self._series.seasons.items():
+            if self.program_id in season.episode_ids:
+                self._season_id = season_id
+                return self._season_id
+        raise IndexError("program_id {} not found in any seasons of "
+                         "series {}".format(self.program_id, self.series_id))
 
     @property
     def episode_number(self):
@@ -88,7 +102,7 @@ class Program:
             LOG.warning("%s is not part of a series", self.title)
             return None
         if not self._episode_number:
-            self._episode_number = self._series.seasons[self.season_number].\
+            self._episode_number = self._series.seasons[self.season_id].\
                 episode_ids.index(self.program_id)
         return self._episode_number
 
@@ -107,11 +121,13 @@ class Program:
             LOG.debug("Making filename for program %s", self.title)
 
             basedir = os.path.join(config.DOWNLOAD_DIR, self._series.dir_name,
-                                   self._series.seasons[self.season_number].dir_name)
+                                   self._series.seasons[
+                                       self.season_id].dir_name)
 
             filename = self._series.title
-            filename += ' - S{:02}E{:02}'.format(self.season_number + 1,
-                                                 self.episode_number + 1)
+
+            filename += ' - S{}E{:02}'.format(utils.zero_pad(self.season_name),
+                                              self.episode_number + 1)
 
             if not self.title.lower().startswith(self._series.title.lower()):
                 filename += ' - {}'.format(self.title)
@@ -133,8 +149,8 @@ class Program:
         string = ''
         if self._series:
             string += "{} - ".format(self._series.title)
-        if self.season_number:
-            string += "Sesong {} - ".format(self.season_number + 1)
+        if self.season_name:
+            string += "Sesong {} - ".format(self.season_name)
         string += self.title
         if self.episode_number_or_date and not string.endswith(self.episode_number_or_date):
             string += ': ' + self.episode_number_or_date
@@ -144,11 +160,10 @@ class Program:
 
 
 class Season:
-    def __init__(self, series_id, idx, season_id, name):
+    def __init__(self, series_id, season_id, name):
         LOG.debug('Creating new season of %s: %s: %s: %s',
-                  series_id, idx, season_id, name)
+                  series_id, season_id, name)
         self.series_id = series_id
-        self.idx = idx
         self.season_id = season_id
         self.name = name
         self._dir_name = None
@@ -158,7 +173,8 @@ class Season:
     @property
     def dir_name(self):
         if not self._dir_name:
-            self._dir_name = utils.valid_filename('Season {:02}'.format(self.idx + 1))
+            self._dir_name = utils.valid_filename('Season {}'.format(
+                utils.zero_pad(self.name)))
         # if not self.name.startswith('Sesong'):
         #     self._dir_name = utils.valid_filename(self._dir_name + '- {}'.format(self.name))
         return self._dir_name
@@ -183,8 +199,7 @@ class Season:
         return self._episodes
 
     def __str__(self):
-        string = '{}: {} ({} episoder)'.format(self.idx + 1, self.name, len(self.episode_ids))
-        return string
+        return '{} ({} episoder)'.format(self.name, len(self.episode_ids))
 
 
 class Series:
@@ -212,9 +227,13 @@ class Series:
     def add_known_series(cls, series_id, series_obj):
         cls._known_series[series_id] = series_obj
 
-    # @property
-    # def seasonId2Idx(self):
-    #     return {season.id: season.number for season in self.seasons}
+    def get_season_id_from_season_name(self, season_name):
+        for season_id, season in self.seasons.items():
+            if season.name == season_name:
+                return season_id
+        raise IndexError("No season in series {} with name {}".format(
+            self.series_id, season_name
+        ))
 
     def __str__(self):
         string = '{} : {} Sesong'.format(self.title, len(self.seasons))
@@ -267,14 +286,13 @@ def series_from_series_id(series_id, image_size=960):
         if image['pixelWidth'] == image_size:
             image_url = image['imageUrl']
 
-    seasons = []
-    for idx, season in enumerate(json['seasons']):
+    seasons = OrderedDict()
+    for season in json['seasons']:
         season_name = re.sub(r'\s+', ' ', season['name'])
         season_id = season['id']
-        seasons.append(Season(series_id=series_id,
-                              idx=idx,
-                              season_id=season_id,
-                              name=season_name))
+        seasons[season_id] = Season(series_id=series_id,
+                                    season_id=season_id,
+                                    name=season_name)
 
     series = Series(series_id=series_id, title=title, description=description,
                     image_url=image_url, seasons=seasons)

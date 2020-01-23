@@ -33,6 +33,13 @@ def parse_datetime(string):
     return dateutil.parser.parse(string)
 
 
+def zero_pad(value):
+    try:
+        return "{:02d}".format(int(value))
+    except ValueError:
+        return value
+
+
 def parse_duration(string):
     # PT28M39S : 28m39s
     # PT3H12M41.6S : 3h12m41.6s

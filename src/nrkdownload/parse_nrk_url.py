@@ -86,22 +86,24 @@ def parse_url(url):
         # We know the season and episode number, but not the media id
         #   https://tv.nrk.no/serie/oppfinneren/sesong/2/episode/2/avspiller
         series_id = series_match.group(1)
-        season_number = int(season_match.group(1))
+        season_name = season_match.group(1)
         episode_number = int(episode_match.group(1))
         series = tv.series_from_series_id(series_id)
-        episode = series.seasons[season_number - 1].episodes[episode_number - 1]
-        LOG.info("URL matches episode %d, season %d of series %s",
-                 episode_number, season_number, series_id)
+        season_id = series.get_season_id_from_season_name(season_name)
+        episode = series.seasons[season_id].episodes[episode_number - 1]
+        LOG.info("URL matches episode %d, season %s of series %s",
+                 episode_number, season_name, series_id)
         return [episode]
 
     if series_match and season_match:
         # A season of a series
         #   https://tv.nrk.no/serie/oppfinneren/sesong/2
-        season_number = int(season_match.group(1))
+        season_name = season_match.group(1)
         series_id = series_match.group(1)
-        LOG.info("URL matches season number %d of series %s", season_number, series_id)
+        LOG.info("URL matches season %s of series %s", season_name, series_id)
         series = tv.series_from_series_id(series_id)
-        episodes = series.seasons[season_number - 1].episodes
+        season_id = series.get_season_id_from_season_name(season_name)
+        episodes = series.seasons[season_id].episodes
         return episodes
 
     if series_match and not season_match:
@@ -110,7 +112,7 @@ def parse_url(url):
         series_id = series_match.group(1)
         series = tv.series_from_series_id(series_id)
         episodes = []
-        for season in series.seasons:
+        for season in series.seasons.values():
             for episode in season.episodes:
                 episodes.append(episode)
         LOG.info("URL matches series %s", series_id)
