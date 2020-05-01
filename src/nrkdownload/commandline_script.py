@@ -102,7 +102,7 @@ def main():
             logging.getLogger().setLevel(logging.DEBUG)
 
     if arguments.d:
-        config.DOWNLOAD_DIR = os.path.expanduser(arguments.d)
+        os.environ["DOWNLOAD_DIR"] = os.path.expanduser(arguments.d)
 
     config.ENABLE_CACHE = arguments.cache
 

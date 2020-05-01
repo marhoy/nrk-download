@@ -217,7 +217,7 @@ def download_programs(programs):
 
 
 def download_series_metadata(series):
-    download_dir = os.path.join(config.DOWNLOAD_DIR, series.dir_name)
+    download_dir = os.path.join(os.environ["DOWNLOAD_DIR"], series.dir_name)
     image_filename = "poster.jpg"
     if not os.path.exists(os.path.join(download_dir, image_filename)):
         LOG.info("Downloading image for series %s", series.title)

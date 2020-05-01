@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
+import os
 
 import nrkdownload.config
 import nrkdownload.parse_nrk_url
@@ -20,12 +21,12 @@ def test_parse_url():
     assert programs[0].episode_number == 1
     assert (
         programs[0].filename
-        == nrkdownload.config.DOWNLOAD_DIR
+        == os.environ["DOWNLOAD_DIR"]
         + "/Oppfinneren/Season 02/Oppfinneren - S02E02 - 2of8"
     )
     assert (
         programs[0].filename
-        == nrkdownload.config.DOWNLOAD_DIR
+        == os.environ["DOWNLOAD_DIR"]
         + "/Oppfinneren/Season 02/Oppfinneren - S02E02 - 2of8"
     )
     assert programs[0].__str__() == "Oppfinneren - Sesong 2 - Oppfinneren: 2:8"
@@ -57,7 +58,7 @@ def test_parse_url():
     assert programs[0].episode_number is None
     assert (
         programs[0].filename
-        == nrkdownload.config.DOWNLOAD_DIR
+        == os.environ["DOWNLOAD_DIR"]
         + "/Arif og Unge Ferrari med Stavanger Symfoniorkester"
     )
 
