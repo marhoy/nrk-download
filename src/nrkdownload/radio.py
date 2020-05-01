@@ -42,6 +42,7 @@ class Podcast:
             self._episodes = podcast_episodes(self.podcast_id)
         return self._episodes
 
+
 #    @episodes.setter
 #    def episodes(self, episodes):
 #        LOG.debug("In episode setter")
@@ -49,8 +50,9 @@ class Podcast:
 
 
 class PodcastEpisode:
-    def __init__(self, podcast_id, episode_id, title, subtitle,
-                 duration, media_urls, published):
+    def __init__(
+        self, podcast_id, episode_id, title, subtitle, duration, media_urls, published
+    ):
         self.podcast_id = podcast_id
         self.episode_id = episode_id
         self.title = title
@@ -71,17 +73,19 @@ class PodcastEpisode:
     @property
     def filename(self):
         basedir = os.path.join(config.DOWNLOAD_DIR, self.podcast.dir_name)
-        string = "{} - Episode {} - {} ({})".format(self.podcast.title,
-                                                    self.episode_number + 1,
-                                                    self.title,
-                                                    self.published.date())
+        string = "{} - Episode {} - {} ({})".format(
+            self.podcast.title,
+            self.episode_number + 1,
+            self.title,
+            self.published.date(),
+        )
         file = utils.valid_filename(string)
         return os.path.join(basedir, file)
 
     def __str__(self):
         string = os.path.basename(self.filename)
         if len(string) > config.MAX_OUTPUT_STRING_LENGTH:
-            string = string[:config.MAX_OUTPUT_STRING_LENGTH - 3] + '...'
+            string = string[: config.MAX_OUTPUT_STRING_LENGTH - 3] + "..."
         return string
 
 
@@ -90,37 +94,46 @@ def podcast_from_podcast_id(podcast_id):
         LOG.debug("Returning known podcast %s", podcast_id)
         return Podcast.known_podcasts[podcast_id]
     json = nrkapi.get_podcast_series(podcast_id)
-    title = json['titles']['title'].strip()
-    subtitle = json['titles']['subtitle']
-    image_url = json['imageUrl']
-    podcast = Podcast(podcast_id=podcast_id, title=title, subtitle=subtitle,
-                      image_url=image_url)
+    title = json["titles"]["title"].strip()
+    subtitle = json["titles"]["subtitle"]
+    image_url = json["imageUrl"]
+    podcast = Podcast(
+        podcast_id=podcast_id, title=title, subtitle=subtitle, image_url=image_url
+    )
     return podcast
 
 
 def podcast_episodes(podcast_id):
     json = nrkapi.get_podcast_episodes(podcast_id)
     episodes = []
-    for item in json['items']:
+    for item in json["items"]:
         episodes.append(podcast_episode_from_json(item))
     return episodes
 
 
 def podcast_episode_from_json(json):
-    if json['_links'].get('podcastEpisode'):
-        url = json['_links']['podcastEpisode']['href']
+    if json["_links"].get("podcastEpisode"):
+        url = json["_links"]["podcastEpisode"]["href"]
     else:
-        url = json['_links']['self']['href']
-    episode_id = url.split('/')[-1]
-    podcast_id = url.split('/')[-3]
-    title = json['titles']['title'].strip()
-    subtitle = json['titles']['subtitle']
-    duration = utils.parse_duration(json['duration'])
-    media_urls = [download_url['audio']['url'] for download_url in json['downloadables']]
-    published = utils.parse_datetime(json['publishedAt'])
-    episode = PodcastEpisode(podcast_id=podcast_id, episode_id=episode_id, title=title,
-                             subtitle=subtitle, duration=duration,
-                             media_urls=media_urls, published=published)
+        url = json["_links"]["self"]["href"]
+    episode_id = url.split("/")[-1]
+    podcast_id = url.split("/")[-3]
+    title = json["titles"]["title"].strip()
+    subtitle = json["titles"]["subtitle"]
+    duration = utils.parse_duration(json["duration"])
+    media_urls = [
+        download_url["audio"]["url"] for download_url in json["downloadables"]
+    ]
+    published = utils.parse_datetime(json["publishedAt"])
+    episode = PodcastEpisode(
+        podcast_id=podcast_id,
+        episode_id=episode_id,
+        title=title,
+        subtitle=subtitle,
+        duration=duration,
+        media_urls=media_urls,
+        published=published,
+    )
     return episode
 
 

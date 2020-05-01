@@ -7,9 +7,9 @@ import logging
 try:
     # Python 3
     from urllib.parse import urlparse
-except ImportError:                                 # pragma: no cover
+except ImportError:  # pragma: no cover
     # Python 2
-    from urlparse import urlparse                   # noqa: F401
+    from urlparse import urlparse  # noqa: F401
 
 import re
 import datetime
@@ -21,12 +21,12 @@ LOG = logging.getLogger(__name__)
 
 
 def valid_filename(string):
-    filename = re.sub(r'[/\\?<>:*|!"\']', '', string)
+    filename = re.sub(r'[/\\?<>:*|!"\']', "", string)
     return filename
 
 
 def create_image_url(image_id):
-    return 'http://m.nrk.no/m/img?kaleidoId={}&width={}'.format(image_id, 960)
+    return "http://m.nrk.no/m/img?kaleidoId={}&width={}".format(image_id, 960)
 
 
 def parse_datetime(string):
@@ -44,13 +44,13 @@ def parse_duration(string):
     # PT28M39S : 28m39s
     # PT3H12M41.6S : 3h12m41.6s
     if not string:
-        LOG.warning('No duration given')
+        LOG.warning("No duration given")
         return datetime.timedelta()
 
     hours = minutes = seconds = 0
-    hours_search = re.search(r'(\d+)H', string)
-    minutes_search = re.search(r'(\d+)M', string)
-    seconds_search = re.search(r'([\d.]+)S', string)
+    hours_search = re.search(r"(\d+)H", string)
+    minutes_search = re.search(r"(\d+)M", string)
+    seconds_search = re.search(r"([\d.]+)S", string)
     if hours_search:
         hours = int(hours_search.group(1))
     if minutes_search:
@@ -66,12 +66,14 @@ def ffmpeg_seconds_downloaded(process):
 
     line = process.stderr.readline()
     if line:
-        time_match = re.search(r'.+\s+time=([\d:.]+)', line)
+        time_match = re.search(r".+\s+time=([\d:.]+)", line)
         if time_match:
-            downloaded_time_list = time_match.group(1).split(':')
-            downloaded_time = datetime.timedelta(hours=int(downloaded_time_list[0]),
-                                                 minutes=int(downloaded_time_list[1]),
-                                                 seconds=float(downloaded_time_list[2]))
+            downloaded_time_list = time_match.group(1).split(":")
+            downloaded_time = datetime.timedelta(
+                hours=int(downloaded_time_list[0]),
+                minutes=int(downloaded_time_list[1]),
+                seconds=float(downloaded_time_list[2]),
+            )
 
         # rate_match = re.search('\s+bitrate=([\d.]+)', line)
         # if rate_match:
@@ -85,6 +87,7 @@ class ClassProperty(property):
     Python doesn't have class properties (yet?), but this should do the trick.
     We need this to keep track of known (previously seen) series.
     """
+
     def __get__(self, obj, obj_type=None):
         return super(ClassProperty, self).__get__(obj_type)
 
