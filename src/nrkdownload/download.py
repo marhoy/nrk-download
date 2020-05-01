@@ -18,7 +18,6 @@ except ImportError:  # pragma: no cover
     from urllib import urlretrieve
 
 from . import utils
-from . import config
 
 
 # Module wide logger

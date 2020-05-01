@@ -6,7 +6,6 @@ import os.path
 import re
 from collections import OrderedDict
 
-
 # The urllib has changed from Python 2 to 3, and thus requires some extra handling
 
 try:  # pragma: no cover
