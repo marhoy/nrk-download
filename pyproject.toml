@@ -1,0 +1,38 @@
+[tool.poetry]
+name = "nrkdownload"
+version = "2.1.0"
+description = "Download series or programs from NRK, complete with images and subtitles"
+readme = "README.md"
+repository = "https://github.com/marhoy/nrk-download"
+documentation = "https://nrkdownload.readthedocs.io/en/latest/"
+keywords = ["download", "video"]
+authors = ["Martin Høy <marhoy@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^2.7 || ^3.6 || ^3.7 || ^3.8"
+requests = "^2.23.0"
+requests_cache = "^0.5.2"
+tqdm = "^4.45.0"
+future = "^0.18.2"
+python-dateutil = "^2.8.1"
+
+[tool.poetry.dev-dependencies]
+tox = "*"
+pytest = "*"
+pytest-cov = "*"
+pytest-console-scripts = "*"
+flake8 = "*"
+isort = "^4.3.21"
+black = { version = "*", python = ">=3.6", allow-prereleases = true }
+pydocstyle = { version = "*", python = ">=3.6" }
+mypy = { version = "*", python = ">=3.6" }
+sphinx = "*"
+sphinx_rtd_theme = "*"
+
+[tool.poetry.scripts]
+nrkdownload = 'nrkdownload.commandline_script:main'
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

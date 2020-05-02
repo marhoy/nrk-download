@@ -1,5 +1,6 @@
-import nrkdownload.utils
 import datetime
+
+import nrkdownload.utils
 
 
 def test_valid_filename(string=r":blah/bl:ah.ext"):

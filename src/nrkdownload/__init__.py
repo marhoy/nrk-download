@@ -1,10 +1,9 @@
-import subprocess
-import os
-import sys
 import logging
+import os
+import subprocess
+import sys
 
-from . import tv
-from . import version
+from . import tv, version
 
 __all__ = ["tv"]
 

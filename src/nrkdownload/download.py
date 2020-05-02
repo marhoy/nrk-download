@@ -8,7 +8,7 @@ import time
 import requests
 import tqdm
 
-from . import tv
+from . import tv, utils
 
 try:
     # Python 3
@@ -16,8 +16,6 @@ try:
 except ImportError:  # pragma: no cover
     # Python 2
     from urllib import urlretrieve
-
-from . import utils
 
 
 # Module wide logger

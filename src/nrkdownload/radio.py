@@ -5,9 +5,7 @@ import logging
 import os.path
 
 # Our own modules
-from . import nrkapi
-from . import utils
-from . import config
+from . import config, nrkapi, utils
 
 # Module wide logger
 LOG = logging.getLogger(__name__)

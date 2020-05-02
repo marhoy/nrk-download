@@ -1,6 +1,8 @@
 import logging
 import re
 
+from . import radio, tv
+
 # The urllib has changed from Python 2 to 3, and thus requires some extra handling
 try:  # pragma: no cover
     # Python 3
@@ -11,8 +13,6 @@ except ImportError:  # pragma: no cover
     from urllib import unquote, urlretrieve  # noqa: F401
     from urlparse import urlparse  # noqa: F401
 
-from . import tv
-from . import radio
 
 # Module wide logger
 LOG = logging.getLogger(__name__)

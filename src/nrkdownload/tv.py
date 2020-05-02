@@ -6,6 +6,10 @@ import os.path
 import re
 from collections import OrderedDict
 
+# Our own modules
+from . import config, nrkapi, utils
+from .utils import ClassProperty
+
 # The urllib has changed from Python 2 to 3, and thus requires some extra handling
 
 try:  # pragma: no cover
@@ -17,11 +21,6 @@ except ImportError:  # pragma: no cover
     from urllib import unquote, urlretrieve  # noqa: F401
     from urlparse import urlparse  # noqa: F401
 
-# Our own modules
-from . import utils
-from . import config
-from . import nrkapi
-from .utils import ClassProperty
 
 # Module wide logger
 LOG = logging.getLogger(__name__)
@@ -82,8 +81,8 @@ class Program:
 
     @property
     def season_id(self):
-        """
-        Loop over the seasons of the series and find the one which contains our program_id
+        """Loop over the seasons of the series and find the one
+        which contains our program_id.
 
         Returns:
             Season ID (str)
@@ -195,7 +194,8 @@ class Season:
                 "Season {}".format(utils.zero_pad(self.season_id))
             )
         # if not self.name.startswith('Sesong'):
-        #     self._dir_name = utils.valid_filename(self._dir_name + '- {}'.format(self.name))
+        #     self._dir_name = utils.valid_filename(self._dir_name
+        #                       + '- {}'.format(self.name))
         return self._dir_name
 
     @property

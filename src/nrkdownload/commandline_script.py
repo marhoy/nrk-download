@@ -1,7 +1,5 @@
 # Python 2 compatibility
-from __future__ import unicode_literals
-from __future__ import print_function
-from future.builtins import input
+from __future__ import print_function, unicode_literals
 
 import argparse
 import logging
@@ -10,13 +8,9 @@ import platform
 import re
 import sys
 
-# Our own modules
-from nrkdownload import config
-from nrkdownload import parse_nrk_url
-from nrkdownload import version
-from nrkdownload import download
-from nrkdownload import tv
-from nrkdownload import radio
+from future.builtins import input
+
+from nrkdownload import config, download, parse_nrk_url, radio, tv, version
 
 LOG = logging.getLogger(__name__)
 

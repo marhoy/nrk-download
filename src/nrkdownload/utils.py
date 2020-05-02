@@ -1,8 +1,11 @@
 # These are needed if we are running under Python 2.7
-from __future__ import unicode_literals
-from __future__ import print_function
+from __future__ import print_function, unicode_literals
 
+import datetime
 import logging
+import re
+
+import dateutil.parser
 
 try:
     # Python 3
@@ -10,10 +13,6 @@ try:
 except ImportError:  # pragma: no cover
     # Python 2
     from urlparse import urlparse  # noqa: F401
-
-import re
-import datetime
-import dateutil.parser
 
 
 # Module wide logger

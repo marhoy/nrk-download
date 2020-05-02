@@ -1,11 +1,11 @@
 import logging
 import os.path
 import re
+import sys
 import tempfile
 
 import requests
 import requests_cache
-import sys
 
 try:
     # Python 3
@@ -80,7 +80,8 @@ def get_mediaelement(element_id):
             subtitle_url = media.get("webVttSubtitlesUrl", None)
 
             if url:
-                # Download URL starts with /i instead of /z, and has master.m3u8 at the end
+                # Download URL starts with /i instead of /z,
+                # and has master.m3u8 at the end
                 url = re.sub(r"\.net/z/", ".net/i/", url)
                 url = re.sub(r"manifest\.f4m$", "master.m3u8", url)
                 json["media_urls"].append(url)
