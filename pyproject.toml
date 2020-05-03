@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nrkdownload"
-version = "2.1.0"
+version = "2.1.1"
 description = "Download series or programs from NRK, complete with images and subtitles"
 readme = "README.md"
 repository = "https://github.com/marhoy/nrk-download"
