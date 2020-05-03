@@ -7,9 +7,19 @@ This is a commandline tool to download programs and series from NRK (Norwegian p
 The documentation for nrkdownload is availabe here:
 https://nrkdownload.readthedocs.org
 
+# Setting up a development environment
+Install [poetry](https://python-poetry.org/), and a recent Python version (>=3.6).
+If you want to run tests with multiple Python versions, install [pyenv](https://github.com/pyenv/pyenv).
+Set up the development environment:
+```bash
+poetry install
+```
+
+
 # Making a new release
-- Make sure all tests are ok: `tox`
-- Push changes to GitHub
+- Make sure all tests are ok by running `tox`
+- Make a pull requst on GitHub
 - Use the "new release" functionallity of GitHub. Make a new tag.
-- `python setup.py sdist bdist_wheel`
-- `twine upload dist/*`
+- Update `pyproject.toml` to match the new version number.
+- `poetry build`
+- `poetry publish`
