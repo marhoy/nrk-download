@@ -117,8 +117,15 @@ def get_episode_ids_of_series_season(series_id, season_id):
     r = requests.get(_api_url("/series/{}/seasons/{}".format(series_id, season_id)))
     r.raise_for_status()
     json = r.json()
-    json["_embedded"]["episodes"]
-    episode_ids = [episode["prfId"] for episode in json["_embedded"]["episodes"]]
+
+    if json["seriesType"] == "sequential":
+        episodes = json["_embedded"]["episodes"]
+    elif json["seriesType"] in ("standard", "news"):
+        episodes = json["_embedded"]["instalments"]
+    else:
+        raise ValueError("Unkown series type: %s", json["seriesType"])
+
+    episode_ids = [episode["prfId"] for episode in episodes]
     return episode_ids
 
 
