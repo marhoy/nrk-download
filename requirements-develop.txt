@@ -1,7 +1,0 @@
-pytest
-pytest-cov
-pytest-console-scripts
-flake8
-tox
-sphinx
-sphinx_rtd_theme

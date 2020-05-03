@@ -1,18 +1,18 @@
 import logging
 import re
 
+from . import radio, tv
+
 # The urllib has changed from Python 2 to 3, and thus requires some extra handling
-try:                                                        # pragma: no cover
+try:  # pragma: no cover
     # Python 3
     from urllib.request import urlretrieve
     from urllib.parse import unquote, urlparse
-except ImportError:                                         # pragma: no cover
+except ImportError:  # pragma: no cover
     # Python 2
-    from urllib import unquote, urlretrieve                 # noqa: F401
-    from urlparse import urlparse                           # noqa: F401
+    from urllib import unquote, urlretrieve  # noqa: F401
+    from urlparse import urlparse  # noqa: F401
 
-from . import tv
-from . import radio
 
 # Module wide logger
 LOG = logging.getLogger(__name__)
@@ -91,8 +91,12 @@ def parse_url(url):
         series = tv.series_from_series_id(series_id)
         season_id = series.get_season_id_from_season_name(season_name)
         episode = series.seasons[season_id].episodes[episode_number - 1]
-        LOG.info("URL matches episode %d, season %s of series %s",
-                 episode_number, season_name, series_id)
+        LOG.info(
+            "URL matches episode %d, season %s of series %s",
+            episode_number,
+            season_name,
+            series_id,
+        )
         return [episode]
 
     if series_match and season_match:
