@@ -2,12 +2,11 @@ import logging
 import os
 import subprocess
 import sys
+import pkg_resources
 
-from . import tv, version
 
-__all__ = ["tv"]
+__version__ = "2.1.2"
 
-__version__ = version.version
 
 # Before we continue, make sure that ffmpeg is available
 try:

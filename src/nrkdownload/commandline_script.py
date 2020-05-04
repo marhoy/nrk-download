@@ -10,7 +10,8 @@ import sys
 
 from future.builtins import input
 
-from nrkdownload import config, download, parse_nrk_url, radio, tv, version
+import nrkdownload
+from nrkdownload import config, download, parse_nrk_url, radio, tv
 
 LOG = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ def make_parser():
         "--version",
         action="version",
         version="%(prog)s version {}, running under {} with Python {}".format(
-            version.version, platform.system(), platform.python_version()
+            nrkdownload.__version__, platform.system(), platform.python_version()
         ),
     )
     parser.add_argument(
