@@ -1,15 +1,14 @@
 [tool.poetry]
 name = "nrkdownload"
-version = "0.1.0"
+version = "3.0.0rc1"
 description = ""
 authors = ["Martin Høy <marhoy@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.8"
 requests = "^2.27.1"
 pydantic = "^1.9.0"
 loguru = "^0.6.0"
-m3u8-To-MP4 = "^0.1.10"
 beautifulsoup4 = "^4.11.1"
 ffmpeg-python = "^0.2.0"
 typer = {extras = ["all"], version = "^0.4.1"}
@@ -19,10 +18,15 @@ halo = "^0.0.31"
 black = "^22.3.0"
 flake8 = "^4.0.1"
 mypy = "^0.942"
+types-requests = "^2.27.16"
+types-setuptools = "^57.4.14"
 pydocstyle = "^6.1.1"
 pre-commit = "^2.18.1"
 pytest = "^7.1.1"
-types-requests = "^2.27.16"
+pytest-cov = "^3.0.0"
+tox = "^3.25.0"
+Sphinx = "^4.5.0"
+sphinx-rtd-theme = "^1.0.0"
 ipykernel = "^6.13.0"
 
 [tool.poetry.scripts]
@@ -34,3 +38,17 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.isort]
 profile = "black"
+
+# This is a very strict mypy-configuration copied from here:
+# https://pydantic-docs.helpmanual.io/mypy_plugin/#configuring-the-plugin
+[tool.mypy]
+plugins = [
+    "pydantic.mypy",
+    ]
+follow_imports = "silent"
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_any_generics = true
+no_implicit_reexport = true
+check_untyped_defs = true
+disallow_untyped_defs = true
