@@ -16,6 +16,7 @@ repos:
         additional_dependencies:
           - pydantic
           - types-requests
+          - types-setuptools
 
   - repo: https://github.com/PyCQA/isort
     rev: 5.10.1
