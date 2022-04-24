@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 import datetime
 import re
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 import ffmpeg
 import requests
@@ -22,13 +24,13 @@ def valid_filename(string: str) -> str:
     return filename
 
 
-def get_image_url(data, key) -> Optional[HttpUrl]:
+def get_image_url(data: Dict[str, Any], key: str) -> Optional[HttpUrl]:
     if data.get(key):
         return data[key][-1]["url"]
     return None
 
 
-def download_image_url(url: Optional[HttpUrl], filename: Path):
+def download_image_url(url: Optional[HttpUrl], filename: Path) -> None:
     filename.parent.mkdir(parents=True, exist_ok=True)
     if not filename.exists() and url is not None:
         with open(filename, "wb") as file:
@@ -53,7 +55,7 @@ class TVProgram(BaseModel):
     subtitle_urls: List[HttpUrl]
 
     @classmethod
-    def from_program_id(cls, program_id: str):
+    def from_program_id(cls, program_id: str) -> TVProgram:
         r = session.get(PS_API + f"/tv/catalog/programs/{program_id}")
         r.raise_for_status()
         data = r.json()
@@ -81,7 +83,7 @@ class TVProgram(BaseModel):
             ],
         )
 
-    def download_as_program(self, basedir: Path):
+    def download_as_program(self, basedir: Path) -> None:
         filename = basedir / f"{self.title} ({self.prod_year})"
         download_image_url(self.poster_url, basedir / "poster.jpg")
         download_image_url(self.backdrop_url, basedir / f"{filename}-backdrop.jpg")
@@ -90,7 +92,7 @@ class TVProgram(BaseModel):
 
     def download_as_episode(
         self, series_title: str, sequence_string: str, basedir: Path
-    ):
+    ) -> None:
         filename = basedir / f"{series_title} - {sequence_string} - {self.title}"
         download_image_url(self.image_url, Path(f"{filename}.jpg"))
         download_video(self, filename)
@@ -121,7 +123,7 @@ class Season(BaseModel):
         return Path(f"Season {self.season_id}")
 
     @classmethod
-    def from_ids(cls, series_id: str, season_id: str):
+    def from_ids(cls, series_id: str, season_id: str) -> Season:
         r = session.get(PS_API + f"/tv/catalog/series/{series_id}/seasons/{season_id}")
         r.raise_for_status()
         data = r.json()
@@ -138,7 +140,7 @@ class Season(BaseModel):
             episodes=[episode["prfId"] for episode in data["_embedded"][episodes_name]],
         )
 
-    def download_images(self, basedir: Path):
+    def download_images(self, basedir: Path) -> None:
         directory = basedir / self.dirname
         download_image_url(
             self.poster_url, directory / f"Season{self.season_id:>02s}.jpg"
@@ -162,7 +164,7 @@ class TVSeries(BaseModel):
         return Path(valid_filename(self.title))
 
     @classmethod
-    def from_series_id(cls, series_id: str):
+    def from_series_id(cls, series_id: str) -> TVSeries:
         r = session.get(PS_API + f"/tv/catalog/series/{series_id}")
         r.raise_for_status()
         data = r.json()
@@ -180,14 +182,14 @@ class TVSeries(BaseModel):
             backdrop_url=get_image_url(data[data["seriesType"]], "backdropImage"),
         )
 
-    def download_images(self, basedir: Path):
+    def download_images(self, basedir: Path) -> None:
         directory = basedir / self.dirname
         download_image_url(self.poster_url, directory / "poster.jpg")
         download_image_url(self.backdrop_url, directory / "backdrop.jpg")
         download_image_url(self.image_url, directory / "banner.jpg")
 
 
-def download_video(program: TVProgram, filename: Path):
+def download_video(program: TVProgram, filename: Path) -> None:
     filename.parent.mkdir(parents=True, exist_ok=True)
 
     # TODO: Handle programs with multiple subtitle URLs
