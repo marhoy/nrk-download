@@ -1,33 +1,22 @@
 Features
 ========
 
-This is a commandline tool to download content from NRK
-(Norwegian public broadcaster). It supports downloading TV, radio and podcasts.
-The tool is written in Python, and is compatible with Python 2.7
-and 3.x. It has been tested under Linux, Mac OS X and Windows.
+This is a commandline tool for downloading content from NRK (Norwegian public
+broadcaster). It supports downloading TV series and programs. The tool is written in
+Python, and is compatible with Python 3.8 or newer. It has been tested under Linux, Mac
+OS X and Windows.
 
-As of autumn 2018, NRK has started to require a secret key in the header of
-the API requests. This download-tool works even after those restrictions.
-Users outside of Norway should note that some of the content is
-geo-restricted.
+Please only use this tool for personal purposes. You are responsible for not breaking
+any Intellectual Property Rights. Users outside of Norway should note that some of the
+content is geo-restricted.
 
 
-How is this tools different than others?
-----------------------------------------
+Downloading media and metadata
+------------------------------
 
-When you download a program with this tool, it doesn't just download one
-file. If the program is part of a series, directories for the series and
-season is created. And the file is automatically named according to its
-episode and season number. Subtitles and additional images are also
-automatically downloaded. The subtitles are automatically embedded in the
-.m4v-file, so you could decide to delete the .srt-file. (I have found that in
-some tools (like VLC), the support for included subtitles is not perfect.
-That's why the separate .srt-file is also there.)
-
-The idea behind all of this is that the downloaded programs should integrate
-seamlessly into you favorite media server, e.g. Plex. If you for example
-download all the episodes of the popular series SKAM, you would get a
-directory-structure like this::
+The idea behind the tool is that the downloaded programs should integrate seamlessly
+into you favorite media server, e.g. Plex. If you for example download all the episodes
+of the popular series SKAM, you would get a directory-structure like this::
 
     SKAM
     ├── poster.jpg
