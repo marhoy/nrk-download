@@ -1,7 +1,9 @@
+import re
 import sys
 from pathlib import Path
 from typing import List, Optional
 
+import pkg_resources
 import typer
 from halo import Halo
 from loguru import logger
@@ -9,7 +11,7 @@ from loguru import logger
 from nrkdownload.nrk_tv import NotPlayableError, TVProgram, TVSeries, TVSeriesType
 
 
-def set_loglevel(verbosity: int):
+def set_loglevel(verbosity: int) -> None:
     levels = {0: "WARNING", 1: "SUCCESS", 2: "INFO", 3: "DEBUG", 4: "TRACE"}
     log_level = levels[verbosity]
     logger.remove()
@@ -17,9 +19,16 @@ def set_loglevel(verbosity: int):
     logger.success(f"Setting loglevel to {log_level}")
 
 
-def series(
-    series_id: str, download_dir: Path, only_seasons: Optional[List[str]] = None
-):
+def version_callback(value: bool) -> None:
+    if value:
+        version = pkg_resources.require("nrkdownload")[0].version
+        typer.echo(f"nrkdownload version: {version}")
+        raise typer.Exit()
+
+
+def download_series(
+    series_id: str, download_dir: Path, only_season_id: Optional[str] = None
+) -> None:
     """_summary_
 
     Args:
@@ -31,7 +40,7 @@ def series(
     typer.echo(f"Downloading {series.title}")
     series.download_images(download_dir)
     for info in series.season_info:
-        if (only_seasons is not None) and (info.season_id not in only_seasons):
+        if (only_season_id is not None) and (info.season_id != only_season_id):
             continue
         season = series.get_season(info.season_id)
         typer.echo(f"Downloading {season.title}")
@@ -52,7 +61,7 @@ def series(
                 # typer.echo(f"Downloading episode {program.title}")
 
 
-def program(program_id: str, download_dir: Path):
+def download_program(program_id: str, download_dir: Path) -> None:
     """_summary_
 
     Args:
@@ -79,6 +88,13 @@ def main(
         "-d",
         help="Download directory",
     ),
+    version: Optional[bool] = typer.Option(
+        None,
+        "--version",
+        help="Print version string",
+        callback=version_callback,
+        is_eager=True,
+    ),
     verbose: int = typer.Option(
         0,
         "-v",
@@ -88,7 +104,7 @@ def main(
         max=4,
         clamp=True,
     ),
-):
+) -> None:
     typer.echo(f"Downloading to {download_dir}:")
     for url in urls:
         # Example program URL:
@@ -109,11 +125,19 @@ def main(
         # https://tv.nrk.no/serie/dagsrevyen-21/202203
         # https://tv.nrk.no/serie/dagsrevyen-21/202203/NNFA21030122/avspiller
 
-        series(url, download_dir)
-        # program(url, download_dir)
+        if match := re.match(
+            r"https://tv.nrk.no/serie/([\w-]+)(?:/sesong/(\w+)|/(\w+)|)", url
+        ):
+            series_id = match.group(1)
+            only_season_id = match.group(2) or match.group(3)
+            download_series(series_id, download_dir, only_season_id)
+
+        elif match := re.match(r"https://tv.nrk.no/program/(\w+)", url):
+            program_id = match.group(1)
+            download_program(program_id, download_dir)
 
 
-def entrypoint():
+def entrypoint() -> None:
     typer.run(main)
 
 
