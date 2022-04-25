@@ -79,6 +79,9 @@ target/
 .idea/nrk-download.iml
 .idea/
 
+# VS Code settings
+.vscode/settings.json
+
 # pyenv
 .python-version
 
