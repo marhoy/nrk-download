@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nrkdownload"
-version = "3.0.0-rc2"
+version = "3.0.0"
 description = ""
 authors = ["Martin Høy <marhoy@gmail.com>"]
 readme = "README.md"
