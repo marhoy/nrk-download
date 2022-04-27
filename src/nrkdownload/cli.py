@@ -1,3 +1,4 @@
+import os
 import re
 import sys
 from pathlib import Path
@@ -9,6 +10,8 @@ from halo import Halo
 from loguru import logger
 
 from nrkdownload.nrk_tv import NotPlayableError, TVProgram, TVSeries, TVSeriesType
+
+app = typer.Typer(add_completion=False)
 
 
 def set_loglevel(verbosity: int) -> None:
@@ -78,15 +81,24 @@ def download_program(program_id: str, download_dir: Path) -> None:
         spinner.succeed()
 
 
+def get_default_dowload_dir() -> Path:
+    dir = os.environ.get("NRKDOWNLOAD_DIR") or Path.home() / "Downloads" / "nrkdownload"
+    return Path(dir)
+
+
+@app.command()
 def main(
     urls: List[str] = typer.Argument(
         ..., help="One or more valid URLs from https://tv.nrk.no/"
     ),
     download_dir: Path = typer.Option(
-        Path.home() / "Downloads" / "nrkdownload",
+        get_default_dowload_dir(),
         "--download-dir",
         "-d",
-        help="Download directory",
+        help=(
+            "Download directory. Can also be specified by setting the environment "
+            "variable NRKDOWNLOAD_DIR"
+        ),
     ),
     version: Optional[bool] = typer.Option(
         None,
@@ -105,7 +117,6 @@ def main(
         clamp=True,
     ),
 ) -> None:
-    typer.echo(f"Downloading to {download_dir}:")
     for url in urls:
         # Example program URL:
         # https://tv.nrk.no/program/KOID75000320
@@ -135,11 +146,6 @@ def main(
         elif match := re.match(r"https://tv.nrk.no/program/(\w+)", url):
             program_id = match.group(1)
             download_program(program_id, download_dir)
-
-
-def entrypoint() -> None:
-    typer.run(main)
-
-
-if __name__ == "__main__":
-    entrypoint()
+        else:
+            typer.echo("Not able to parse URL")
+            typer.Exit(1)
