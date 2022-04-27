@@ -1,40 +1,55 @@
 [tool.poetry]
 name = "nrkdownload"
-version = "2.1.2"
-description = "Download series or programs from NRK, complete with images and subtitles"
-readme = "README.md"
-repository = "https://github.com/marhoy/nrk-download"
-documentation = "https://nrkdownload.readthedocs.io/en/latest/"
-keywords = ["download", "video"]
+version = "3.0.0-rc2"
+description = ""
 authors = ["Martin Høy <marhoy@gmail.com>"]
-license = "MIT"
+readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^2.7 || ^3.6 || ^3.7 || ^3.8"
-requests = "^2.23.0"
-requests_cache = "^0.5.2"
-tqdm = "^4.46.0"
-future = "^0.18.2"
-python-dateutil = "^2.8.1"
+python = "^3.8"
+requests = "^2.27.1"
+pydantic = "^1.9.0"
+loguru = "^0.6.0"
+beautifulsoup4 = "^4.11.1"
+ffmpeg-python = "^0.2.0"
+typer = {extras = ["all"], version = "^0.4.1"}
+halo = "^0.0.31"
 
 [tool.poetry.dev-dependencies]
-pydantic = { version = "*", python = ">=3.6" }
-ipykernel = { version = "*", python = ">=3.6" }
-tox = "*"
-pytest = "*"
-pytest-cov = "*"
-pytest-console-scripts = "*"
-flake8 = "*"
-isort = "*"
-black = { version = "*", python = ">=3.6", allow-prereleases = true }
-pydocstyle = { version = "*", python = ">=3.6" }
-mypy = { version = "*", python = ">=3.6" }
-sphinx = "*"
-sphinx_rtd_theme = "*"
+black = "^22.3.0"
+flake8 = "^4.0.1"
+mypy = "^0.942"
+types-requests = "^2.27.16"
+types-setuptools = "^57.4.14"
+pydocstyle = "^6.1.1"
+pre-commit = "^2.18.1"
+pytest = "^7.1.1"
+pytest-cov = "^3.0.0"
+tox = "^3.25.0"
+Sphinx = "^4.5.0"
+sphinx-rtd-theme = "^1.0.0"
+ipykernel = "^6.13.0"
 
 [tool.poetry.scripts]
-nrkdownload = 'nrkdownload.commandline_script:main'
+nrkdownload = "nrkdownload.cli:app"
 
 [build-system]
-requires = ["poetry>=0.12"]
-build-backend = "poetry.masonry.api"
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+profile = "black"
+
+# This is a very strict mypy-configuration copied from here:
+# https://pydantic-docs.helpmanual.io/mypy_plugin/#configuring-the-plugin
+[tool.mypy]
+plugins = [
+    "pydantic.mypy",
+    ]
+follow_imports = "silent"
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_any_generics = true
+no_implicit_reexport = true
+check_untyped_defs = true
+disallow_untyped_defs = true
