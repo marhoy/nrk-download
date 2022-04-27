@@ -1,8 +1,9 @@
 [tool.poetry]
 name = "nrkdownload"
-version = "3.0.0-rc1"
+version = "3.0.0-rc2"
 description = ""
 authors = ["Martin Høy <marhoy@gmail.com>"]
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"
