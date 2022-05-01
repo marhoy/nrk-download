@@ -18,7 +18,7 @@ halo = "^0.0.31"
 [tool.poetry.dev-dependencies]
 black = "^22.3.0"
 flake8 = "^4.0.1"
-mypy = "^0.942"
+mypy = "^0.950"
 types-requests = "^2.27.16"
 types-setuptools = "^57.4.14"
 pydocstyle = "^6.1.1"
