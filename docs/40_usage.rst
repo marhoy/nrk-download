@@ -17,7 +17,7 @@ Options
   Options:
     -d, --download-dir PATH  Download directory. Can also be specified by
                             setting the environment variable NRKDOWNLOAD_DIR
-                            [default: /Users/marhoy/Downloads/nrkdownload]
+                            [default: ~/Downloads/nrkdownload]
     --version                Print version string
     -v                       Increase logger verbosity. Can be repeated up to
                             four times.  [default: 0; x<=4]

@@ -1,6 +1,14 @@
 Examples
 ========
 
+
+Downloading programs
+--------------------
+
+For downloading a specific program that is not part of a series, the URL
+could look like e.g. https://tv.nrk.no/program/MUHH49000021
+
+
 Dowloading series
 -----------------
 
@@ -10,8 +18,8 @@ page with the URL https://tv.nrk.no/serie/elias. If you give this URL as an argu
 ``nrkdownload``, all (available) episodes in all seasons will be downloaded.
 
 
-Downloading seasons
--------------------
+Downloading a single season
+---------------------------
 
 If you are only interested in a specific season of a series, click around on
 the webpages until you are only looking at that season. As an example, if you
@@ -19,8 +27,15 @@ wanted to download the third season of SKAM, you would use an URL like
 https://tv.nrk.no/serie/skam/sesong/3
 
 
-Downloading programs
---------------------
+Downloading a single episode
+----------------------------
 
-For downloading a specific program that is not part of a series, the URL
-could look like e.g. https://tv.nrk.no/program/KOID28004110/pushwagner
+If you want to download only a single episode of a series, navigate https://tv.nrk.no
+until that episode is selected. The URL will look like e.g.
+https://tv.nrk.no/serie/kongen-av-gulset/sesong/1/episode/3/avspiller or
+https://tv.nrk.no/serie/klassequizen/2021/DSRR21000521/avspiller, where information
+about the episode is included.
+
+Giving a URL like this as argument to nrkdownload, will result in only this single
+episode to be downloaded.
+

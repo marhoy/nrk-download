@@ -1,4 +1,4 @@
-from nrkdownload.nrk_tv import TVProgram, TVSeries
+from nrkdownload.nrk_tv import TVProgram, TVSeries, TVSeriesType
 
 
 def test_tv_series() -> None:
@@ -11,6 +11,7 @@ def test_tv_season() -> None:
     series = TVSeries.from_series_id("kongen-av-gulset")
     season = series.get_season(series.season_info[0].season_id)
     assert len(season.episodes) == 7
+    assert series.type == TVSeriesType.sequential
 
 
 def test_tv_program() -> None:
