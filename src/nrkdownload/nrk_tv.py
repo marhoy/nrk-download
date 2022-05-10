@@ -1,15 +1,21 @@
 from __future__ import annotations
 
 import datetime
-import re
-from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 import ffmpeg
 import requests
 from loguru import logger
 from pydantic import BaseModel, Field, HttpUrl
+
+from nrkdownload.nrk_common import (
+    SeasonInfo,
+    SeriesType,
+    download_image_url,
+    get_image_url,
+    valid_filename,
+)
 
 PS_API = "https://psapi.nrk.no/"
 session = requests.Session()
@@ -17,24 +23,6 @@ session = requests.Session()
 
 class NotPlayableError(Exception):
     pass
-
-
-def valid_filename(string: str) -> str:
-    filename = re.sub(r'[/\\?<>:*|!"\']', "", string)
-    return filename
-
-
-def get_image_url(data: Dict[str, Any], key: str) -> Optional[HttpUrl]:
-    if data.get(key):
-        return data[key][-1]["url"]
-    return None
-
-
-def download_image_url(url: Optional[HttpUrl], filename: Path) -> None:
-    filename.parent.mkdir(parents=True, exist_ok=True)
-    if not filename.exists() and url is not None:
-        with open(filename, "wb") as file:
-            file.write(requests.get(url).content)
 
 
 class TVProgram(BaseModel):
@@ -98,27 +86,16 @@ class TVProgram(BaseModel):
         download_video(self, filename)
 
 
-class TVSeriesType(str, Enum):
-    sequential = "sequential"
-    standard = "standard"
-    news = "news"
-
-
-class SeasonInfo(BaseModel):
-    season_id: str
-    title: str
-
-
 class Season(BaseModel):
     season_id: str
     title: str
-    series_type: TVSeriesType
+    series_type: SeriesType
     poster_url: Optional[HttpUrl]
     episodes: List[str]
 
     @property
     def dirname(self) -> Path:
-        if self.series_type == TVSeriesType.sequential:
+        if self.series_type == SeriesType.sequential:
             return Path(f"Season {int(self.season_id):02d}")
         return Path(f"Season {self.season_id}")
 
@@ -150,7 +127,7 @@ class Season(BaseModel):
 class TVSeries(BaseModel):
     series_id: str
     title: str
-    type: TVSeriesType
+    type: SeriesType
     season_info: List[SeasonInfo]
     image_url: Optional[HttpUrl]
     poster_url: Optional[HttpUrl]
