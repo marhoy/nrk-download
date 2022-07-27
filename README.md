@@ -28,6 +28,6 @@ poetry install
 - Make sure all tests are ok by running `tox`
 - Make a pull requst on GitHub
 - Use the "new release" functionallity of GitHub. Make a new tag.
-- Update `pyproject.toml` and `__init__.py` to match the new version number.
+- Update `pyproject.toml` to match the new version number.
 - `poetry build`
 - `poetry publish`
