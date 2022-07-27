@@ -6,7 +6,13 @@ import typer
 from halo import Halo
 from loguru import logger
 
-from nrkdownload.nrk_tv import NotPlayableError, TVProgram, TVSeries, TVSeriesType
+from nrkdownload.nrk_tv import (
+    NotPlayableError,
+    TVProgram,
+    TVSeries,
+    TVSeriesType,
+    valid_filename,
+)
 
 
 def get_default_dowload_dir() -> Path:
@@ -70,7 +76,9 @@ def download_series(
                 else:
                     sequence_string = season.season_id
 
-                program.download_as_episode(series.title, sequence_string, directory)
+                program.download_as_episode(
+                    valid_filename(series.title), sequence_string, directory
+                )
                 # typer.echo(f"Downloading episode {program.title}")
 
 
