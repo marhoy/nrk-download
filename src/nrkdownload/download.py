@@ -6,7 +6,8 @@ import typer
 from halo import Halo
 from loguru import logger
 
-from nrkdownload.nrk_tv import NotPlayableError, TVProgram, TVSeries, TVSeriesType
+from nrkdownload.nrk_common import NotPlayableError, SeriesType
+from nrkdownload.nrk_tv import TVProgram, TVSeries
 
 
 def get_default_dowload_dir() -> Path:
@@ -47,14 +48,14 @@ def download_series(
                 # If it's a sequential series, only_episode_id is an episode number.
                 # Otherwise, only_episode_id is a program_id.
                 if only_episode_id is not None:
-                    if (series.type == TVSeriesType.sequential) and (
+                    if (series.type == SeriesType.sequential) and (
                         only_episode_id != str(episode_number)
                     ):
                         logger.debug(f"Skipping episode number {episode_number}...")
                         continue
                     elif (
-                        (series.type == TVSeriesType.news)
-                        or (series.type == TVSeriesType.standard)
+                        (series.type == SeriesType.news)
+                        or (series.type == SeriesType.standard)
                     ) and (only_episode_id != program_id):
                         logger.debug(f"Skipping episode ID {program_id}...")
                         continue
@@ -65,7 +66,7 @@ def download_series(
                     typer.echo(f"Skipping: {e}")
                     continue
 
-                if series.type == TVSeriesType.sequential:
+                if series.type == SeriesType.sequential:
                     sequence_string = f"s{season.season_id:>02s}e{episode_number:>02d}"
                 else:
                     sequence_string = season.season_id

@@ -2,27 +2,22 @@ from __future__ import annotations
 
 import datetime
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional
 
 import ffmpeg
-import requests
 from loguru import logger
 from pydantic import BaseModel, Field, HttpUrl
 
 from nrkdownload.nrk_common import (
-    SeasonInfo,
-    SeriesType,
+    PS_API,
+    NotPlayableError,
+    Season,
+    Series,
     download_image_url,
     get_image_url,
+    session,
     valid_filename,
 )
-
-PS_API = "https://psapi.nrk.no/"
-session = requests.Session()
-
-
-class NotPlayableError(Exception):
-    pass
 
 
 class TVProgram(BaseModel):
@@ -86,84 +81,23 @@ class TVProgram(BaseModel):
         download_video(self, filename)
 
 
-class Season(BaseModel):
-    season_id: str
-    title: str
-    series_type: SeriesType
-    poster_url: Optional[HttpUrl]
-    episodes: List[str]
-
-    @property
-    def dirname(self) -> Path:
-        if self.series_type == SeriesType.sequential:
-            return Path(f"Season {int(self.season_id):02d}")
-        return Path(f"Season {self.season_id}")
-
+class TVSeason(Season):
     @classmethod
-    def from_ids(cls, series_id: str, season_id: str) -> Season:
+    def get_json_data(cls, series_id: str, season_id: str) -> Dict[str, Any]:
         r = session.get(PS_API + f"/tv/catalog/series/{series_id}/seasons/{season_id}")
         r.raise_for_status()
-        data = r.json()
-
-        episodes_name = "episodes"
-        if data["seriesType"] in ("news", "standard"):
-            episodes_name = "instalments"
-
-        return cls(
-            season_id=season_id,
-            title=data["titles"]["title"],
-            series_type=data["seriesType"],
-            poster_url=get_image_url(data, "posterImage"),
-            episodes=[episode["prfId"] for episode in data["_embedded"][episodes_name]],
-        )
-
-    def download_images(self, basedir: Path) -> None:
-        directory = basedir / self.dirname
-        download_image_url(
-            self.poster_url, directory / f"Season{self.season_id:>02s}.jpg"
-        )
+        return r.json()
 
 
-class TVSeries(BaseModel):
-    series_id: str
-    title: str
-    type: SeriesType
-    season_info: List[SeasonInfo]
-    image_url: Optional[HttpUrl]
-    poster_url: Optional[HttpUrl]
-    backdrop_url: Optional[HttpUrl]
-
-    def get_season(self, season_id: str) -> Season:
-        return Season.from_ids(self.series_id, season_id)
-
-    @property
-    def dirname(self) -> Path:
-        return Path(valid_filename(self.title))
+class TVSeries(Series):
+    def get_season(self, season_id: str) -> TVSeason:
+        return TVSeason.from_ids(self.series_id, season_id)
 
     @classmethod
-    def from_series_id(cls, series_id: str) -> TVSeries:
+    def get_json_data(cls, series_id: str) -> Dict[str, Any]:
         r = session.get(PS_API + f"/tv/catalog/series/{series_id}")
         r.raise_for_status()
-        data = r.json()
-
-        return cls(
-            series_id=series_id,
-            title=data[data["seriesType"]]["titles"]["title"],
-            type=data["seriesType"],
-            season_info=[
-                SeasonInfo(season_id=item["name"], title=item["title"])
-                for item in data["_links"]["seasons"]
-            ],
-            image_url=get_image_url(data[data["seriesType"]], "image"),
-            poster_url=get_image_url(data[data["seriesType"]], "posterImage"),
-            backdrop_url=get_image_url(data[data["seriesType"]], "backdropImage"),
-        )
-
-    def download_images(self, basedir: Path) -> None:
-        directory = basedir / self.dirname
-        download_image_url(self.poster_url, directory / "poster.jpg")
-        download_image_url(self.backdrop_url, directory / "backdrop.jpg")
-        download_image_url(self.image_url, directory / "banner.jpg")
+        return r.json()
 
 
 def download_video(program: TVProgram, filename: Path) -> None:

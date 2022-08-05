@@ -1,10 +1,6 @@
 from typing import Any, Dict
 
-import requests
-
-from nrkdownload.nrk_common import PS_API, Season, Series
-
-session = requests.Session()
+from nrkdownload.nrk_common import PS_API, Season, Series, session
 
 
 class PodcastSeason(Season):

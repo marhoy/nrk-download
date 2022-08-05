@@ -3,13 +3,22 @@ from __future__ import annotations
 import re
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Type, TypeVar
 
 import requests
 from pydantic import BaseModel, HttpUrl
 
 PS_API = "https://psapi.nrk.no/"
 session = requests.Session()
+
+# Create a generic variable that can be 'Season', or any subclass.
+SeasonT = TypeVar("SeasonT", bound="Season")
+# Create a generic variable that can be 'Series', or any subclass.
+SeriesT = TypeVar("SeriesT", bound="Series")
+
+
+class NotPlayableError(Exception):
+    pass
 
 
 def valid_filename(string: str) -> str:
@@ -59,7 +68,7 @@ class Season(BaseModel):
         return NotImplemented
 
     @classmethod
-    def from_ids(cls, series_id: str, season_id: str) -> Season:
+    def from_ids(cls: Type[SeasonT], series_id: str, season_id: str) -> SeasonT:
         data = cls.get_json_data(series_id, season_id)
 
         if data.get("type"):
@@ -116,7 +125,7 @@ class Series(BaseModel):
         return Path(valid_filename(self.title))
 
     @classmethod
-    def from_series_id(cls, series_id: str) -> Series:
+    def from_series_id(cls: Type[SeriesT], series_id: str) -> SeriesT:
         data = cls.get_json_data(series_id)
 
         if data.get("series"):
