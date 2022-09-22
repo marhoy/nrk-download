@@ -79,7 +79,9 @@ class TVProgram(BaseModel):
             backdrop_url=get_image_url(data, "backdropImage"),
             media_urls=[asset["url"] for asset in manifest["playable"]["assets"]],
             subtitle_urls=[
-                title["webVtt"] for title in manifest["playable"]["subtitles"]
+                title["webVtt"]
+                for title in manifest["playable"]["subtitles"]
+                if title["defaultOn"]
             ],
         )
 
