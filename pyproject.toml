@@ -1,41 +1,116 @@
-[tool.poetry]
+[project]
 name = "nrkdownload"
-version = "3.1.2"
+dynamic = ["version"]
 description = ""
-authors = ["Martin Høy <marhoy@gmail.com>"]
+authors = [{ name = "Martin Høy", email = "martin@hoy.priv.no" }]
 readme = "README.md"
+requires-python = ">=3.8"
+dependencies = [
+    "loguru>=0.7.3",
+    "pydantic>=2.10.6",
+    "typer>=0.15.1",
+    "halo>=0.0.31",
+    "beautifulsoup4>=4.13.3",
+    "requests>=2.32.3",
+    "ffmpeg-python>=0.2.0",
+]
 
-[tool.poetry.dependencies]
-python = "^3.8"
-requests = "^2.27.1"
-pydantic = "^1.9.0"
-loguru = "^0.6.0"
-beautifulsoup4 = "^4.11.1"
-ffmpeg-python = "^0.2.0"
-typer = {extras = ["all"], version = "^0.4.1"}
-halo = "^0.0.31"
 
-[tool.poetry.dev-dependencies]
-black = "^22.3.0"
-flake8 = "^4.0.1"
-mypy = "^0.950"
-types-requests = "^2.27.16"
-types-setuptools = "^57.4.14"
-pydocstyle = "^6.1.1"
-pre-commit = "^2.18.1"
-pytest = "^7.1.1"
-pytest-cov = "^3.0.0"
-tox = "^3.25.0"
-Sphinx = "^4.5.0"
-sphinx-rtd-theme = "^1.0.0"
-ipykernel = "^6.13.0"
+[dependency-groups]
+docs = ["sphinx>=7.1.2", "sphinx-rtd-theme>=3.0.2"]
+dev = [
+    "ipykernel>=6.29.5",
+    "nox>=2025.2.9",
+    "pre-commit>=3.5.0",
+    "pytest>=8.3.4",
+    "pytest-cov>=5.0.0",
+    "types-requests>=2.32.0.20241016",
+]
 
-[tool.poetry.scripts]
+[project.scripts]
 nrkdownload = "nrkdownload.cli:app"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+# FIXME: temporary workaround until https://github.com/pypa/setuptools/issues/4759 is fixed
+[tool.setuptools]
+license-files = []
+
+[tool.setuptools_scm]
+# Use the git tags to determine the version
+
+[tool.ruff]
+# Consider packages in the src directory as first-party code
+src = ["src"]
+
+# Run ruff on Notebooks as well
+extend-include = ["*.ipynb"]
+
+[tool.ruff.lint.per-file-ignores]
+# Allow the use of assert in tests
+"tests/*" = ["S101"]
+
+[tool.ruff.lint]
+select = [
+    "F",   # Pyflakes
+    "E",   # pycodestyle
+    "W",   # pycodestyle
+    "C90", # mccabe
+    "I",   # isort
+    "ICN", # flake8-import-conventions
+    "N",   # pep8-naming
+    "D",   # pydocstyle
+    "UP",  # pyupgrade
+    "ANN", # flake8-annotations
+    "S",   # flake8-bandit
+    "B",   # flake8-bugbear
+    "A",   # flake8-builtins
+    "C4",  # flake8-comprehensions
+    "DTZ", # flake8-datetimez
+    "FA",  # flake8-future-annotations
+    "ISC", # flake8-implicit-str-concat
+    "ICN", # flake8-import-conventions
+    "PT",  # flake8-pytest-style
+    "Q",   # flake8-quotes
+    "RET", # flake8-return
+    "SIM", # flake8-simplify
+    "TID", # flake8-tidy-imports
+    "ARG", # flake8-unused-arguments
+    "PTH", # flake8-use-pathlib
+    "PD",  # pandas-vet
+    "PLC", # Pylint convention
+    "PLE", # Pylint error
+    # "PLR",  # Pylint refactor
+    "NPY",  # NumPy
+    "FAST", # FastAPI
+    "RUF",  # Ruff-specific rules
+]
+ignore = []
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+
+# mypy configuration, taken from pydantic documentation
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+
+follow_imports = "silent"
+warn_redundant_casts = true
+warn_unused_ignores = true
+disallow_any_generics = true
+check_untyped_defs = true
+no_implicit_reexport = true
+
+disallow_untyped_defs = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
 
 [tool.pytest.ini_options]
 addopts = "--verbose --cov-report term-missing:skip-covered --cov=nrkdownload"
@@ -44,20 +119,3 @@ filterwarnings = [
     "ignore::DeprecationWarning:past.*",
     "ignore::DeprecationWarning:halo.*",
 ]
-
-[tool.isort]
-profile = "black"
-
-# This is a very strict mypy-configuration copied from here:
-# https://pydantic-docs.helpmanual.io/mypy_plugin/#configuring-the-plugin
-[tool.mypy]
-plugins = [
-    "pydantic.mypy",
-    ]
-follow_imports = "silent"
-warn_redundant_casts = true
-warn_unused_ignores = true
-disallow_any_generics = true
-no_implicit_reexport = true
-check_untyped_defs = true
-disallow_untyped_defs = true

@@ -82,9 +82,6 @@ target/
 # VS Code settings
 .vscode/settings.json
 
-# pyenv
-.python-version
-
 # celery beat schedule file
 celerybeat-schedule
 
