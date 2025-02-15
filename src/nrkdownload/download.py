@@ -48,7 +48,6 @@ def download_series(
         directory = download_dir / series.dirname / season.dirname
         with typer.progressbar(season.episodes) as episodes:
             for episode_number, program_id in enumerate(episodes, start=1):
-
                 # If we're asked to only download one episode, possibly skip this one.
                 # If it's a sequential series, only_episode_id is an episode number.
                 # Otherwise, only_episode_id is a program_id.
@@ -58,7 +57,7 @@ def download_series(
                     ):
                         logger.debug(f"Skipping episode number {episode_number}...")
                         continue
-                    elif (
+                    if (
                         (series.type == TVSeriesType.news)
                         or (series.type == TVSeriesType.standard)
                     ) and (only_episode_id != program_id):

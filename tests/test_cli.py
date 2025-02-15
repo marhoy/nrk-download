@@ -48,8 +48,7 @@ def test_not_available_episode(tmp_path: Path) -> None:
     result = runner.invoke(
         app,
         [
-            "https://tv.nrk.no/serie/elias/sesong/1/episode/1/avspiller"
-            "--download-dir",
+            "https://tv.nrk.no/serie/elias/sesong/1/episode/1/avspiller--download-dir",
             str(tmp_path),
         ],
     )
@@ -85,7 +84,7 @@ def test_download_news_episode(tmp_path: Path) -> None:
     result = runner.invoke(
         app,
         [
-            "https://tv.nrk.no/serie/distriktsnyheter-oslo-og-viken/202204/DKOV98040122/avspiller",  # noqa: E501
+            "https://tv.nrk.no/serie/distriktsnyheter-oslo-og-viken/202204/DKOV98040122/avspiller",
             "--download-dir",
             str(tmp_path),
         ],

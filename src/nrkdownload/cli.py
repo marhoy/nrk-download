@@ -39,7 +39,7 @@ def match_program_url(url: str) -> Optional[str]:
 
 def match_series_url(url: str) -> Optional[Tuple[str, Optional[str], Optional[str]]]:
     if match := re.match(
-        r"https://tv.nrk.no/serie/([\w-]+)(?:/sesong/(\w+)|/(\w+)|)(?:/episode/(\w+)|/(\w+)|)",  # noqa: E501
+        r"https://tv.nrk.no/serie/([\w-]+)(?:/sesong/(\w+)|/(\w+)|)(?:/episode/(\w+)|/(\w+)|)",
         url,
     ):
         series_id = match.group(1)
