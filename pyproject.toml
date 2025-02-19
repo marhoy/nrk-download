@@ -4,15 +4,13 @@ dynamic = ["version"]
 description = ""
 authors = [{ name = "Martin Høy", email = "martin@hoy.priv.no" }]
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dependencies = [
     "loguru>=0.7.3",
     "pydantic>=2.10.6",
     "typer>=0.15.1",
-    "halo>=0.0.31",
-    "beautifulsoup4>=4.13.3",
     "requests>=2.32.3",
-    "ffmpeg-python>=0.2.0",
+    "python-ffmpeg>=2.0.12",
 ]
 
 
@@ -115,7 +113,4 @@ warn_required_dynamic_aliases = true
 [tool.pytest.ini_options]
 addopts = "--verbose --cov-report term-missing:skip-covered --cov=nrkdownload"
 # Ignore deprecation warnings from third party packages
-filterwarnings = [
-    "ignore::DeprecationWarning:past.*",
-    "ignore::DeprecationWarning:halo.*",
-]
+filterwarnings = ["ignore::DeprecationWarning:past.*"]
