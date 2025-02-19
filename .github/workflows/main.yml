@@ -21,6 +21,12 @@ jobs:
       - name: Checkout the repository
         uses: actions/checkout@v4
 
+      - name: Install FFmpeg
+        uses: FedericoCarboni/setup-ffmpeg@v3
+        id: setup-ffmpeg
+        with:
+          ffmpeg-version: release
+
       - name: Install uv and set the python version
         uses: astral-sh/setup-uv@v5
         with:
