@@ -32,8 +32,8 @@ Downloading a single episode
 
 If you want to download only a single episode of a series, navigate https://tv.nrk.no
 until that episode is selected. The URL will look like e.g.
-https://tv.nrk.no/serie/kongen-av-gulset/sesong/1/episode/3/avspiller or
-https://tv.nrk.no/serie/klassequizen/2021/DSRR21000521/avspiller, where information
+https://tv.nrk.no/serie/kongen-av-gulset/sesong/1/episode/MYNT19000318 or
+https://tv.nrk.no/serie/klassequizen/sesong/2021/episode/DSRR21000521, where information
 about the episode is included.
 
 Giving a URL like this as argument to nrkdownload, will result in only this single

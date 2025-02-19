@@ -15,19 +15,18 @@ The documentation for nrkdownload is availabe here: https://nrkdownload.readthed
 
 # Setting up a development environment
 
-Install [poetry](https://python-poetry.org/), and a recent Python version (>=3.7). If
-you want to run tests with multiple Python versions, install
-[pyenv](https://github.com/pyenv/pyenv). Set up the development environment:
+Install [uv](https://docs.astral.sh/uv/). To set up the development environment:
 
 ```bash
-poetry install
+uv sync --group docs
+pre-commit install
 ```
 
 # Making a new release
 
-- Make sure all tests are ok by running `tox`
+- Make sure all tests are ok by running `nox`
+- Make sure all pre-commit hooks are ok by running `pre-commit run --all-files`
 - Make a pull requst on GitHub
+- Merge the PR to master.
 - Use the "new release" functionallity of GitHub. Make a new tag.
-- Update `pyproject.toml` to match the new version number.
-- `poetry build`
-- `poetry publish`
+- The release will be published to PyPi automatically.

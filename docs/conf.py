@@ -1,3 +1,4 @@
+"""Sphinx configuration."""
 #
 # Configuration file for the Sphinx documentation builder.
 #
@@ -7,22 +8,21 @@
 
 # -- Path setup --------------------------------------------------------------
 
-import os
 import sys
+from pathlib import Path
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-from typing import Dict, List
 
-sys.path.insert(0, os.path.abspath("../src/"))
+sys.path.insert(0, str(Path("../src/").resolve()))
 
 
 # -- Project information -----------------------------------------------------
 
 project = "nrkdownload"
-copyright = "2018, Martin Høy"
+copyright = "2018, Martin Høy"  # noqa: A001
 author = "Martin Høy"
 
 # The short X.Y version
@@ -67,7 +67,7 @@ master_doc = "index"
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = "en"
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -94,7 +94,7 @@ html_theme = "sphinx_rtd_theme"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path: List[str] = []
+html_static_path: list[str] = []
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
@@ -115,7 +115,7 @@ htmlhelp_basename = "nrkdownloaddoc"
 
 # -- Options for LaTeX output ------------------------------------------------
 
-latex_elements: Dict[str, str] = {
+latex_elements: dict[str, str] = {
     # The paper size ('letterpaper' or 'a4paper').
     #
     # 'papersize': 'letterpaper',
@@ -192,7 +192,7 @@ epub_exclude_files = ["search.html"]
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {"https://docs.python.org/": None}
+# intersphinx_mapping = {"https://docs.python.org/": None}
 
 # -- Options for todo extension ----------------------------------------------
 

@@ -23,9 +23,10 @@ Depending on your Linux-distribution, you might have to add a
 package-repository in order to install ffmpeg. If you get stuck, try too
 Google installing ffmpeg for YOUR_LINUX_DISTRO.
 
-For MacOS
+
+For macOS
 ---------
 
-Download the static build of the latest release.
-Open the .dmg-file and copy the binary file ffmpeg to e.g. a directory
-``bin`` inside your home directory. Then, add ``~/bin`` to your PATH.
+The easiest way to install and update ffmpeg is maybe via `Homebrew
+<https://brew.sh/>`_. After installing Homebrew itself, you can just say: ``brew install
+ffmpeg``.
