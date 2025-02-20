@@ -5,6 +5,20 @@ description = ""
 authors = [{ name = "Martin Høy", email = "martin@hoy.priv.no" }]
 readme = "README.md"
 requires-python = ">=3.10"
+
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+
+    "Environment :: Console",
+
+    # Specify the Python versions you support here.
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+]
+
 dependencies = [
     "loguru>=0.7.3",
     "pydantic>=2.10.6",
