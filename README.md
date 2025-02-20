@@ -6,7 +6,7 @@
 
 This is a commandline tool to download programs and series from NRK (Norwegian public
 broadcaster). It supports both TV, Radio and Podcast content. The tool is written in
-Python, and is compatible with Python 3.8 or newer. It has been tested under Linux, Mac
+Python, and is compatible with Python 3.10 or newer. It has been tested under Linux, Mac
 OS X and Windows.
 
 # Documentation
