@@ -105,7 +105,10 @@ class TVProgram(BaseModel):
         self, series_title: str, sequence_string: str, basedir: Path
     ) -> None:
         """Download as an episode in a series."""
-        filename = basedir / f"{series_title} - {sequence_string} - {self.title}"
+        if not sequence_string:
+            filename = basedir / f"{series_title} - {self.title}"
+        else:
+            filename = basedir / f"{series_title} - {sequence_string} - {self.title}"
         download_image_url(self.image_url, Path(f"{filename}.jpg"))
         download_video(self, filename)
 
@@ -138,13 +141,20 @@ class Season(BaseModel):
     def dirname(self) -> Path:
         """Get the directory name for the season."""
         if self.series_type == TVSeriesType.sequential:
+            if self.season_id == "ekstramateriale":
+                return Path("Ekstramateriale")
             return Path(f"Season {int(self.season_id):02d}")
         return Path(f"Season {self.season_id}")
 
     @classmethod
     def from_ids(cls, series_id: str, season_id: str) -> Season:
         """Create a Season object from a series ID and season ID."""
-        r = session.get(PS_API + f"/tv/catalog/series/{series_id}/seasons/{season_id}")
+        if season_id == "ekstramateriale":
+            r = session.get(PS_API + f"/tv/catalog/series/{series_id}/extramaterial")
+        else:
+            r = session.get(
+                PS_API + f"/tv/catalog/series/{series_id}/seasons/{season_id}"
+            )
         r.raise_for_status()
         data = r.json()
 
@@ -175,9 +185,15 @@ class TVSeries(BaseModel):
     title: str
     type: TVSeriesType
     season_info: list[SeasonInfo]
+    extramaterial: SeasonInfo | None
     image_url: HttpUrl | None
     poster_url: HttpUrl | None
     backdrop_url: HttpUrl | None
+
+    @property
+    def season_infos(self) -> list[SeasonInfo]:
+        """Get the season info, including the extramaterial."""
+        return self.season_info + ([self.extramaterial] if self.extramaterial else [])
 
     def get_season(self, season_id: str) -> Season:
         """Get a season object from a season ID."""
@@ -195,6 +211,13 @@ class TVSeries(BaseModel):
         r.raise_for_status()
         data = r.json()
 
+        # Possibly add an "Ekstramateriale" season
+        extramaterial = None
+        if data["_links"].get("extramaterial"):
+            extramaterial = SeasonInfo(
+                season_id="ekstramateriale", title="Ekstramateriale"
+            )
+
         return cls(
             series_id=series_id,
             title=data[data["seriesType"]]["titles"]["title"],
@@ -203,6 +226,7 @@ class TVSeries(BaseModel):
                 SeasonInfo(season_id=item["name"], title=item["title"])
                 for item in data["_links"]["seasons"]
             ],
+            extramaterial=extramaterial,
             image_url=get_image_url(data[data["seriesType"]], "image"),
             poster_url=get_image_url(data[data["seriesType"]], "posterImage"),
             backdrop_url=get_image_url(data[data["seriesType"]], "backdropImage"),

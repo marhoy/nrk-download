@@ -53,6 +53,14 @@ license-files = []
 [tool.setuptools_scm]
 # Use the git tags to determine the version
 
+[tool.uv]
+# Rebuild if pyproject.toml changes, or if the git commit or tags changes
+cache-keys = [
+    { file = "pyproject.toml" },
+    { file = "**/*.py" },
+    { git = { commit = true, tags = true } },
+]
+
 [tool.ruff]
 # Consider packages in the src directory as first-party code
 src = ["src"]

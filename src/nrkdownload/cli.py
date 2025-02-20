@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
+from ffmpeg import FFmpeg
 from loguru import logger
 
 from nrkdownload import __version__
@@ -107,6 +108,15 @@ def main(
     ] = 0,
 ) -> None:
     """Download content from https://tv.nrk.no/."""
+    try:
+        FFmpeg().option("version").execute().decode("utf-8")
+    except FileNotFoundError:
+        typer.echo(
+            "\nFFmpeg not found, must be installed to use this package.\n"
+            "See documentation: https://nrkdownload.readthedocs.io/"
+        )
+        raise typer.Exit(1) from None
+
     for url in urls:
         if program_id := match_program_url(url):
             download_program(download_dir, program_id)

@@ -87,6 +87,33 @@ def test_download_sequential_episode(tmp_path: Path) -> None:  # noqa: D103
 
 
 @pytest.mark.download
+def test_download_extramaterial(tmp_path: Path) -> None:  # noqa: D103
+    result = runner.invoke(
+        app,
+        [
+            "https://tv.nrk.no/serie/monsen-og-nasjonalparkene/sesong/ekstramateriale/episode/KMNO10002125",
+            "--download-dir",
+            str(tmp_path),
+        ],
+    )
+    assert result.exit_code == 0
+
+    directory = tmp_path / "Monsen og nasjonalparkene"
+    assert (directory / "banner.jpg").exists()
+    directory = directory / "Ekstramateriale"
+    assert (
+        directory / "Monsen og nasjonalparkene - TRAILER Monsen og nasjonalparkene.jpg"
+    ).exists()
+    assert (
+        directory / "Monsen og nasjonalparkene - TRAILER Monsen og nasjonalparkene.m4v"
+    ).exists()
+    assert (
+        directory
+        / "Monsen og nasjonalparkene - TRAILER Monsen og nasjonalparkene.no.srt"
+    ).exists()
+
+
+@pytest.mark.download
 def test_download_news_episode(tmp_path: Path) -> None:  # noqa: D103
     result = runner.invoke(
         app,
