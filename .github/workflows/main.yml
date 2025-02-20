@@ -37,7 +37,7 @@ jobs:
         run: uv sync --all-extras --dev
 
       - name: Run tests
-        run: uv run pytest
+        run: uv run pytest -m "not download"
 
   pre-commit:
     name: pre-commit
