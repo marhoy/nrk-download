@@ -33,12 +33,12 @@ def download_series(
     series = TVSeries.from_series_id(series_id)
     typer.echo(f"Downloading {series.title}")
     series.download_images(download_dir)
-    for info in series.season_info:
-        if (only_season_id is not None) and (info.season_id != only_season_id):
-            logger.debug(f"Skipping season number {info.season_id}...")
+    for season_info in series.season_infos:
+        if (only_season_id is not None) and (season_info.season_id != only_season_id):
+            logger.debug(f"Skipping season number {season_info.season_id}...")
             continue
 
-        season = series.get_season(info.season_id)
+        season = series.get_season(season_info.season_id)
         typer.echo(f"Downloading {season.title}")
         season.download_images(download_dir / series.dirname)
 
@@ -56,7 +56,10 @@ def download_series(
                 continue
 
             if series.type == TVSeriesType.sequential:
-                sequence_string = f"s{season.season_id:>02s}e{episode_number:>02d}"
+                if season_info.season_id == "ekstramateriale":
+                    sequence_string = ""
+                else:
+                    sequence_string = f"s{season.season_id:>02s}e{episode_number:>02d}"
             else:
                 sequence_string = season.season_id
 
