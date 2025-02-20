@@ -17,5 +17,5 @@ def test_tv_season() -> None:  # noqa: D103
 
 
 def test_tv_program() -> None:  # noqa: D103
-    program = TVProgram.from_program_id("MSUI14009516")
-    assert program.title == "Røverrotta"
+    program = TVProgram.from_program_id("MYNR46000018")
+    assert program.title == "Arif og Unge Ferrari med Stavanger Symfoniorkester"
