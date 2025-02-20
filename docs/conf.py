@@ -11,6 +11,8 @@
 import sys
 from pathlib import Path
 
+import nrkdownload
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -26,9 +28,9 @@ copyright = "2018, Martin Høy"  # noqa: A001
 author = "Martin Høy"
 
 # The short X.Y version
-version = ""
+# version = ""
 # The full version, including alpha/beta/rc tags
-release = ""
+release = nrkdownload.__version__
 
 
 # -- General configuration ---------------------------------------------------
