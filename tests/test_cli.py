@@ -1,5 +1,8 @@
+"""Tests for the CLI."""
+
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 from nrkdownload.cli import app
@@ -7,7 +10,7 @@ from nrkdownload.cli import app
 runner = CliRunner()
 
 
-def test_version_string() -> None:
+def test_version_string() -> None:  # noqa: D103
     result = runner.invoke(
         app,
         ["--version"],
@@ -16,23 +19,23 @@ def test_version_string() -> None:
     assert "version" in result.stdout
 
 
-def test_verbose_level() -> None:
-    result = runner.invoke(app, ["-v", "--version"])
+def test_verbose_level() -> None:  # noqa: D103
+    result = runner.invoke(app, ["-v"])
     assert "Setting loglevel to SUCCESS" in result.stdout
-    result = runner.invoke(app, ["-vv", "--version"])
+    result = runner.invoke(app, ["-vv"])
     assert "Setting loglevel to INFO" in result.stdout
-    result = runner.invoke(app, ["-vvv", "--version"])
+    result = runner.invoke(app, ["-vvv"])
     assert "Setting loglevel to DEBUG" in result.stdout
-    result = runner.invoke(app, ["-vvvv", "--version"])
+    result = runner.invoke(app, ["-vvvv"])
     assert "Setting loglevel to TRACE" in result.stdout
 
 
-def test_illegal_url() -> None:
+def test_illegal_url() -> None:  # noqa: D103
     result = runner.invoke(app, "https://tv.nrk.no/")
     assert result.exit_code == 1
 
 
-def test_not_available_program(tmp_path: Path) -> None:
+def test_not_available_program(tmp_path: Path) -> None:  # noqa: D103
     result = runner.invoke(
         app,
         [
@@ -44,11 +47,11 @@ def test_not_available_program(tmp_path: Path) -> None:
     assert "not playable" in result.stdout
 
 
-def test_not_available_episode(tmp_path: Path) -> None:
+def test_not_available_episode(tmp_path: Path) -> None:  # noqa: D103
     result = runner.invoke(
         app,
         [
-            "https://tv.nrk.no/serie/elias/sesong/1/episode/1/avspiller"
+            "https://tv.nrk.no/serie/elias/sesong/1/episode/MSUE10001112",
             "--download-dir",
             str(tmp_path),
         ],
@@ -56,52 +59,62 @@ def test_not_available_episode(tmp_path: Path) -> None:
     assert "not playable" in result.stdout
 
 
-def test_download_sequential_episode(tmp_path: Path) -> None:
+@pytest.mark.download
+def test_download_sequential_episode(tmp_path: Path) -> None:  # noqa: D103
     result = runner.invoke(
         app,
         [
-            "https://tv.nrk.no/serie/kongen-av-gulset/sesong/1/episode/3/avspiller",
+            "https://tv.nrk.no/serie/kongen-av-gulset/sesong/1/episode/MYNT19000318",
             "--download-dir",
             str(tmp_path),
         ],
     )
     assert result.exit_code == 0
 
-    dir = tmp_path / "Kongen av Gulset"
-    assert (dir / "banner.jpg").exists()
-    dir = dir / "Season 01"
+    directory = tmp_path / "Kongen av Gulset"
+    assert (directory / "banner.jpg").exists()
+    directory = directory / "Season 01"
     assert (
-        dir / "Kongen av Gulset - s01e03 - 3. Pene jenter, peacocking & pine.jpg"
+        directory / "Kongen av Gulset - s01e03 - 3. Pene jenter, peacocking & pine.jpg"
     ).exists()
     assert (
-        dir / "Kongen av Gulset - s01e03 - 3. Pene jenter, peacocking & pine.m4v"
+        directory / "Kongen av Gulset - s01e03 - 3. Pene jenter, peacocking & pine.m4v"
     ).exists()
     assert (
-        dir / "Kongen av Gulset - s01e03 - 3. Pene jenter, peacocking & pine.no.srt"
+        directory
+        / "Kongen av Gulset - s01e03 - 3. Pene jenter, peacocking & pine.no.srt"
     ).exists()
 
 
-def test_download_news_episode(tmp_path: Path) -> None:
+@pytest.mark.download
+def test_download_news_episode(tmp_path: Path) -> None:  # noqa: D103
     result = runner.invoke(
         app,
         [
-            "https://tv.nrk.no/serie/distriktsnyheter-oslo-og-viken/202204/DKOV98040122/avspiller",  # noqa: E501
+            "https://tv.nrk.no/serie/distriktsnyheter-oslo-og-viken/sesong/202204/episode/DKOV98040122",
             "--download-dir",
             str(tmp_path),
         ],
     )
     assert result.exit_code == 0
 
-    dir = tmp_path / "Distriktsnyheter Oslo og Viken"
-    assert (dir / "banner.jpg").exists()
-    assert (dir / "backdrop.jpg").exists()
-    dir = dir / "Season 202204"
-    assert (dir / "Distriktsnyheter Oslo og Viken - 202204 - 1. april.jpg").exists()
-    assert (dir / "Distriktsnyheter Oslo og Viken - 202204 - 1. april.m4v").exists()
-    assert (dir / "Distriktsnyheter Oslo og Viken - 202204 - 1. april.no.srt").exists()
+    directory = tmp_path / "Distriktsnyheter Oslo og Viken"
+    assert (directory / "banner.jpg").exists()
+    assert (directory / "backdrop.jpg").exists()
+    directory = directory / "Season 202204"
+    assert (
+        directory / "Distriktsnyheter Oslo og Viken - 202204 - 1. april 2022.jpg"
+    ).exists()
+    assert (
+        directory / "Distriktsnyheter Oslo og Viken - 202204 - 1. april 2022.m4v"
+    ).exists()
+    assert (
+        directory / "Distriktsnyheter Oslo og Viken - 202204 - 1. april 2022.no.srt"
+    ).exists()
 
 
-def test_download_program(tmp_path: Path) -> None:
+@pytest.mark.download
+def test_download_program(tmp_path: Path) -> None:  # noqa: D103
     result = runner.invoke(
         app,
         [
@@ -112,6 +125,6 @@ def test_download_program(tmp_path: Path) -> None:
     )
     assert result.exit_code == 0
 
-    dir = tmp_path / "Dokumentaren om Radioresepsjonen"
-    assert (dir / "Dokumentaren om Radioresepsjonen (2010).jpg").exists()
-    assert (dir / "Dokumentaren om Radioresepsjonen (2010).m4v").exists()
+    directory = tmp_path / "Dokumentaren om Radioresepsjonen"
+    assert (directory / "Dokumentaren om Radioresepsjonen (2010).jpg").exists()
+    assert (directory / "Dokumentaren om Radioresepsjonen (2010).m4v").exists()

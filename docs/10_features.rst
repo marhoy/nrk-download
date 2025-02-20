@@ -3,7 +3,7 @@ Features
 
 This is a commandline tool for downloading content from NRK (Norwegian public
 broadcaster). It supports downloading TV series and programs. The tool is written in
-Python, and is compatible with Python 3.8 or newer. It has been tested under Linux, Mac
+Python, and is compatible with Python 3.10 or newer. It has been tested under Linux, Mac
 OS X and Windows.
 
 Please only use this tool for personal purposes. You are responsible for not breaking
@@ -22,9 +22,9 @@ this::
     Førstegangstjenesten
     ├── banner.jpg
     ├── Season 01
-    │   ├── Førstegangstjenesten - s01e01 - 1. Pilot - del 1.jpg
-    │   ├── Førstegangstjenesten - s01e01 - 1. Pilot - del 1.m4v
-    │   ├── Førstegangstjenesten - s01e01 - 1. Pilot - del 1.no.srt
+    │   ├── Førstegangstjenesten - s01e01 - 1. Pilot - del 1.jpg
+    │   ├── Førstegangstjenesten - s01e01 - 1. Pilot - del 1.m4v
+    │   ├── Førstegangstjenesten - s01e01 - 1. Pilot - del 1.no.srt
     ⋮
     └── Season 02
         ├── Førstegangstjenesten - s02e01 - 1. episode.jpg
