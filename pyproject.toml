@@ -112,5 +112,8 @@ warn_required_dynamic_aliases = true
 
 [tool.pytest.ini_options]
 addopts = "--verbose --cov-report term-missing:skip-covered --cov=nrkdownload"
+markers = [
+    "download: tests that downloads content (deselect with '-m \"not download\"')",
+]
 # Ignore deprecation warnings from third party packages
 filterwarnings = ["ignore::DeprecationWarning:past.*"]

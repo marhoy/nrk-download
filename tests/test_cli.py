@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+import pytest
 from typer.testing import CliRunner
 
 from nrkdownload.cli import app
@@ -58,6 +59,7 @@ def test_not_available_episode(tmp_path: Path) -> None:  # noqa: D103
     assert "not playable" in result.stdout
 
 
+@pytest.mark.download
 def test_download_sequential_episode(tmp_path: Path) -> None:  # noqa: D103
     result = runner.invoke(
         app,
@@ -84,6 +86,7 @@ def test_download_sequential_episode(tmp_path: Path) -> None:  # noqa: D103
     ).exists()
 
 
+@pytest.mark.download
 def test_download_news_episode(tmp_path: Path) -> None:  # noqa: D103
     result = runner.invoke(
         app,
@@ -110,6 +113,7 @@ def test_download_news_episode(tmp_path: Path) -> None:  # noqa: D103
     ).exists()
 
 
+@pytest.mark.download
 def test_download_program(tmp_path: Path) -> None:  # noqa: D103
     result = runner.invoke(
         app,
