@@ -8,7 +8,7 @@ on:
 jobs:
   pytest:
     name: pytest
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04 # FFmeg core-dumps on 22.04/24.04
     steps:
       - name: Checkout the repository
         uses: actions/checkout@v4
@@ -27,8 +27,14 @@ jobs:
       - name: Install the project with dependencies
         run: uv sync
 
+      - name: Test FFmpeg subtitle conversion
+        run: ffmpeg -i https://undertekst.nrk.no/MUHH54/00/MUHH54000115/TTV/MUHH54000115.vtt test.no.srt
+
+      - name: Test FFmpeg video download
+        run: ffmpeg -i 'https://nrk-od-world-02.akamaized.net/open/ps/kmno/kmno10002125/4d0e5003-6.smil/index.m3u8?adap=small&s=0' test.mkv -vcodec copy -acodec copy
+
       - name: Run tests
-        run: uv run pytest -m "not download" --cov-branch --cov-report=xml
+        run: uv run pytest --cov-branch --cov-report=xml
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v5

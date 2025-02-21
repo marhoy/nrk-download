@@ -126,7 +126,3 @@ def main(
         else:
             typer.echo("Not able to parse URL")
             raise typer.Exit(code=1)
-
-
-if __name__ == "__main__":
-    app()

@@ -59,38 +59,54 @@ def test_not_available_episode(tmp_path: Path) -> None:  # noqa: D103
     assert "not playable" in result.stdout
 
 
+def test_ffmpeg_not_found(tmp_path: Path) -> None:  # noqa: D103
+    # Change $PATH environment variable to make ffmpeg not found
+    result = runner.invoke(
+        app,
+        [
+            "https://tv.nrk.no/serie/elias/sesong/1/episode/MSUE10001112",
+            "--download-dir",
+            str(tmp_path),
+        ],
+        env={"PATH": ""},
+    )
+    assert "FFmpeg not found" in result.stdout
+
+
 @pytest.mark.download
 def test_download_sequential_episode(tmp_path: Path) -> None:  # noqa: D103
     result = runner.invoke(
         app,
         [
-            "https://tv.nrk.no/serie/kongen-av-gulset/sesong/1/episode/MYNT19000318",
+            "https://tv.nrk.no/serie/humorkalender/sesong/1/episode/MUHH54000115",
             "--download-dir",
             str(tmp_path),
         ],
     )
     assert result.exit_code == 0
 
-    directory = tmp_path / "Kongen av Gulset"
+    directory = tmp_path / "Humorkalender"
     assert (directory / "banner.jpg").exists()
     directory = directory / "Season 01"
     assert (
-        directory / "Kongen av Gulset - s01e03 - 3. Pene jenter, peacocking & pine.jpg"
+        directory / "Humorkalender - s01e01 - 1. Christian Kopperuds julenissetips.jpg"
     ).exists()
     assert (
-        directory / "Kongen av Gulset - s01e03 - 3. Pene jenter, peacocking & pine.m4v"
+        directory / "Humorkalender - s01e01 - 1. Christian Kopperuds julenissetips.m4v"
     ).exists()
     assert (
         directory
-        / "Kongen av Gulset - s01e03 - 3. Pene jenter, peacocking & pine.no.srt"
+        / "Humorkalender - s01e01 - 1. Christian Kopperuds julenissetips.no.srt"
     ).exists()
 
 
 @pytest.mark.download
 def test_download_extramaterial(tmp_path: Path) -> None:  # noqa: D103
+    # Download the same video twice, to trigger the "already exists" line
     result = runner.invoke(
         app,
         [
+            "https://tv.nrk.no/serie/monsen-og-nasjonalparkene/sesong/ekstramateriale/episode/KMNO10002125",
             "https://tv.nrk.no/serie/monsen-og-nasjonalparkene/sesong/ekstramateriale/episode/KMNO10002125",
             "--download-dir",
             str(tmp_path),
