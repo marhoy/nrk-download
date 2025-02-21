@@ -1,8 +1,8 @@
 # nrkdownload
 
-!["Latest version"](https://img.shields.io/github/v/release/marhoy/nrk-download?include_prereleases)
-
-!["Supported Python versions"](https://img.shields.io/pypi/pyversions/nrkdownload)
+!["Build status"](https://img.shields.io/github/actions/workflow/status/marhoy/nrk-download/main.yml)
+!["Latest version"](https://img.shields.io/pypi/v/nrkdownload)
+!["Supported Python versions"](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fmarhoy%2Fnrk-download%2Frefs%2Fheads%2Fmain%2Fpyproject.toml)
 
 This is a commandline tool to download programs and series from NRK (Norwegian public
 broadcaster). It supports both TV, Radio and Podcast content. The tool is written in
@@ -27,6 +27,7 @@ pre-commit install
 - Make sure all tests are ok by running `nox`
 - Make sure all pre-commit hooks are ok by running `pre-commit run --all-files`
 - Make a pull requst on GitHub
-- Merge the PR to master.
-- Use the "new release" functionallity of GitHub. Make a new tag.
-- The release will be published to PyPi automatically.
+- Merge the PR to the `main` branch
+- Create a new tag nameed `vX.Y.Z` where `X.Y.Z` is the new version number
+- The new version of the package will be published to PyPi automatically
+- Optionally create a new release on GitHub, based on the new tag

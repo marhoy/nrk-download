@@ -1,0 +1,31 @@
+site_name: nrkdownload
+site_url: !ENV READTHEDOCS_CANONICAL_URL
+repo_url: https://github.com/marhoy/nrk-download
+
+nav:
+  - Home: index.md
+  - Features: features.md
+  - Installation:
+      - nrkdownload: installing-nrkdownload.md
+      - FFmpeg: installing-ffmpeg.md
+  - Usage:
+      - Usage: usage.md
+      - Examples: examples.md
+  - Contributing: contributing.md
+
+theme:
+  name: material
+  custom_dir: docs/overrides
+  features:
+    - navigation.expand
+    - content.code.copy
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+
+extra_javascript:
+  - javascript/readthedocs-search.js
+  - javascript/readthedocs-menu.js
