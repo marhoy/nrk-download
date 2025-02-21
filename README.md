@@ -27,6 +27,7 @@ pre-commit install
 - Make sure all tests are ok by running `nox`
 - Make sure all pre-commit hooks are ok by running `pre-commit run --all-files`
 - Make a pull requst on GitHub
-- Merge the PR to master.
-- Use the "new release" functionallity of GitHub. Make a new tag.
-- The release will be published to PyPi automatically.
+- Merge the PR to the `main` branch
+- Create a new tag nameed `vX.Y.Z` where `X.Y.Z` is the new version number
+- The new version of the package will be published to PyPi automatically
+- Optionally create a new release on GitHub, based on the new tag

@@ -29,7 +29,10 @@ dependencies = [
 
 
 [dependency-groups]
-docs = ["mkdocs>=1.6.1", "mkdocs-material>=9.6.5"]
+docs = [
+    "mkdocs>=1.6.1",
+    "mkdocs-material>=9.6.5",
+]
 dev = [
     "ipykernel>=6.29.5",
     "nox>=2025.2.9",
