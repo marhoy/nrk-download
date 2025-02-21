@@ -1,0 +1,9 @@
+site_name: nrkdownload
+site_url: !ENV READTHEDOCS_CANONICAL_URL
+theme:
+  name: material
+  custom_dir: docs/overrides
+
+extra_javascript:
+  - javascript/readthedocs-search.js
+  - javascript/readthedocs-menu.js

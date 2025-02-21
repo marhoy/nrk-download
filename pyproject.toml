@@ -29,7 +29,7 @@ dependencies = [
 
 
 [dependency-groups]
-docs = ["sphinx>=7.1.2", "sphinx-rtd-theme>=3.0.2"]
+docs = ["mkdocs>=1.6.1", "mkdocs-material>=9.6.5"]
 dev = [
     "ipykernel>=6.29.5",
     "nox>=2025.2.9",
@@ -139,3 +139,6 @@ markers = [
 ]
 # Ignore deprecation warnings from third party packages
 filterwarnings = ["ignore::DeprecationWarning:past.*"]
+
+[tool.coverage.run]
+omit = ["src/nrkdownload/__main__.py"]
