@@ -19,7 +19,7 @@ def test_tv_season() -> None:  # noqa: D103
 
 
 def test_tv_series_extramaterial() -> None:  # noqa: D103
-    series = TVSeries.from_series_id("kongen-av-gulset")
+    series = TVSeries.from_series_id("kongen-av-gulset", with_extras=True)
     assert series.extramaterial is not None
     extras = series.get_season(series.extramaterial.season_id)
     assert extras.dirname == Path("Ekstramateriale")
