@@ -34,4 +34,4 @@ def docs(session: nox.Session) -> None:
             "UV_PROJECT_ENVIRONMENT": session.virtualenv.location,
         },
     )
-    session.run("sphinx-build", "--write-all", "docs", "docs/_build")
+    session.run("mkdocs", "build", "--strict")
