@@ -8,16 +8,19 @@ on:
 jobs:
   pytest:
     name: pytest
-    runs-on: ubuntu-20.04 # FFmeg core-dumps on 22.04/24.04
+    runs-on: ubuntu-22.04 # FFmpeg core-dumps on 22.04/24.04
     steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v4
-
       - name: Install FFmpeg
         uses: FedericoCarboni/setup-ffmpeg@v3
         id: setup-ffmpeg
         with:
-          ffmpeg-version: release
+          ffmpeg-version: git
+
+      - name: Test FFmpeg
+        run: ffmpeg -version
+
+      - name: Checkout the repository
+        uses: actions/checkout@v4
 
       - name: Install uv and set the python version
         uses: astral-sh/setup-uv@v5
@@ -26,12 +29,6 @@ jobs:
 
       - name: Install the project with dependencies
         run: uv sync
-
-      - name: Test FFmpeg subtitle conversion
-        run: ffmpeg -i https://undertekst.nrk.no/MUHH54/00/MUHH54000115/TTV/MUHH54000115.vtt test.no.srt
-
-      - name: Test FFmpeg video download
-        run: ffmpeg -i 'https://nrk-od-world-02.akamaized.net/open/ps/kmno/kmno10002125/4d0e5003-6.smil/index.m3u8?adap=small&s=0' test.mkv -vcodec copy -acodec copy
 
       - name: Run tests
         run: uv run pytest --cov-branch --cov-report=xml
