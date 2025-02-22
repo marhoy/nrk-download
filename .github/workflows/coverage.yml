@@ -8,7 +8,7 @@ on:
 jobs:
   pytest:
     name: pytest
-    runs-on: ubuntu-22.04 # FFmpeg core-dumps on 22.04/24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Install FFmpeg
         uses: FedericoCarboni/setup-ffmpeg@v3
