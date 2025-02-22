@@ -25,11 +25,18 @@ theme:
     - navigation.footer
     - content.code.copy
 
+extra:
+  generator: false
+
 markdown_extensions:
   - admonition
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.superfences
+
+plugins:
+  - git-revision-date-localized:
+      enable_creation_date: true
 
 extra_javascript:
   - javascript/readthedocs-search.js
