@@ -15,6 +15,9 @@ nav:
 
 theme:
   name: material
+  icon:
+    logo: fontawesome/solid/tv
+    repo: fontawesome/brands/github
   custom_dir: docs/overrides
   features:
     - navigation.expand
