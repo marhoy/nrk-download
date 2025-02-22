@@ -12,7 +12,7 @@ OS X and Windows.
 
 # Documentation
 
-The documentation for nrkdownload is availabe here: https://nrkdownload.readthedocs.org
+The documentation for nrkdownload is availabe here: https://nrkdownload.readthedocs.io
 
 # Setting up a development environment
 
