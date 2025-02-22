@@ -83,6 +83,13 @@ def main(
             ),
         ),
     ] = DEFAULT_DOWNLOAD_DIR,
+    with_extras: Annotated[
+        bool,
+        typer.Option(
+            "--with-extras/--without-extras",
+            help="Download extra material for series.",
+        ),
+    ] = False,
     _version: Annotated[
         bool | None,
         typer.Option(
@@ -123,7 +130,7 @@ def main(
             download_program(download_dir, program_id)
         elif match := match_series_url(url):
             series_id, season_id, episode_id = match
-            download_series(download_dir, series_id, season_id, episode_id)
+            download_series(download_dir, series_id, with_extras, season_id, episode_id)
         else:
             typer.echo("Not able to parse URL")
             raise typer.Exit(code=1)

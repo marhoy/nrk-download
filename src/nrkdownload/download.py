@@ -19,6 +19,7 @@ from nrkdownload.nrk_tv import (
 def download_series(
     download_dir: Path,
     series_id: str,
+    with_extras: bool,
     only_season_id: str | None = None,
     only_episode_id: str | None = None,
 ) -> None:
@@ -27,10 +28,13 @@ def download_series(
     Args:
         download_dir (_type_): _description_
         series_id (_type_): _description_
+        with_extras (_type_): Whether to include extra material.
         only_season_id (_type_, optional): _description_. Defaults to None.
         only_episode_id (_type_, optional): _description_. Defaults to None.
     """
-    series = TVSeries.from_series_id(series_id)
+    if only_season_id == "ekstramateriale":
+        with_extras = True
+    series = TVSeries.from_series_id(series_id, with_extras)
     typer.echo(f"Downloading {series.title}")
     series.download_images(download_dir)
     for season_info in series.season_infos:

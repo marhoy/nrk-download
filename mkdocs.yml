@@ -1,6 +1,7 @@
 site_name: nrkdownload
 site_url: !ENV READTHEDOCS_CANONICAL_URL
 repo_url: https://github.com/marhoy/nrk-download
+repo_name: marhoy/nrk-download
 
 nav:
   - Home: index.md
@@ -15,9 +16,11 @@ nav:
 
 theme:
   name: material
+  palette:
+    primary: light blue
   favicon: images/favicon.ico
   icon:
-    logo: fontawesome/solid/tv
+    logo: fontawesome/solid/cloud-arrow-down
     repo: fontawesome/brands/github
   custom_dir: docs/overrides
   features:

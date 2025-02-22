@@ -4,6 +4,12 @@ Start by browsing <https://tv.nrk.no> until you find what you want. Copy the URL
 give it as an argument for this tool. You can list several URLs on the command line
 (separated by space). Content that are already downloaded will be skipped.
 
+!!! tip
+
+    If you want to automatically download extra material ("Ekstramateriale") for a series,
+    you need to add the option `--with-extras` to the command line. This is off by default,
+    unless the URL contains the string `ekstramateriale`.
+
 ## Arguments and Options
 
 ![Usage](images/nrkdownload_help.png)
