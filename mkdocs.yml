@@ -15,6 +15,7 @@ nav:
 
 theme:
   name: material
+  favicon: images/favicon.ico
   icon:
     logo: fontawesome/solid/tv
     repo: fontawesome/brands/github
