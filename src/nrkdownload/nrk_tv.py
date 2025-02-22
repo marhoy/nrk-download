@@ -205,7 +205,7 @@ class TVSeries(BaseModel):
         return Path(valid_filename(self.title))
 
     @classmethod
-    def from_series_id(cls, series_id: str, with_extras: bool) -> TVSeries:
+    def from_series_id(cls, series_id: str, with_extras: bool = False) -> TVSeries:
         """Create a TVSeries object from a series ID."""
         r = session.get(PS_API + f"/tv/catalog/series/{series_id}")
         r.raise_for_status()
