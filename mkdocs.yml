@@ -22,6 +22,7 @@ theme:
   custom_dir: docs/overrides
   features:
     - navigation.expand
+    - navigation.footer
     - content.code.copy
 
 markdown_extensions:
