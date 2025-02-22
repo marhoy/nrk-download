@@ -20,7 +20,7 @@ theme:
     primary: light blue
   favicon: images/favicon.ico
   icon:
-    logo: fontawesome/solid/download
+    logo: fontawesome/solid/cloud-arrow-down
     repo: fontawesome/brands/github
   custom_dir: docs/overrides
   features:
