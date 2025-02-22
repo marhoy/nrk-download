@@ -6,7 +6,7 @@ give it as an argument for this tool. You can list several URLs on the command l
 
 ## Arguments and Options
 
-![Usage](../images/nrkdownload_help.png)
+![Usage](images/nrkdownload_help.png)
 
 The files are by default downloaded to `~/Downloads/nrkdownload`. This can be changed by
 using the option `-d` as described above, or you can define the environment variable

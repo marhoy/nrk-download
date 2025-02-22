@@ -15,16 +15,28 @@ nav:
 
 theme:
   name: material
+  favicon: images/favicon.ico
+  icon:
+    logo: fontawesome/solid/tv
+    repo: fontawesome/brands/github
   custom_dir: docs/overrides
   features:
     - navigation.expand
+    - navigation.footer
     - content.code.copy
+
+extra:
+  generator: false
 
 markdown_extensions:
   - admonition
   - pymdownx.highlight:
       anchor_linenums: true
   - pymdownx.superfences
+
+plugins:
+  - git-revision-date-localized:
+      enable_creation_date: true
 
 extra_javascript:
   - javascript/readthedocs-search.js

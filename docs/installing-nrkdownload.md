@@ -25,4 +25,4 @@ uv tool upgrade nrkdownload
 ```
 
 Note that in order to download video and subtitles, an installation of `ffmpeg` is also
-needed. See [Installing FFmpeg](/installing-ffmpeg).
+needed. See [Installing FFmpeg](installing-ffmpeg.md).

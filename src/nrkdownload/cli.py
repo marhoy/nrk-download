@@ -109,7 +109,8 @@ def main(
 ) -> None:
     """Download content from https://tv.nrk.no/."""
     try:
-        FFmpeg().option("version").execute().decode("utf-8")
+        ffmpeg_version = FFmpeg().option("version").execute().decode("utf-8")
+        logger.info(f"FFmpeg version: {ffmpeg_version.splitlines()[:2]}")
     except FileNotFoundError:
         typer.echo(
             "\nFFmpeg not found, must be installed to use this package.\n"
