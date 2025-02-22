@@ -16,6 +16,12 @@ jobs:
         with:
           ffmpeg-version: git
 
+      # This is needed because FFmpeg is compiled with an old glibc version
+      - name: Install nscd
+        uses: ConorMacBride/install-package@v1
+        with:
+          apt: nscd
+
       - name: Test FFmpeg
         run: ffmpeg -version
 
