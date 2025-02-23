@@ -1,7 +1,7 @@
 [project]
 name = "nrkdownload"
+description = "Download content from NRK TV."
 dynamic = ["version"]
-description = ""
 authors = [{ name = "Martin Høy", email = "martin@hoy.priv.no" }]
 readme = "README.md"
 requires-python = ">=3.10"
@@ -25,7 +25,6 @@ dependencies = [
     "requests>=2.32.3",
     "python-ffmpeg>=2.0.12",
 ]
-
 
 [dependency-groups]
 docs = [
