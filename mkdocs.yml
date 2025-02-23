@@ -43,5 +43,5 @@ plugins:
       enable_creation_date: true
 
 extra_javascript:
-  - javascript/readthedocs-search.js
+  #  - javascript/readthedocs-search.js
   - javascript/readthedocs-menu.js
