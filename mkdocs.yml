@@ -20,13 +20,15 @@ theme:
     primary: light blue
   favicon: images/favicon.ico
   icon:
-    logo: fontawesome/solid/cloud-arrow-down
+    logo: material/monitor-arrow-down
     repo: fontawesome/brands/github
   custom_dir: docs/overrides
   features:
     - navigation.expand
     - navigation.footer
     - content.code.copy
+    - search.highlight
+    - search.share
 
 extra:
   generator: false
@@ -38,9 +40,10 @@ markdown_extensions:
   - pymdownx.superfences
 
 plugins:
+  - search
   - git-revision-date-localized:
       enable_creation_date: true
 
 extra_javascript:
-  - javascript/readthedocs-search.js
+  #  - javascript/readthedocs-search.js
   - javascript/readthedocs-menu.js
