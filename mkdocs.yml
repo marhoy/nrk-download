@@ -20,13 +20,15 @@ theme:
     primary: light blue
   favicon: images/favicon.ico
   icon:
-    logo: fontawesome/solid/cloud-arrow-down
+    logo: material/monitor-arrow-down
     repo: fontawesome/brands/github
   custom_dir: docs/overrides
   features:
     - navigation.expand
     - navigation.footer
     - content.code.copy
+    - search.highlight
+    - search.share
 
 extra:
   generator: false
