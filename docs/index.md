@@ -1,5 +1,10 @@
 # Welcome to the nrkdownload documentation
 
+!["Build status"](https://img.shields.io/github/actions/workflow/status/marhoy/nrk-download/main.yml)
+[![codecov](https://codecov.io/gh/marhoy/nrk-download/branch/main/graph/badge.svg?token=84LOP32NP6)](https://codecov.io/gh/marhoy/nrk-download)
+!["Latest version"](https://img.shields.io/pypi/v/nrkdownload)
+!["Supported Python versions"](https://img.shields.io/python/required-version-toml?tomlFilePath=https%3A%2F%2Fraw.githubusercontent.com%2Fmarhoy%2Fnrk-download%2Frefs%2Fheads%2Fmain%2Fpyproject.toml)
+
 This is a commandline tool for downloading content from NRK (Norwegian public
 broadcaster). It supports downloading TV series and programs. The tool is written in
 Python, and is compatible with Python 3.10 or newer. It has been tested under Linux,
