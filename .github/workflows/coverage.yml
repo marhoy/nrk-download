@@ -14,7 +14,7 @@ jobs:
         uses: FedericoCarboni/setup-ffmpeg@v3
         id: setup-ffmpeg
         with:
-          ffmpeg-version: git
+          ffmpeg-version: release
 
       # This is needed because FFmpeg is compiled with an old glibc version
       - name: Install nscd
