@@ -21,13 +21,13 @@ def test_version_string() -> None:  # noqa: D103
 
 def test_verbose_level() -> None:  # noqa: D103
     result = runner.invoke(app, ["-v"])
-    assert "Setting loglevel to SUCCESS" in result.stdout
+    assert "Setting loglevel to SUCCESS" in result.stderr
     result = runner.invoke(app, ["-vv"])
-    assert "Setting loglevel to INFO" in result.stdout
+    assert "Setting loglevel to INFO" in result.stderr
     result = runner.invoke(app, ["-vvv"])
-    assert "Setting loglevel to DEBUG" in result.stdout
+    assert "Setting loglevel to DEBUG" in result.stderr
     result = runner.invoke(app, ["-vvvv"])
-    assert "Setting loglevel to TRACE" in result.stdout
+    assert "Setting loglevel to TRACE" in result.stderr
 
 
 def test_illegal_url() -> None:  # noqa: D103
