@@ -17,6 +17,12 @@ from pydantic import BaseModel, Field, HttpUrl
 PS_API = "https://psapi.nrk.no/"
 session = requests.Session()
 
+# Some NRK HLS streams only reveal their audio parameters late in the stream. With
+# ffmpeg's default analysis window it reports "Could not find codec parameters ...
+# 0 channels, unspecified sample rate" and silently leaves the audio out of the
+# .m4v file. A longer analysis window avoids that.
+FFMPEG_INPUT_OPTIONS = {"analyzeduration": "120M", "probesize": "200M"}
+
 
 class NotPlayableError(Exception):
     """Raised when a program is not playable."""
@@ -272,7 +278,7 @@ def download_video(program: TVProgram, filename: Path) -> None:
 
         ffmpeg = (
             FFmpeg()
-            .input(program.media_urls[0].unicode_string())
+            .input(program.media_urls[0].unicode_string(), FFMPEG_INPUT_OPTIONS)
             .output(str(media_filename), vcodec="copy", acodec="copy")
         )
 
